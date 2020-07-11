@@ -19,7 +19,7 @@ const port = process.env.PORT || 8080;
 app.get('/', (req, res) => res.send('Hello World with Express'));
 
 // Uso Api routes en App
-app.use('/rutes', apiRoutes);
+app.use(apiRoutes);
 
 app.listen(port, function() {
   console.log('Running RestHub on port ' + port);

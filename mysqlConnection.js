@@ -1,6 +1,6 @@
 var mysql = require('mysql');
 
-var con = mysql.createConnection({
+var conMysql = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "tesis2020",
@@ -8,19 +8,19 @@ var con = mysql.createConnection({
   //insecureAuth : true,
 });
 
-con.connect((err) => {
+conMysql.connect((err) => {
     if(err){
-      console.log('Error connecting to Db');
+      console.log('Error connecting to DB');
       console.log(err)
       return;
     }
-    console.log('Connection established');
+    console.log('Connection with DB established');
   });
   
-  /*con.end((err) => {
+  /*conMysql.end((err) => {
     // The connection is terminated gracefully
     // Ensures all remaining queries are executed
     // Then sends a quit packet to the MySQL server.
   });*/
 
-module.exports = con;
+module.exports = conMysql;
