@@ -23,9 +23,9 @@ exports.getShopDisabledProducts = (shop, callback) => {
     });
 }
 
-exports.updateDisabledProduct = (product, callback) => {
-    const sql = 'UPDATE producto SET disponible = 1 WHERE id = ?';
-    var values = [product.id]
+exports.updateProductStatus = (product, callback) => {
+    const sql = 'UPDATE producto SET disponible = ? WHERE id = ?';
+    var values = [product.disponible, product.id]
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);

@@ -69,3 +69,17 @@ exports.getShopByAddress = (req, res) => {
             return res.json(result)
     })
 }
+
+exports.setShop = (req, res) => {
+    ShopService.updateShop(req.body, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).send('Error al actualizar local')
+        }
+        else if (result.affectedRows == 0) {
+            return res.status(404).send('Local no encontrado')
+        }
+        else
+            return res.send('Local actualizado')
+    })
+}

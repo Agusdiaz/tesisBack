@@ -29,8 +29,8 @@ exports.getAllDisabledByShop = (req, res) => {
     })
 }
 
-exports.enableProduct = (req, res) => {
-    ProductService.updateDisabledProduct(req.body, (error, result) => {
+exports.setProductStatus = (req, res) => {
+    ProductService.updateProductStatus(req.body, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).send('Error al actualizar Producto')

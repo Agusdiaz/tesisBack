@@ -11,9 +11,9 @@ exports.getShopDisabledIngredients = (shop, callback) => {
     });
 }
 
-exports.updateDisabledIngredient = (ingredient, callback) => {
-    const sql = 'UPDATE ingrediente SET disponible = 1 WHERE id = ?';
-    var values = [ingredient.id]
+exports.updateIngredientStatus = (ingredient, callback) => {
+    const sql = 'UPDATE ingrediente SET disponible = ? WHERE id = ?';
+    var values = [ingredient.disponible, ingredient.id]
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);

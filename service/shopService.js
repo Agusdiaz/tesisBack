@@ -58,3 +58,14 @@ exports.getShopByAddress = (shop, callback) => {
     });
 }
 
+exports.updateShop = (shop, callback) => {
+    const sql = 'UPDATE local SET mascotas= ?, bebes= ?, juegos= ?, aireLibre= ?, libreHumo= ?, wifi= ? WHERE cuit= ?';
+    var values = [shop.mascotas, shop.bebes, shop.juegos, shop.aireLibre, shop.libreHumo, shop.wifi, shop.cuit]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+

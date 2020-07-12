@@ -70,7 +70,7 @@ exports.shareOrder = (req, res) => {
                 else if (result.length > 0) {
                     return res.json('Cliente y pedido ya existentes')
                 }
-                else{
+                else {
                     OrderService.shareOrder(req.body, (error, result) => {
                         if (error) {
                             console.log(error)
@@ -79,14 +79,11 @@ exports.shareOrder = (req, res) => {
                         else
                             return res.json('Pedido compartido')
                     })
-                } 
-            })  
+                }
+            })
         }
     })
 }
-
-
-
 
 exports.getClientPendingOrders = (req, res) => {
     OrderService.getClientPendingOrders(req.body, (error, result) => {
@@ -99,106 +96,40 @@ exports.getClientPendingOrders = (req, res) => {
         }
         else {
             var finalResult = []
-            asyncProducts1(result, finalResult).then(() => {
-                //console.log("3  ", result)
-                return res.json(result)
+            var long = result.length;
+            var i = 0;
+            result.map(obj => {
+                obj.productos = []
+                asyncProducts(obj.numero, res, (r) => {
+                    obj.productos.push(r)
+                    //console.log('2 - ', obj)
+                    finalResult.push(obj)
+                    i++
+                    if (i == long)
+                        return res.json(finalResult) //console.log(finalResult[i].productos[0])
+                })
+
             })
-
-
-            /*
-            var finalResult = {};
-            const getResult = result.map((obj, index) => {
-                        ClientService.getProductOrders(obj.numero, (error, result) => {
-                            obj['productos'] = []
-                            if (error) {
-                                console.log(error)
-                                return res.status(500).send('Error al buscar productos en pedido')
-                            }
-                            else if (result.length > 0) {
-                                //obj['productos'] = []
-                                var prod = JSON.parse(JSON.stringify(result))
-                                prod.forEach(it => {
-                                    obj['productos'].push(it)
-                                })
-                            }
-                            //finalResult[index] = obj
-                            console.log(obj)
-                            
-                        })
-                        return obj;
-                    })
-                    //return Promise.resolve()
-                
-            
-            Promise.all(getResult).then(() => { return res.json(result) })
-            */
-
-
-            /*var finalResult = {};
-            var wait = new Promise((resolve, reject) => {
-                result.map((obj, index) => {
-                ClientService.getProductOrders(obj.numero, (error, result) => {
-                    obj['productos'] = []
-                    if (error) {
-                        console.log(error)
-                        return res.status(500).send('Error al buscar productos en pedido')
-                    }
-                    else if (result.length > 0) {
-                        obj['productos'] = []
-                        var prod = JSON.parse(JSON.stringify(result))
-                        prod.forEach(it => {
-                            obj['productos'].push(it)
-                        })
-                    }
-                    finalResult[index] = obj
-                    console.log(finalResult[index])
-                    
-                })}
-            )
-            resolve();
-        })
-            wait.then(() => { return res.json(finalResult) })*/
         }
     })
 }
 
-async function asyncProducts1(result, finalResult) {
-    let promise = new Promise((resolve, reject) => {
-        result.map((obj) => {
-            asyncProducts2(obj).then((r) => {
-                result.push(r)
-                console.log("1  ", finalResult)
-                resolve()
+function asyncProducts(num, res, callback) {
+    ProductService.getProductOrders(num, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).send('Error al buscar productos en pedido')
+        }
+        else if (result.length > 0) {
+            var prod = JSON.parse(JSON.stringify(result))
+            var resProd = []
+            resProd = prod.map(it => {
+                return it
             })
-        })
+            //console.log('1 - ', resProd)
+            callback(resProd)
+        }
+        else
+            callback()
     })
-    await promise
-    console.log("2  ", finalResult)
-    return
-}
-
-async function asyncProducts2(obj) {
-    obj.productos = []
-    let promise = new Promise((resolve, reject) => {
-        ProductService.getProductOrders(obj.numero, (error, result) => {
-            if (error) {
-                console.log(error)
-                return res.status(500).send('Error al buscar productos en pedido')
-            }
-            else if (result.length > 0) {
-                var prod = JSON.parse(JSON.stringify(result))
-                var resProd = []
-                resProd = prod.map(it => {
-                    return it
-                })
-                resolve(resProd)
-            }
-            else
-                resolve()
-        })
-    })
-    let result = await promise
-    obj.productos = result
-    console.log('prod   ', obj)
-    return obj
 }

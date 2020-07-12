@@ -14,7 +14,7 @@ conMysql.connect((err) => {
       console.log(err)
       return;
     }
-    console.log('Connection with DB established');
+    console.log('Connection to DB established');
   });
   
   /*conMysql.end((err) => {

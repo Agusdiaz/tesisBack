@@ -4,6 +4,7 @@ const ShopController = require('./controllers/ShopController');
 const OrderController = require('./controllers/OrderController');
 const ProductController = require('./controllers/ProductController');
 const IngredientController = require('./controllers/IngredientController');
+const PaymentController = require('./controllers/PaymentController');
 
 router.get('/', function(req, res) {
   res.json(
@@ -61,18 +62,27 @@ router.post('/getAllDisabledByShop', function(req, res){
   ProductController.getAllDisabledByShop(req, res);
 })
 
-router.post('/enableIngredient', function(req, res){
-  IngredientController.enableIngredient(req, res);
+router.post('/updateIngredientStatus', function(req, res){
+  IngredientController.setIngredientStatus(req, res);
 })
 
-router.post('/enableProduct', function(req, res){
-  ProductController.enableProduct(req, res);
+router.post('/updateProductStatus', function(req, res){
+  ProductController.setProductStatus(req, res);
+})
+
+router.post('/insertPayment', function(req, res){
+  PaymentController.insertPayment(req, res);
+})
+
+router.post('/updateShop', function(req, res){
+  ShopController.setShop(req, res);
 })
 
 
 
 
-router.post('/getPendingOrders', function(req, res){ //NO FUNCIONA
+
+router.post('/getPendingOrdersByClient', function(req, res){ //NO FUNCIONA
   OrderController.getClientPendingOrders(req, res);
 })
 
