@@ -66,8 +66,6 @@ exports.shareOrder = (body, callback) => {
     });
 }
 
-
-
 exports.getClientPendingOrders = (client, callback) => {
     const sql = 'SELECT numero, nombre, etapa, propina, total, fecha FROM pendiente INNER JOIN pedido ON pendiente.pedido = pedido.numero ' + 
     'INNER JOIN local ON pedido.local = local.cuit WHERE pendiente.cliente = ?';
@@ -80,14 +78,3 @@ exports.getClientPendingOrders = (client, callback) => {
     });
 }
 
-exports.getProductOrders = (orderNum, callback) => {
-    const sql = 'SELECT nombre, precio, cantidad FROM pedidoproducto INNER JOIN producto ON pedidoproducto.producto = producto.id ' + 
-    'WHERE pedidoproducto.pedido = ?';
-    var values = [orderNum]
-    conMysql.query(sql, values, (err, result) => {
-        if (err)
-            callback(err);
-        else
-            callback(null, result);
-    });
-}

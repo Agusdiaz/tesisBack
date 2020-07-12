@@ -1,5 +1,6 @@
 const OrderService = require('../service/orderService');
 const ClientService = require('../service/clientService')
+const ProductService = require('../service/productService')
 
 exports.setOrderDeliveredByClient = (req, res) => {
     OrderService.deleteOrderPendingByClient(req.body, (error, result) => {
@@ -179,7 +180,7 @@ async function asyncProducts1(result, finalResult) {
 async function asyncProducts2(obj) {
     obj.productos = []
     let promise = new Promise((resolve, reject) => {
-        OrderService.getProductOrders(obj.numero, (error, result) => {
+        ProductService.getProductOrders(obj.numero, (error, result) => {
             if (error) {
                 console.log(error)
                 return res.status(500).send('Error al buscar productos en pedido')

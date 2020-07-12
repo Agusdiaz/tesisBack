@@ -1,7 +1,9 @@
 const router = require('express').Router();
 const ClientController = require('./controllers/ClientController');
-const ShopController = require('./controllers/ShopController')
-const OrderController = require('./controllers/OrderController')
+const ShopController = require('./controllers/ShopController');
+const OrderController = require('./controllers/OrderController');
+const ProductController = require('./controllers/ProductController');
+const IngredientController = require('./controllers/IngredientController');
 
 router.get('/', function(req, res) {
   res.json(
@@ -54,6 +56,20 @@ router.post('/setOrderReadyByShop', function(req, res){
 router.post('/shareOrder', function(req, res){
   OrderController.shareOrder(req, res);
 })
+
+router.post('/getAllDisabledByShop', function(req, res){
+  ProductController.getAllDisabledByShop(req, res);
+})
+
+router.post('/enableIngredient', function(req, res){
+  IngredientController.enableIngredient(req, res);
+})
+
+router.post('/enableProduct', function(req, res){
+  ProductController.enableProduct(req, res);
+})
+
+
 
 
 router.post('/getPendingOrders', function(req, res){ //NO FUNCIONA
