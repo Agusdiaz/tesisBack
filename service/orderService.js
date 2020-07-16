@@ -1,5 +1,43 @@
 var conMysql = require('../mysqlConnection');
 
+exports.createClientOrder = (order, callback) => {
+    const sql = 'INSERT INTO pedido (cliente, local, total, fecha, etapa, takeAway, propina) VALUES ?';
+    var fecha = new Date()
+    var values = [
+        [order.mail, order.cuit, order.total, fecha, 'pendiente', order.takeAway, order.propina]
+    ]
+    conMysql.query(sql, [values], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.createPendingOrder = (mail, cuit, num, callback) => {
+    const sql = 'INSERT INTO pendiente (cliente, local, pedido) VALUES ?';
+    var values = [
+        [mail, cuit, num]
+    ]
+    conMysql.query(sql, [values], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.deletOrderByClient = (order, callback) => {
+    const sql = 'DELETE FROM pedido WHERE numero = ?';
+    var values = [order.numero]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 exports.deleteOrderPendingByClient = (order, callback) => {
     const sql = 'DELETE FROM pendiente WHERE pedido = ?';
     var values = [order.numero]
@@ -78,3 +116,37 @@ exports.getClientPendingOrders = (client, callback) => {
     });
 }
 
+exports.getClientAllOrders = (client, callback) => {
+    const sql = 'SELECT numero, nombre, etapa, propina, total, fecha FROM pedido INNER JOIN local ON pedido.local = local.cuit WHERE ' +
+    'pedido.cliente = ? AND pedido.etapa = ?';
+    var values = [client.mail, 'entregado']
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getShopPendingOrdersByArrival = (shop, callback) => {
+    const sql = 'SELECT numero, cliente, takeAway, total, fecha FROM pedido WHERE local = ? AND etapa = ? ORDER BY fecha ASC';
+    var values = [shop.cuit, 'pendiente']
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getShopPendingOrdersByProducts = (shop, callback) => {
+    const sql = 'SELECT numero, cliente, takeAway, total, fecha, SUM(cantidad) as cantProductos FROM pedido INNER JOIN ' + 
+    'pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND etapa = ? GROUP BY numero ORDER BY cantProductos DESC';
+    var values = [shop.cuit, 'pendiente']
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}

@@ -14,6 +14,32 @@ exports.getClientFavourites = (req, res) => {
     })
 }
 
+exports.setShopAsFavourite = (req, res) => {
+    ShopService.createShopAsFavourite(req.body, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).send('Error al guardar local como favorito')
+        }
+        else
+            return res.send('Local guardado como favorito')
+    })
+}
+
+exports.deleteShopAsFavourite = (req, res) => {
+    ShopService.deleteShopAsFavourite(req.body, (error, result) => {
+        console.log(result)
+        if (error) {
+            console.log(error)
+            return res.status(500).send('Error al eliminar local como favorito')
+        }
+        else if (result.affectedRows == 0) {
+            return res.status(204).send('Cliente no tiene local como favorito')
+        }
+        else
+            return res.send('Local eliminado como favorito')
+    })
+}
+
 exports.getAllShopsOpenClose = (req, res) => {
     ShopService.getAllShopsOpenClose((error, result) => {
         if (error) {
@@ -81,5 +107,19 @@ exports.setShop = (req, res) => {
         }
         else
             return res.send('Local actualizado')
+    })
+}
+
+exports.setShopDelay = (req, res) => {
+    ShopService.updateDelayShop(req.body, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).send('Error al actualizar demora del local')
+        }
+        else if (result.affectedRows == 0) {
+            return res.status(404).send('Local no encontrado')
+        }
+        else
+            return res.send('Demora del local actualizada')
     })
 }

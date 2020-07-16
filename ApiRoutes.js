@@ -30,6 +30,14 @@ router.post('/getFavourites', function(req, res){
   ShopController.getClientFavourites(req, res);
 })
 
+router.post('/setShopAsFavourite', function(req, res){
+  ShopController.setShopAsFavourite(req, res);
+})
+
+router.post('/deleteShopAsFavourite', function(req, res){
+  ShopController.deleteShopAsFavourite(req, res);
+})
+
 router.post('/getShopByName', function(req, res){
   ShopController.getShopByName(req, res);
 })
@@ -78,12 +86,32 @@ router.post('/updateShop', function(req, res){
   ShopController.setShop(req, res);
 })
 
+router.post('/updateShopDelay', function(req, res){
+  ShopController.setShopDelay(req, res);
+})
 
-
-
-
-router.post('/getPendingOrdersByClient', function(req, res){ //NO FUNCIONA
+router.post('/getPendingOrdersByClient', function(req, res){
   OrderController.getClientPendingOrders(req, res);
+})
+
+router.post('/getAllOrdersByClient', function(req, res){
+  OrderController.getClientAllOrders(req, res);
+})
+
+router.post('/getPendingOrdersInOrderByShop', function(req, res){
+  OrderController.getShopPendingOrdersByArrival(req, res);
+})
+
+router.post('/getPendingOrdersMoreProductsByShop', function(req, res){
+  OrderController.getShopPendingOrdersByProducts(req, res);
+})
+
+router.post('/getShopMenu', function(req, res){
+  ProductController.getShopMenu(req, res);
+})
+
+router.post('/insertClientOrder', function(req, res){
+  OrderController.insertClientOrder(req, res);
 })
 
 module.exports = router;

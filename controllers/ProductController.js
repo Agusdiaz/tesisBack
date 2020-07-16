@@ -42,3 +42,49 @@ exports.setProductStatus = (req, res) => {
             return res.send('Producto actualizado')
     })
 }
+
+exports.getShopMenu = (req, res) => {
+    ProductService.getProductsMenu(req.body, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).send('Error al buscar productos del menú')
+        }
+        else if (result.length == 0) {
+            return res.status(204).send('Local sin productos en menú')
+        }
+        else {
+            var finalResult = []
+            var long = result.length;
+            var i = 0;
+            result.map(obj => {
+                obj.ingredientes = []
+                asyncIngredientsMenu(obj.id, res, (r) => {
+                    obj.ingredientes.push(r)
+                    finalResult.push(obj)
+                    i++
+                    if (i == long)
+                        return res.json(finalResult)
+                })
+            })
+        }
+    })
+}
+
+function asyncIngredientsMenu(id, res, callback){
+    IngredientService.getIngredientsByProductMenu(id, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).send('Error al buscar ingredientes del menú')
+        }
+        else if (result.length > 0) {
+            var ingr = JSON.parse(JSON.stringify(result))
+            var resIngr = []
+            resIngr = ingr.map(it => {
+                return it
+            })
+            callback(resIngr)
+        }
+        else
+            callback()
+    })
+}

@@ -5,6 +5,7 @@ var conMysql = mysql.createConnection({
   user: "root",
   password: "tesis2020",
   database: "flamma",
+  multipleStatements: true,
   //insecureAuth : true,
 });
 
