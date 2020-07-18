@@ -33,6 +33,8 @@ exports.setShopAsFavourite = (req, res) => {
             console.log(error)
             return res.status(500).send('Error al guardar local como favorito')
         }
+        else if (result.affectedRows == 0)
+            return res.status(401).send('El local ya es favorito')
         else
             return res.send('Local guardado como favorito')
     })
@@ -219,8 +221,17 @@ exports.getTopRequestedHoursByShop = (req, res) => {
         else if (result.length == 0) {
             return res.status(204).send('No hay pedidos realizados')
         }
-        else
-            return res.json(result)
+        else {
+            var hoursResult = [{ hora: 00, cantidad: 0 }, { hora: 01, cantidad: 0 }, { hora: 02, cantidad: 0 }, { hora: 03, cantidad: 0 }, { hora: 04, cantidad: 0 },
+            { hora: 05, cantidad: 0 }, { hora: 06, cantidad: 0 }, { hora: 07, cantidad: 0 }, { hora: 08, cantidad: 0 }, { hora: 09, cantidad: 0 }, { hora: 10, cantidad: 0 },
+            { hora: 11, cantidad: 0 }, { hora: 12, cantidad: 0 }, { hora: 13, cantidad: 0 }, { hora: 14, cantidad: 0 }, { hora: 15, cantidad: 0 }, { hora: 16, cantidad: 0 },
+            { hora: 17, cantidad: 0 }, { hora: 18, cantidad: 0 }, { hora: 19, cantidad: 0 }, { hora: 20, cantidad: 0 }, { hora: 21, cantidad: 0 }, { hora: 22, cantidad: 0 },
+            { hora: 23, cantidad: 0 }]
+            result.map(obj => {
+                hoursResult[obj.hora].cantidad = obj.cantidad
+            })
+            return res.json(hoursResult)
+        }
     })
 }
 
@@ -233,8 +244,37 @@ exports.getLast6MonthOrdersByShop = (req, res) => {
         else if (result.length == 0) {
             return res.status(204).send('No hay pedidos realizados')
         }
-        else
-            return res.json(result)
+        else {
+            var months = [{ mes: 'Enero', nroMes: 1, cantidad: 0 }, { mes: 'Febrero', nroMes: 2, cantidad: 0 }, { mes: 'Marzo', nroMes: 3, cantidad: 0 },
+            { mes: 'Abril', nroMes: 4, cantidad: 0 }, { mes: 'Mayo', nroMes: 5, cantidad: 0 }, { mes: 'Junio', nroMes: 6, cantidad: 0 },
+            { mes: 'Julio', nroMes: 7, cantidad: 0 }, { mes: 'Agosto', nroMes: 8, cantidad: 0 }, { mes: 'Septiembre', nroMes: 9, cantidad: 0 },
+            { mes: 'Octubre', nroMes: 10, cantidad: 0 }, { mes: 'Noviembre', nroMes: 11, cantidad: 0 }, { mes: 'Diciembre', nroMes: 12, cantidad: 0 }]
+            var actualMonth = new Date().getMonth() + 1
+            var monthsResult = []
+            if (actualMonth < 6) { //INTERVALO DE 6 MESES 
+                var rest = -(actualMonth - 6)
+                var m = 12 - rest;
+                for (i = 0; i < rest; i++) {
+                    monthsResult.push(months[m])
+                    m++
+                }
+                for (i = 0; i < 6 - rest; i++) {
+                    monthsResult.push(months[i])
+                }
+            }
+            else {
+                for (i = actualMonth - 6; i < actualMonth; i++) {
+                    monthsResult.push(months[i])
+                }
+            }
+            result.map(obj => {
+                for (i = 0; i < 6; i++) {
+                    if (monthsResult[i].nroMes == obj.mes)
+                        monthsResult[i].cantidad = obj.cantidad
+                }
+            })
+            return res.json(monthsResult)
+        }
     })
 }
 

@@ -1,6 +1,36 @@
 const PromoService = require('../service/promoService');
 const IngredientService = require('../service/ingredientService');
 
+exports.insertPromoWithProducts = (req, res) => {
+    if (req.body.productos != null)
+        return res.status(401).send('La promoción debe tener productos')
+    else {
+        PromoService.createPromo(req.body, (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).send('Error al guardar promoción')
+            }
+            else {
+                var idPromocion = result.insertId
+                var i = 0
+                req.body.productos.map(obj => {
+                    PromoService.createProductPromo(obj, idPromocion, (error, result) => {
+                        if (error) {
+                            console.log(error)
+                            return res.status(500).send('Error al guardar producto en promocion')
+                        }
+                        else {
+                            i++
+                            if (i == req.body.productos.length)
+                                return res.send('Promoción con productos guardada')
+                        }
+                    })
+                })
+            }
+        })
+    }
+}
+
 exports.getShopPromos = (req, res) => {
     PromoService.getShopPromos(req.body, (error, result) => {
         if (error) {

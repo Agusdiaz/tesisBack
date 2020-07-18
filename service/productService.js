@@ -1,5 +1,18 @@
 var conMysql = require('../mysqlConnection');
 
+exports.createProduct = (body, CUIT, callback) => {
+    const sql = 'INSERT INTO producto (nombre, codigo, precio, detalle, condicion, tipo, local) VALUES ?';
+    var values = [
+        [body.nombre, body.codigo, body.precio, body.detalle, body.condicion, body.tipo, CUIT]
+    ]
+    conMysql.query(sql, [values], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 exports.getProductsOrder = (orderNum, callback) => {
     const sql = 'SELECT nombre, precio, cantidad, pedidoproducto.id FROM pedidoproducto INNER JOIN producto ON pedidoproducto.producto = producto.id ' +
         'WHERE pedidoproducto.pedido = ?';
@@ -34,6 +47,16 @@ exports.getShopDisabledProducts = (shop, callback) => {
     });
 }
 
+exports.validateNameAndCodeOfProduct = (name, code, CUIT, callback) => {
+    const sql = 'SELECT * FROM producto WHERE (nombre = ? OR codigo = ?) AND local = ?';
+    conMysql.query(sql, [name, code, CUIT], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 exports.updateProductStatus = (product, callback) => {
     const sql = 'UPDATE producto SET disponible = ? WHERE id = ?';
     var values = [product.disponible, product.id]
@@ -57,7 +80,7 @@ exports.validateProduct = (product, callback) => {
 
 exports.validateProductsAndIngredients = (products, ingredients, callback) => {
     const sql = 'SELECT id FROM producto WHERE id IN ? AND disponible = 0; SELECT id FROM ingrediente WHERE id IN ? AND disponible = 0;'
-    conMysql.query(sql, [[products],[ingredients]] , (err, result) => {
+    conMysql.query(sql, [[products], [ingredients]], (err, result) => {
         if (err)
             callback(err)
         else

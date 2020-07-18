@@ -139,4 +139,16 @@ router.post('/getLast6MonthOrdersByShop', function(req, res){
   ShopController.getLast6MonthOrdersByShop(req, res);
 })
 
+router.post('/insertProductWithIngredients', function(req, res){
+  ProductController.insertProductWithIngredients(req, res);
+})
+
+router.post('/insertPromoWithProducts', function(req, res){
+  PromoController.insertPromoWithProducts(req, res);
+})
+
+router.post('/getAllIngredientsByShop', function(req, res){
+  IngredientController.getAllIngredientsByShop(req, res);
+})
+
 module.exports = router;

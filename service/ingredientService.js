@@ -1,5 +1,41 @@
 var conMysql = require('../mysqlConnection');
 
+exports.createIngredient = (body, idProd, CUIT, callback) => {
+    const sql = 'INSERT INTO ingrediente (nombre, codigo, precio, detalle, local) VALUES ?'
+    var values = [
+        [body.nombre, body.codigo, body.precio, body.detalle, CUIT]
+    ]
+    conMysql.query(sql, [values], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(this.asociateIngredientAndProduct(body, idProd, result.insertId, callback))
+    })
+}
+
+exports.asociateIngredientAndProduct = (body, idProd, idIngr, callback) => {
+    const sql = 'INSERT INTO productoingrediente (producto, ingrediente, cantidad, opcion) VALUES ?';
+    values = [
+        [idProd, idIngr, body.cantidad, (body.opcion != null) ? body.opcion : false]
+    ]
+    conMysql.query(sql, [values], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.validateNameAndCodeOfIngredient = (names, codes, CUIT, callback) => {
+    const sql = 'SELECT * FROM ingrediente WHERE (nombre IN ? OR codigo IN ?) AND local = ?';
+    conMysql.query(sql, [[names], [codes], CUIT], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 exports.getShopDisabledIngredients = (shop, callback) => {
     const sql = 'SELECT id, nombre, precio, detalle FROM ingrediente WHERE local = ? AND disponible = 0;';
     var values = [shop.cuit]
@@ -47,6 +83,17 @@ exports.getIngredientsByProduct = (prodId, callback) => {
     });
 }
 
+exports.getIngredientsByShop = (shop, callback) => {
+    const sql = 'SELECT id, nombre, codigo, precio, detalle, disponible FROM ingrediente WHERE local = ?';
+    var values = [shop.cuit]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 exports.validateIngredient = (ingredient, callback) => {
     const sql = 'SELECT * FROM ingrediente WHERE id = ? AND disponible = 1';
     conMysql.query(sql, [ingredient.idIngrediente], (err, result) => {
@@ -69,3 +116,14 @@ exports.createIngredientForOrder = (ingredient, idPedidoProducto, idProducto, ca
             callback(null, result);
     });
 }
+
+/*exports.getIngredientByShop = (id, CUIT, callback) => {
+    const sql = 'SELECT * FROM ingrediente WHERE local = ? AND id = ?';
+    var values = [CUIT, id]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}*/

@@ -24,9 +24,9 @@ exports.getFavourites = (client, callback) => {
 }
 
 exports.createShopAsFavourite = (body, callback) => {
-    const sql = 'INSERT INTO favorito (cliente, local) VALUES ?';
-    var values = [[body.mail, body.cuit]]
-    conMysql.query(sql, [values], (err, result) => {
+    const sql = 'INSERT INTO favorito (cliente, local) SELECT ? , ? FROM favorito WHERE NOT EXISTS (SELECT * FROM favorito WHERE cliente=? AND local = ?)';
+    var values = [body.mail, body.cuit, body.mail, body.cuit]
+    conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);
         else
