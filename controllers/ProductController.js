@@ -71,7 +71,7 @@ exports.getShopMenu = (req, res) => {
 }
 
 function asyncIngredientsMenu(id, res, callback){
-    IngredientService.getIngredientsByProductMenu(id, (error, result) => {
+    IngredientService.getIngredientsByProduct(id, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).send('Error al buscar ingredientes del menú')

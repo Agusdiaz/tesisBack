@@ -5,6 +5,7 @@ const OrderController = require('./controllers/OrderController');
 const ProductController = require('./controllers/ProductController');
 const IngredientController = require('./controllers/IngredientController');
 const PaymentController = require('./controllers/PaymentController');
+const PromoController = require('./controllers/PromoController')
 
 router.get('/', function(req, res) {
   res.json(
@@ -46,6 +47,10 @@ router.post('/getShopByAddress', function(req, res){
   ShopController.getShopByAddress(req, res);
 })
 
+router.get('/getShopByPromo', function(req, res){
+  ShopController.getShopsByPromos(req, res);
+})
+
 router.get('/getAllShopsOpenClose', function(req, res){ //VER CUANDO ESTA ABIERTO/CERRADO
   ShopController.getAllShopsOpenClose(req, res);
 })
@@ -82,8 +87,8 @@ router.post('/insertPayment', function(req, res){
   PaymentController.insertPayment(req, res);
 })
 
-router.post('/updateShop', function(req, res){
-  ShopController.setShop(req, res);
+router.post('/updateShopFeatures', function(req, res){
+  ShopController.setShopFeatures(req, res);
 })
 
 router.post('/updateShopDelay', function(req, res){
@@ -112,6 +117,26 @@ router.post('/getShopMenu', function(req, res){
 
 router.post('/insertClientOrder', function(req, res){
   OrderController.insertClientOrder(req, res);
+})
+
+router.post('/insertShop', function(req, res){
+  ShopController.insertShop(req, res);
+})
+
+router.post('/getShopPromos', function(req, res){
+  PromoController.getShopPromos(req, res);
+})
+
+router.post('/getTopRequestedProductsByShop', function(req, res){
+  ShopController.getTopRequestedProductsByShop(req, res);
+})
+
+router.post('/getTopRequestedHoursByShop', function(req, res){
+  ShopController.getTopRequestedHoursByShop(req, res);
+})
+
+router.post('/getLast6MonthOrdersByShop', function(req, res){
+  ShopController.getLast6MonthOrdersByShop(req, res);
 })
 
 module.exports = router;

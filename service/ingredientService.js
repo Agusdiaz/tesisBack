@@ -35,8 +35,8 @@ exports.getIngredientsOrder = (orderNum, callback) => {
     });
 }
 
-exports.getIngredientsByProductMenu = (prodId, callback) => {
-    const sql = 'SELECT ingrediente.id, nombre, codigo, precio, detalle, disponible, cantidad FROM ingrediente INNER JOIN ' +
+exports.getIngredientsByProduct = (prodId, callback) => {
+    const sql = 'SELECT ingrediente.id, nombre, codigo, precio, detalle, disponible, cantidad, opcion FROM ingrediente INNER JOIN ' +
         'productoingrediente ON ingrediente.id = productoingrediente.ingrediente WHERE productoingrediente.producto = ? AND disponible = 1';
     var values = [prodId]
     conMysql.query(sql, values, (err, result) => {

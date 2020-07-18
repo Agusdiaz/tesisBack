@@ -150,3 +150,35 @@ exports.getShopPendingOrdersByProducts = (shop, callback) => {
             callback(null, result);
     });
 }
+
+exports.getTopRequestedProducts = (shop, callback) => {
+    const sql = 'SELECT producto.id, nombre, SUM(cantidad) AS cantidad FROM pedidoproducto INNER JOIN pedido ON pedido = numero ' + 
+    'INNER JOIN producto ON producto = producto.id WHERE pedido.local = ? GROUP BY producto ORDER BY cantidad DESC';
+    conMysql.query(sql, shop.cuit, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getOrdersTopHours = (shop, callback) => {
+    const sql = 'SELECT HOUR(fecha) AS hora, COUNT(*) AS cantidad FROM pedido WHERE local = ? GROUP BY hora ORDER BY fecha DESC';
+    conMysql.query(sql, shop.cuit, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getLast6MonthOrdersAmount = (shop, callback) => {
+    const sql = 'SELECT MONTH(fecha) AS mes, COUNT(*) AS cantidad FROM pedido WHERE local = ? AND fecha >= DATE_SUB(CURRENT_DATE(), ' +
+    'INTERVAL 6 MONTH) GROUP BY mes ORDER BY mes;';
+    conMysql.query(sql, shop.cuit, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
