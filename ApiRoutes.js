@@ -1,11 +1,12 @@
 const router = require('express').Router();
+const auth = require('./auth/authToken');
 const ClientController = require('./controllers/ClientController');
 const ShopController = require('./controllers/ShopController');
 const OrderController = require('./controllers/OrderController');
 const ProductController = require('./controllers/ProductController');
 const IngredientController = require('./controllers/IngredientController');
 const PaymentController = require('./controllers/PaymentController');
-const PromoController = require('./controllers/PromoController')
+const PromoController = require('./controllers/PromoController');
 
 router.get('/', function(req, res) {
   res.json(
@@ -21,7 +22,7 @@ router.post('/login', function(req, res){
 
 router.post('/insertClient', function(req, res){
   ClientController.insertClient(req, res);
-});
+})
 
 router.post('/updateClient', function(req, res){
   ClientController.setClient(req, res);

@@ -1,8 +1,10 @@
 var conMysql = require('../mysqlConnection');
+var bcrypt = require('bcrypt'); 
 
 exports.createShop = (shop, callback) => {
+    let hashedPassword = bcrypt.hashSync(toString(shop.contraseña), process.env.BCRYPT_ROUNDS || 10)
     const sql = 'INSERT INTO local (cuit, nombre, direccion, telefono, razonSocial, mail, contraseña) VALUES ?';
-    var values = [[shop.cuit, shop.nombre, shop.direccion, shop.telefono, shop.razonSocial, shop.mail, shop.contraseña]]
+    var values = [[shop.cuit, shop.nombre, shop.direccion, shop.telefono, shop.razonSocial, shop.mail, hashedPassword]]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
             callback(err);

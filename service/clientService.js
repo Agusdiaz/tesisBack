@@ -1,9 +1,11 @@
 var conMysql = require('../mysqlConnection');
+var bcrypt = require('bcrypt'); 
 
 exports.createClient = (client, callback) => {
+    let hashedPassword = bcrypt.hashSync(toString(client.contraseña), process.env.BCRYPT_ROUNDS || 10)
     const sql = 'INSERT INTO cliente (mail, nombre, apellido, contraseña) VALUES ?';
     var values = [
-        [client.mail, client.nombre, client.apellido, client.contraseña]
+        [client.mail, client.nombre, client.apellido, hashedPassword]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)

@@ -1,6 +1,8 @@
 const ShopService = require('../service/shopService');
 const PromoService = require('../service/promoService');
-const OrderService = require('../service/orderService')
+const OrderService = require('../service/orderService');
+var bcrypt = require('bcrypt'); 
+var jwt = require('jsonwebtoken');
 
 exports.insertShop = (req, res) => {
     ShopService.createShop(req.body, (error, result) => {
@@ -8,8 +10,18 @@ exports.insertShop = (req, res) => {
             console.log(error)
             return res.status(500).send('Error al guardar local')
         }
-        else
-            return res.send('Local guardado')
+        else{
+            /*let token = jwt.sign({
+                id: result.insertId
+            }, process.env.SECRET || 'token-secret', {
+                expiresIn: 86400 // expires in 24 hours
+            });
+            let sendJson = {
+                token: token,
+                mail: req.body.mail,
+            }*/
+            return res.json('Local guardado')
+        }
     })
 }
 
