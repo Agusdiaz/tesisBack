@@ -1,15 +1,17 @@
 const ClientService = require('../service/clientService');
-var bcrypt = require('bcrypt'); 
+var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 
 exports.insertClient = (req, res) => {
     ClientService.createClient(req.body, (error, result) => {
-        console.log(result)
+        //console.log(result.length)
         if (error) {
             console.log(error)
             return res.status(500).send('Error al guardar cliente')
         }
-        else{
+        else if (result.length > 1)
+            return res.status(401).send('Mail existente')
+        else {
             let token = jwt.sign({
                 id: result.insertId
             }, process.env.SECRET || 'token-secret', {
@@ -26,28 +28,31 @@ exports.insertClient = (req, res) => {
 
 exports.loginUser = (req, res) => {
     ClientService.validateUser(req.body, (error, result) => {
-        let passwordIsValid = bcrypt.compareSync(toString(req.body.contraseña), result[0].contraseña)
         if (error) {
             console.log(error)
             return res.status(500).send('Error al loguear usuario')
         }
         else if (result.length == 0) {
-            return res.status(404).send('Usuario no encontrado')
+            return res.status(404).send('Usuario no encontrado o no habilitado')
         }
-        else if (passwordIsValid) {
-            let token = jwt.sign({
-                id: result[0].id
-            }, process.env.SECRET || 'token-secret', {
-                expiresIn: 86400 // expires in 24 hours
-            });
-            let sendJson = {
-                token: token,
-                mail: result[0].mail,
+        else {
+            let passwordIsValid = bcrypt.compareSync(toString(req.body.contraseña), result[0].contraseña)
+            if (passwordIsValid) {
+                let token = jwt.sign({
+                    id: result[0].id
+                }, process.env.SECRET || 'token-secret', {
+                    expiresIn: 86400 // expires in 24 hours
+                });
+                let sendJson = {
+                    token: token,
+                    mail: result[0].mail,
+                    nuevo: result[0].nuevo,
+                }
+                return res.json(sendJson)
             }
-            return res.json(sendJson)
+            else
+                return res.status(401).send('Contraseña inválida')
         }
-        else
-            return res.status(401).send('Contraseña inválida')
     })
 }
 

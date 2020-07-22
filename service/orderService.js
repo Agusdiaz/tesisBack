@@ -72,8 +72,9 @@ exports.deleteOrderPendingByShop = (order, callback) => {
 }
 
 exports.updateOrderReady = (order, callback) => {
-    const sql = 'UPDATE pedido SET etapa = ? WHERE numero = ?';
-    var values = ['listo', order.numero]
+    const sql = 'UPDATE pedido SET etapa = ?, fechaListo = ? WHERE numero = ?';
+    var fecha = new Date()
+    var values = ['listo', fecha, order.numero]
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);

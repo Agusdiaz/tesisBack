@@ -48,11 +48,11 @@ router.post('/getShopByAddress', function(req, res){
   ShopController.getShopByAddress(req, res);
 })
 
-router.get('/getShopByPromo', function(req, res){
+router.get('/getShopByPromo', function(req, res){ //VER LA VALIDEZ
   ShopController.getShopsByPromos(req, res);
 })
 
-router.get('/getAllShopsOpenClose', function(req, res){ //VER CUANDO ESTA ABIERTO/CERRADO
+router.get('/getAllShopsOpenClose', function(req, res){
   ShopController.getAllShopsOpenClose(req, res);
 })
 
@@ -92,8 +92,16 @@ router.post('/updateShopFeatures', function(req, res){
   ShopController.setShopFeatures(req, res);
 })
 
+router.post('/updateShopSchedule', function(req, res){
+  ShopController.setShopSchedule(req, res);
+})
+
 router.post('/updateShopDelay', function(req, res){
   ShopController.setShopDelay(req, res);
+})
+
+router.post('/insertShopSchedule', function(req, res){
+  ShopController.insertShopSchedule(req, res);
 })
 
 router.post('/getPendingOrdersByClient', function(req, res){

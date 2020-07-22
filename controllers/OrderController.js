@@ -1,7 +1,8 @@
 const OrderService = require('../service/orderService');
-const ClientService = require('../service/clientService')
-const ProductService = require('../service/productService')
-const IngredientService = require('../service/ingredientService')
+const ClientService = require('../service/clientService');
+const ShopService = require('../service/shopService');
+const ProductService = require('../service/productService');
+const IngredientService = require('../service/ingredientService');
 
 exports.setOrderDeliveredByClient = (req, res) => {
     OrderService.deleteOrderPendingByClient(req.body, (error, result) => {
@@ -41,13 +42,13 @@ exports.setOrderReadyByShop = (req, res) => {
             OrderService.updateOrderReady(req.body, (error, result) => {
                 if (error) {
                     console.log(error)
-                    return res.status(500).send('Error al actualizar etapa pedido')
+                    return res.status(500).send('Error al actualizar etapa y fecha del pedido')
                 }
                 else if (result.affectedRows == 0) {
                     return res.status(404).send('Pedido no encontrado')
                 }
                 else
-                    return res.send('Etapa pedido actualizada')
+                    return res.send('Etapa y fecha del pedido actualizada')
             })
         }
     })
@@ -196,84 +197,94 @@ exports.getShopPendingOrdersByProducts = (req, res) => {
 }
 
 exports.insertClientOrder = (req, res) => {
-    validateProductsAndIngredients(req.body, (error, result) => {
+    ShopService.validateOpenShop(req.body.cuit, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al validar productos e ingredientes en pedido')
+            return res.status(500).send('Error al validar si el local esta abierto')
         }
-        else if (result != null) {
-            if (result[0].length > 0 && result[1].length > 0) {
-                return res.status(401).send('Productos con id=' + result[0][0].id + ' e Ingredientes con id=' + result[1][0].id + ' no disponibles')
-            }
-            else if (result[0].length > 0) {
-                return res.status(401).send('Productos con id=' + result[0][0].id + ' no disponibles')
-            }
-            else {
-                return res.status(401).send('Ingredientes con id=' + result[1][0].id + ' no disponibles')
-            }
-        }
+        else if (result.length == 0) 
+                return res.status(401).send('Local cerrado')
         else {
-            OrderService.createClientOrder(req.body, (error, result) => {
+            validateProductsAndIngredients(req.body, (error, result) => {
                 if (error) {
                     console.log(error)
-                    return res.status(500).send('Error al crear pedido')
+                    return res.status(500).send('Error al validar productos e ingredientes en pedido')
+                }
+                else if (result != null) {
+                    if (result[0].length > 0 && result[1].length > 0) {
+                        return res.status(401).send('Productos con id=' + result[0][0].id + ' e Ingredientes con id=' + result[1][0].id + ' no disponibles')
+                    }
+                    else if (result[0].length > 0) {
+                        return res.status(401).send('Productos con id=' + result[0][0].id + ' no disponibles')
+                    }
+                    else {
+                        return res.status(401).send('Ingredientes con id=' + result[1][0].id + ' no disponibles')
+                    }
                 }
                 else {
-                    var orderNumber = result.insertId
-                    var longProd = req.body.productos.length
-                    var iProd = 0
-                    req.body.productos.forEach(obj => {
-                        var iIngr = 0
-                        var longIngr = obj.ingredientes.length
-                        ProductService.createProductForOrder(obj, orderNumber, (error, result) => {
-                            if (error) {
-                                console.log(error)
-                                return res.status(500).send('Error al guardar producto en pedido')
-                            }
-                            else {
-                                if (longIngr > 0) {
-                                    var idPedidoProducto = result.insertId
-                                    var idProducto = obj.idProducto
-                                    obj.ingredientes.forEach(obj => {
-                                        IngredientService.createIngredientForOrder(obj, idPedidoProducto, idProducto, (error, result) => {
-                                            if (error) {
-                                                console.log(error)
-                                                return res.status(500).send('Error al guardar ingrediente en pedido')
-                                            }
-                                            else {
-                                                iIngr++
-                                                iProd++
-                                                if (iIngr == longIngr && iProd == longProd) {
-                                                    OrderService.createPendingOrder(req.body.mail, req.body.cuit, orderNumber, (error, result) => {
-                                                        if (error) {
-                                                            console.log(error)
-                                                            return res.status(500).send('Error al crear pedido pendiente')
-                                                        }
-                                                        else {
-                                                            return res.send('Pedido creado')
-                                                        }
-                                                    })
-                                                }
-                                            }
-                                        })
-                                    })
-                                }
-                                else {
-                                    iProd++
-                                    if (iProd == longProd) {
-                                        OrderService.createPendingOrder(req.body.mail, req.body.cuit, orderNumber, (error, result) => {
-                                            if (error) {
-                                                console.log(error)
-                                                return res.status(500).send('Error al crear pedido pendiente')
-                                            }
-                                            else {
-                                                return res.send('Pedido creado')
-                                            }
-                                        })
+                    OrderService.createClientOrder(req.body, (error, result) => {
+                        if (error) {
+                            console.log(error)
+                            return res.status(500).send('Error al crear pedido')
+                        }
+                        else {
+                            var orderNumber = result.insertId
+                            var longProd = req.body.productos.length
+                            var iProd = 0
+                            req.body.productos.forEach(obj => {
+                                var iIngr = 0
+                                var longIngr = obj.ingredientes.length
+                                ProductService.createProductForOrder(obj, orderNumber, (error, result) => {
+                                    if (error) {
+                                        console.log(error)
+                                        return res.status(500).send('Error al guardar producto en pedido')
                                     }
-                                }
-                            }
-                        })
+                                    else {
+                                        if (longIngr > 0) {
+                                            var idPedidoProducto = result.insertId
+                                            var idProducto = obj.idProducto
+                                            obj.ingredientes.forEach(obj => {
+                                                IngredientService.createIngredientForOrder(obj, idPedidoProducto, idProducto, (error, result) => {
+                                                    if (error) {
+                                                        console.log(error)
+                                                        return res.status(500).send('Error al guardar ingrediente en pedido')
+                                                    }
+                                                    else {
+                                                        iIngr++
+                                                        iProd++
+                                                        if (iIngr == longIngr && iProd == longProd) {
+                                                            OrderService.createPendingOrder(req.body.mail, req.body.cuit, orderNumber, (error, result) => {
+                                                                if (error) {
+                                                                    console.log(error)
+                                                                    return res.status(500).send('Error al crear pedido pendiente')
+                                                                }
+                                                                else {
+                                                                    return res.send('Pedido creado')
+                                                                }
+                                                            })
+                                                        }
+                                                    }
+                                                })
+                                            })
+                                        }
+                                        else {
+                                            iProd++
+                                            if (iProd == longProd) {
+                                                OrderService.createPendingOrder(req.body.mail, req.body.cuit, orderNumber, (error, result) => {
+                                                    if (error) {
+                                                        console.log(error)
+                                                        return res.status(500).send('Error al crear pedido pendiente')
+                                                    }
+                                                    else {
+                                                        return res.send('Pedido creado')
+                                                    }
+                                                })
+                                            }
+                                        }
+                                    }
+                                })
+                            })
+                        }
                     })
                 }
             })

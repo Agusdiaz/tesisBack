@@ -1,7 +1,7 @@
 const ShopService = require('../service/shopService');
 const PromoService = require('../service/promoService');
 const OrderService = require('../service/orderService');
-var bcrypt = require('bcrypt'); 
+var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 
 exports.insertShop = (req, res) => {
@@ -10,7 +10,9 @@ exports.insertShop = (req, res) => {
             console.log(error)
             return res.status(500).send('Error al guardar local')
         }
-        else{
+        else if (result.length > 1)
+            return res.status(401).send('Mail existente')
+        else {
             /*let token = jwt.sign({
                 id: result.insertId
             }, process.env.SECRET || 'token-secret', {
@@ -34,8 +36,21 @@ exports.getClientFavourites = (req, res) => {
         else if (result.length == 0) {
             return res.status(204).send('Cliente sin favoritos')
         }
-        else
-            return res.json(result)
+        else {
+            var finalResult = []
+            var long = result.length;
+            var i = 0;
+            result.map(obj => {
+                obj.horarios = []
+                asyncSchedule(obj.cuit, res, (r) => {
+                    obj.horarios.push(r)
+                    finalResult.push(obj)
+                    i++
+                    if (i == long)
+                        return res.json(finalResult)
+                })
+            })
+        }
     })
 }
 
@@ -76,8 +91,21 @@ exports.getAllShopsOpenClose = (req, res) => {
         else if (result.length == 0) {
             return res.status(204).send('No hay locales')
         }
-        else
-            return res.json(result)
+        else {
+            var finalResult = []
+            var long = result.length;
+            var i = 0;
+            result.map(obj => {
+                obj.horarios = []
+                asyncSchedule(obj.cuit, res, (r) => {
+                    obj.horarios.push(r)
+                    finalResult.push(obj)
+                    i++
+                    if (i == long)
+                        return res.json(finalResult)
+                })
+            })
+        }
     })
 }
 
@@ -90,13 +118,27 @@ exports.getAllShopsAZ = (req, res) => {
         else if (result.length == 0) {
             return res.status(204).send('No hay locales')
         }
-        else
-            return res.json(result)
+        else {
+            var finalResult = []
+            var long = result.length;
+            var i = 0;
+            result.map(obj => {
+                obj.horarios = []
+                asyncSchedule(obj.cuit, res, (r) => {
+                    obj.horarios.push(r)
+                    finalResult.push(obj)
+                    i++
+                    if (i == long)
+                        return res.json(finalResult)
+                })
+            })
+        }
     })
 }
 
 exports.getShopsByPromos = (req, res) => {
     PromoService.getShopWithPromos((error, result) => {
+        console.log(result)
         if (error) {
             console.log(error)
             return res.status(500).send('Error al buscar local por promoción')
@@ -141,7 +183,19 @@ exports.getShopsByPromos = (req, res) => {
                                             return res.status(204).send('No existen locales con esos CUIT')
                                         }
                                         else {
-                                            return res.json(result)
+                                            var finalResult = []
+                                            var long = result.length;
+                                            var i = 0;
+                                            result.map(obj => {
+                                                obj.horarios = []
+                                                asyncSchedule(obj.cuit, res, (r) => {
+                                                    obj.horarios.push(r)
+                                                    finalResult.push(obj)
+                                                    i++
+                                                    if (i == long)
+                                                        return res.json(finalResult)
+                                                })
+                                            })
                                         }
                                     })
                                 }
@@ -163,8 +217,21 @@ exports.getShopByName = (req, res) => {
         else if (result.length == 0) {
             return res.status(204).send('No existen locales con ese nombre')
         }
-        else
-            return res.json(result)
+        else {
+            var finalResult = []
+            var long = result.length;
+            var i = 0;
+            result.map(obj => {
+                obj.horarios = []
+                asyncSchedule(obj.cuit, res, (r) => {
+                    obj.horarios.push(r)
+                    finalResult.push(obj)
+                    i++
+                    if (i == long)
+                        return res.json(finalResult)
+                })
+            })
+        }
     })
 }
 
@@ -177,8 +244,21 @@ exports.getShopByAddress = (req, res) => {
         else if (result.length == 0) {
             return res.status(204).send('No existen locales con esa dirección')
         }
-        else
-            return res.json(result)
+        else {
+            var finalResult = []
+            var long = result.length;
+            var i = 0;
+            result.map(obj => {
+                obj.horarios = []
+                asyncSchedule(obj.cuit, res, (r) => {
+                    obj.horarios.push(r)
+                    finalResult.push(obj)
+                    i++
+                    if (i == long)
+                        return res.json(finalResult)
+                })
+            })
+        }
     })
 }
 
@@ -207,6 +287,51 @@ exports.setShopDelay = (req, res) => {
         }
         else
             return res.send('Demora del local actualizada')
+    })
+}
+
+exports.insertShopSchedule = (req, res) => {
+    var i = 0
+    req.body.map(obj => {
+        ShopService.createShopShedule(obj, (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).send('Error al crear horarios del local')
+            }
+            else if (result.affectedRows == 0) {
+                return res.status(404).send('Local no encontrado')
+            }
+            else {
+                i++
+                if (i == req.body.length)
+                    return res.send('Horarios del local creados')
+            }
+        })
+    })
+}
+
+exports.setShopSchedule = (req, res) => {
+    var i = 0
+    req.body.map(obj => {
+        ShopService.deleteShopSchedule(obj.cuit, obj.diaSemana, (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).send('Error al eliminar horarios del local')
+            }
+        })
+    })
+    req.body.map(obj => {
+        ShopService.createShopShedule(obj, (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).send('Error al actualizar horarios del local')
+            }
+            else {
+                i++
+                if (i == req.body.length)
+                    return res.send('Horarios del local actualizados')
+            }
+        })
     })
 }
 
@@ -311,6 +436,24 @@ function asyncValidateProductsPromo(id, res, callback) {
                     callback(false)
                 return it
             })
+        } else
+            callback()
+    })
+}
+
+function asyncSchedule(cuit, res, callback) {
+    ShopService.getShopShedule(cuit, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).send('Error al buscar horarios del local')
+        }
+        else if (result.length > 0) {
+            var times = JSON.parse(JSON.stringify(result))
+            var resTimes = []
+            resTimes = times.map(it => {
+                return it
+            })
+            callback(resTimes)
         } else
             callback()
     })

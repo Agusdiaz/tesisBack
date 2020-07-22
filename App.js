@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
+const EventController = require('./controllers/EventController')
 
 // Importo router
 const apiRoutes = require('./ApiRoutes');
@@ -24,3 +25,6 @@ app.use(apiRoutes);
 app.listen(port, function() {
   console.log('Running RestHub on port ' + port);
 });
+
+//setInterval(EventController.checkAllShopsSchedules, 60000) //Cada 1 minuto (60000)
+//clearInterval(interval)
