@@ -1,6 +1,9 @@
 const ShopService = require('../service/shopService');
+const cron = require('node-cron');
 
-exports.checkAllShopsSchedules = () => {
+cron.schedule('* * * * *', checkAllShopsSchedules) //Cada 1 minuto
+
+function checkAllShopsSchedules () {
     console.log('entre')
     ShopService.getAllShopsOpenClose((error, result) => {
         if (error) {

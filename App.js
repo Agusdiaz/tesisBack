@@ -25,6 +25,3 @@ app.use(apiRoutes);
 app.listen(port, function() {
   console.log('Running RestHub on port ' + port);
 });
-
-//setInterval(EventController.checkAllShopsSchedules, 60000) //Cada 1 minuto (60000)
-//clearInterval(interval)
