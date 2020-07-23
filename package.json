@@ -2,7 +2,7 @@
   "name": "tesis-back",
   "version": "0.1.0",
   "private": true,
-  "engines":{
+  "engines": {
     "node": "13.x"
   },
   "dependencies": {
