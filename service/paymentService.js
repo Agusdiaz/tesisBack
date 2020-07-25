@@ -1,10 +1,12 @@
 var conMysql = require('../mysqlConnection');
+var bcrypt = require('bcrypt');
 
 exports.createPayment = (payment, callback) => {
-    const sql = 'INSERT INTO pago (cliente, local, total, fecha, nroTarjeta, medioPago) VALUES ?';
-    var medioPago = (payment.medioPago != null) ? payment.medioPago : null
+    const sql = 'INSERT INTO pago (cliente, local, total, fecha, nroTarjeta, clave, medioPago) VALUES ?';
+    let hashedKey = bcrypt.hashSync(toString(payment.clave), process.env.BCRYPT_ROUNDS || 10)
+    //var medioPago = (payment.medioPago != null) ? payment.medioPago : null
     var fecha = new Date();
-    var values = [[payment.mail, payment.cuit, payment.total, fecha, payment.nroTarjeta, medioPago]]
+    var values = [[payment.mail, payment.cuit, payment.total, fecha, payment.nroTarjeta, hashedKey, payment.medioPago]]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
             callback(err);

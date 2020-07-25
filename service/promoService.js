@@ -26,8 +26,22 @@ exports.createProductPromo = (product, idPromo, callback) => {
     });
 }
 
+exports.createPromoForOrder = (promo, orderNum, callback) => {
+    const sql = 'INSERT INTO pedidoproducto (pedido, promocion, cantidad) VALUES ?';
+    var values = [
+        [orderNum, promo.idPromo, promo.cantidad]
+    ]
+    conMysql.query(sql, [values], (err, result) => {
+        if (err)
+            callback(err)
+        else {
+            callback(null, result)
+        }
+    });
+}
+
 exports.getShopPromos = (shop, callback) => {
-    const sql = 'SELECT id, nombre, detalle, precio FROM promocion WHERE local = ?';
+    const sql = 'SELECT id, nombre, detalle, precio, valida FROM promocion WHERE local = ?';
     var values = [shop.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -38,7 +52,7 @@ exports.getShopPromos = (shop, callback) => {
 }
 
 exports.getShopWithPromos = (callback) => {
-    const sql = 'SELECT id, local FROM promocion';
+    const sql = 'SELECT id, local FROM promocion WHERE valida = 1';
     conMysql.query(sql, (err, result) => {
         if (err)
             callback(err);
@@ -52,6 +66,75 @@ exports.getProductsPromo = (promoID, callback) => {
         'INNER JOIN producto ON producto = producto.id WHERE promocion = ?;';
     var values = [promoID]
     conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.updateValidPromo = (valida, id, callback) => {
+    const sql = 'UPDATE promocion SET valida = ? WHERE id = ?';
+    var values = [valida, id]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.createPromoHours = (promo, callback) => {
+    const sql = 'INSERT INTO validezpromocion (promocion, diaSemana, horaAbre, horaCierra, horaExtendida) VALUES ?'; 
+    var values = [
+        [promo.idPromo, promo.diaSemana, promo.horaAbre, promo.horaCierra, (promo.horaExtendida != null) ? promo.horaExtendida : 0]
+    ]
+    conMysql.query(sql, [values], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.deletePromoHours = (idPromo, diaSemana, callback) => {
+    const sql = 'DELETE FROM validezpromocion WHERE promocion = ? AND diaSemana = ?';
+    var values = [idPromo, diaSemana]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getAllPromos = (callback) => {
+    const sql = 'SELECT * FROM promocion'; 
+    conMysql.query(sql, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getPromoHours = (idPromo, callback) => {
+    const sql = 'SELECT diaSemana, horaAbre, horaCierra, horaExtendida FROM validezpromocion WHERE promocion = ? ORDER BY diaSemana, horaAbre ASC'; 
+    conMysql.query(sql, [idPromo], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.checkHours = (idPromo, callback) => {
+    var actualDay = new Date().getDay() + 1
+    var prevDay = (actualDay == 1) ? 7 : actualDay-1
+    const sql = 'SELECT * FROM validezpromocion WHERE promocion = ? AND ( (diaSemana = ? AND horaAbre <= current_time() AND horaCierra >= ' +
+    'current_time()) OR (diaSemana = ? AND horaExtendida = 1 AND horaCierra >= current_time()) OR (diaSemana = ? AND horaExtendida = 1 ' +
+    'AND horaCierra <= current_time()))'
+    conMysql.query(sql, [idPromo, actualDay, prevDay, actualDay], (err, result) => {
         if (err)
             callback(err);
         else

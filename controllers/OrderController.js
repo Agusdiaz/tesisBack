@@ -3,6 +3,7 @@ const ClientService = require('../service/clientService');
 const ShopService = require('../service/shopService');
 const ProductService = require('../service/productService');
 const IngredientService = require('../service/ingredientService');
+const PromoService = require('../service/promoService')
 
 exports.setOrderDeliveredByClient = (req, res) => {
     OrderService.deleteOrderPendingByClient(req.body, (error, result) => {

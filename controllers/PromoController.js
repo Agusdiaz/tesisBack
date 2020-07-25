@@ -2,7 +2,8 @@ const PromoService = require('../service/promoService');
 const IngredientService = require('../service/ingredientService');
 
 exports.insertPromoWithProducts = (req, res) => {
-    if (req.body.productos != null)
+    console.log(req.body.productos)
+    if (req.body.productos == null)
         return res.status(401).send('La promoción debe tener productos')
     else {
         PromoService.createPromo(req.body, (error, result) => {
@@ -22,13 +23,78 @@ exports.insertPromoWithProducts = (req, res) => {
                         else {
                             i++
                             if (i == req.body.productos.length)
-                                return res.send('Promoción con productos guardada')
+                                return res.send('Promoción id=' + idPromocion + ' con productos guardada')
                         }
                     })
                 })
             }
         })
     }
+}
+
+exports.insertPromoHours = (req, res) => {
+    var i = 0
+    req.body.map(obj => {
+        PromoService.createPromoHours(obj, (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).send('Error al crear horarios de la promoción')
+            }
+            else if (result.affectedRows == 0) {
+                return res.status(404).send('Promoción no encontrada')
+            }
+            else {
+                i++
+                if (i == req.body.length)
+                    return res.send('Horarios de la promoción creados')
+            }
+        })
+    })
+}
+
+exports.deletePromoHours = (req, res) => {
+    var i = 0
+    req.body.map(obj => {
+        PromoService.deletePromoHours(obj.idPromo, obj.diaSemana, (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).send('Error al eliminar horarios de la promoción')
+            }
+            else if (result.affectedRows == 0) {
+                return res.status(404).send('Promoción no encontrada')
+            }
+            else {
+                i++
+                if (i == req.body.length)
+                    return res.send('Horarios de la promoción eliminados')
+            }
+        })
+    })
+}
+
+exports.setPromoHours = (req, res) => {
+    var i = 0
+    req.body.map(obj => {
+        PromoService.deletePromoHours(obj.idPromo, obj.diaSemana, (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).send('Error al eliminar horarios de la promoción')
+            }
+        })
+    })
+    req.body.map(obj => {
+        PromoService.createPromoHours(obj, (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).send('Error al actualizar horarios de la promoción')
+            }
+            else {
+                i++
+                if (i == req.body.length)
+                    return res.send('Horarios de la promoción actualizados')
+            }
+        })
+    })
 }
 
 exports.getShopPromos = (req, res) => {
@@ -45,6 +111,7 @@ exports.getShopPromos = (req, res) => {
             var long = result.length;
             var i = 0
             result.map(obj => {
+                obj.horarios = []
                 obj.productos = []
                 asyncValidateProductsPromo(obj.id, res, (r) => {
                     obj.productos.push(r)
@@ -55,6 +122,7 @@ exports.getShopPromos = (req, res) => {
                         i = 0
                         var finalRta = []
                         finalResult.map(obj => {
+                            console.log('entreeee')
                             i++
                             if (obj.productos[0] != null)
                                 finalRta.push(obj)
@@ -62,7 +130,21 @@ exports.getShopPromos = (req, res) => {
                                 if (finalRta.length == 0) {
                                     return res.status(204).send('Local sin promociones')
                                 }
-                                else return res.json(finalRta)
+                                else {
+                                    console.log(finalRta.length)
+                                    finalResult = []
+                                    long = finalRta.length;
+                                    i = 0;
+                                    result.map(obj => {
+                                        asyncPromoHours(obj.id, res, (r) => {
+                                            obj.horarios.push(r)
+                                            finalResult.push(obj)
+                                            i++
+                                            if (i == long)
+                                                return res.json(finalResult)
+                                        })
+                                    })
+                                }
                             }
                         })
                     }
@@ -120,6 +202,24 @@ function asyncIngredientsPromo(num, res, callback) {
             callback(resIngr)
         }
         else
+            callback()
+    })
+}
+
+function asyncPromoHours(idPromo, res, callback) {
+    PromoService.getPromoHours(idPromo, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).send('Error al buscar horarios de la promoción')
+        }
+        else if (result.length > 0) {
+            var times = JSON.parse(JSON.stringify(result))
+            var resTimes = []
+            resTimes = times.map(it => {
+                return it
+            })
+            callback(resTimes)
+        } else
             callback()
     })
 }

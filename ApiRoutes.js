@@ -96,6 +96,10 @@ router.post('/updateShopSchedule', function(req, res){
   ShopController.setShopSchedule(req, res);
 })
 
+router.post('/deleteShopSchedule', function(req, res){
+  ShopController.deleteShopSchedule(req, res);
+})
+
 router.post('/updateShopDelay', function(req, res){
   ShopController.setShopDelay(req, res);
 })
@@ -136,8 +140,8 @@ router.post('/getShopPromos', function(req, res){
   PromoController.getShopPromos(req, res);
 })
 
-router.post('/getTopRequestedProductsByShop', function(req, res){
-  ShopController.getTopRequestedProductsByShop(req, res);
+router.post('/getTop10RequestedProductsByShop', function(req, res){
+  ShopController.getTop10RequestedProductsByShop(req, res);
 })
 
 router.post('/getTopRequestedHoursByShop', function(req, res){
@@ -158,6 +162,18 @@ router.post('/insertPromoWithProducts', function(req, res){
 
 router.post('/getAllIngredientsByShop', function(req, res){
   IngredientController.getAllIngredientsByShop(req, res);
+})
+
+router.post('/insertPromoHours', function(req, res){
+  PromoController.insertPromoHours(req, res);
+})
+
+router.post('/updatePromoHours', function(req, res){
+  PromoController.setPromoHours(req, res);
+})
+
+router.post('/deletePromoHours', function(req, res){
+  PromoController.deletePromoHours(req, res);
 })
 
 module.exports = router;

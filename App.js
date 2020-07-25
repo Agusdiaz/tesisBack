@@ -25,3 +25,6 @@ app.use(apiRoutes);
 app.listen(port, function() {
   console.log('Running RestHub on port ' + port);
 });
+
+EventController.checkAllShopsSchedules()
+EventController.checkAllPromosHours()

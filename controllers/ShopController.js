@@ -310,6 +310,26 @@ exports.insertShopSchedule = (req, res) => {
     })
 }
 
+exports.deleteShopSchedule = (req, res) => {
+    var i = 0
+    req.body.map(obj => {
+        ShopService.deleteShopSchedule(obj.cuit, obj.diaSemana, (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).send('Error al eliminar horarios del local')
+            }
+            else if (result.affectedRows == 0) {
+                return res.status(404).send('Local no encontrado')
+            }
+            else {
+                i++
+                if (i == req.body.length)
+                    return res.send('Horarios del local eliminados')
+            }
+        })
+    })
+}
+
 exports.setShopSchedule = (req, res) => {
     var i = 0
     req.body.map(obj => {
@@ -335,7 +355,7 @@ exports.setShopSchedule = (req, res) => {
     })
 }
 
-exports.getTopRequestedProductsByShop = (req, res) => {
+exports.getTop10RequestedProductsByShop = (req, res) => {
     OrderService.getTopRequestedProducts(req.body, (error, result) => {
         if (error) {
             console.log(error)
