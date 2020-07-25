@@ -83,6 +83,29 @@ exports.getIngredientsByProduct = (prodId, callback) => {
     });
 }
 
+exports.getIngredientsByProductPromo = (prodId, callback) => {
+    const sql = 'SELECT ingrediente.id, nombre, codigo, precio, detalle, disponible, cantidad, opcion FROM ingrediente INNER JOIN ' +
+        'productoingrediente ON ingrediente.id = productoingrediente.ingrediente WHERE productoingrediente.producto = ?';
+    var values = [prodId]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getUnavailableIngredientsByProductsPromo = (promos, callback) => {
+    const sql = 'SELECT * FROM ingrediente INNER JOIN productoingrediente ON ingrediente.id = productoingrediente.ingrediente INNER JOIN ' +
+    'promocionproducto ON promocionproducto.producto = productoingrediente.producto WHERE promocionproducto.promocion IN ? AND ingrediente.disponible = 0';
+    conMysql.query(sql, [[promos]], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 exports.getIngredientsByShop = (shop, callback) => {
     const sql = 'SELECT id, nombre, codigo, precio, detalle, disponible FROM ingrediente WHERE local = ?';
     var values = [shop.cuit]

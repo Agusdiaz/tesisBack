@@ -27,7 +27,7 @@ exports.createProductPromo = (product, idPromo, callback) => {
 }
 
 exports.createPromoForOrder = (promo, orderNum, callback) => {
-    const sql = 'INSERT INTO pedidoproducto (pedido, promocion, cantidad) VALUES ?';
+    const sql = 'INSERT INTO pedidopromocion (pedido, promocion, cantidad) VALUES ?';
     var values = [
         [orderNum, promo.idPromo, promo.cantidad]
     ]
@@ -66,6 +66,16 @@ exports.getProductsPromo = (promoID, callback) => {
         'INNER JOIN producto ON producto = producto.id WHERE promocion = ?;';
     var values = [promoID]
     conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getProductsPromos = (promos, callback) => {
+    const sql = 'SELECT producto.id FROM promocionproducto INNER JOIN producto ON producto = producto.id WHERE promocion IN ?';
+    conMysql.query(sql, [[promos]], (err, result) => {
         if (err)
             callback(err);
         else
@@ -126,6 +136,16 @@ exports.getPromoHours = (idPromo, callback) => {
         else
             callback(null, result);
     });
+}
+
+exports.validatePromos = (promos, callback) => {
+    const sql = 'SELECT id FROM promocion WHERE id IN ? AND valida = 0';
+    conMysql.query(sql, [[promos]], (err, result) => {
+        if (err)
+            callback(err)
+        else
+            callback(null, result)
+    })
 }
 
 exports.checkHours = (idPromo, callback) => {

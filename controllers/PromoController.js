@@ -122,7 +122,6 @@ exports.getShopPromos = (req, res) => {
                         i = 0
                         var finalRta = []
                         finalResult.map(obj => {
-                            console.log('entreeee')
                             i++
                             if (obj.productos[0] != null)
                                 finalRta.push(obj)

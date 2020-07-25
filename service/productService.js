@@ -79,13 +79,24 @@ exports.validateProduct = (product, callback) => {
 }
 
 exports.validateProductsAndIngredients = (products, ingredients, callback) => {
-    const sql = 'SELECT id FROM producto WHERE id IN ? AND disponible = 0; SELECT id FROM ingrediente WHERE id IN ? AND disponible = 0;'
-    conMysql.query(sql, [[products], [ingredients]], (err, result) => {
-        if (err)
-            callback(err)
-        else
-            callback(null, result)
-    })
+    const sql1 = 'SELECT id FROM producto WHERE id IN ? AND disponible = 0; SELECT id FROM ingrediente WHERE id IN ? AND disponible = 0;'
+    const sql2 = 'SELECT id FROM producto WHERE id IN ? AND disponible = 0;'
+    if(ingredients.length > 0){
+        conMysql.query(sql1, [[products], [ingredients]], (err, result) => {
+            if (err)
+                callback(err)
+            else
+                callback(null, result)
+        })
+    }
+    else{
+        conMysql.query(sql2, [[products]], (err, result) => {
+            if (err)
+                callback(err)
+            else
+                callback(null, result)
+        })
+    }
 }
 
 exports.createProductForOrder = (product, orderNum, callback) => {
