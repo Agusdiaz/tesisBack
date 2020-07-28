@@ -1,10 +1,10 @@
 var mysql = require('mysql');
 
 var conMysql = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "tesis2020",
-  database: "flamma",
+  host: process.env.HOST || "localhost",
+  user: process.env.USER || "root",
+  password: process.env.PASS || "tesis2020",
+  database: process.env.DB || "flamma",
   multipleStatements: true,
   //insecureAuth : true,
 });

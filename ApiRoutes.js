@@ -8,18 +8,19 @@ const IngredientController = require('./controllers/IngredientController');
 const PaymentController = require('./controllers/PaymentController');
 const PromoController = require('./controllers/PromoController');
 
-router.get('/', function(req, res) {
-  res.json(
-      {
-        status: 'API Its Working',
-        message: 'Welcome',
-      });
-});
-
 router.post('/login', function(req, res){
   ClientController.loginUser(req, res);
 })
 
+router.post('/getShopMenu', function(req, res){
+  ProductController.getShopMenu(req, res);
+})
+
+router.post('/getShopPromos', function(req, res){
+  PromoController.getShopPromos(req, res);
+})
+
+//PARA CLIENTE
 router.post('/insertClient', function(req, res){
   ClientController.insertClient(req, res);
 })
@@ -48,7 +49,7 @@ router.post('/getShopByAddress', function(req, res){
   ShopController.getShopByAddress(req, res);
 })
 
-router.get('/getShopByPromo', function(req, res){ //VER LA VALIDEZ
+router.get('/getShopByPromo', function(req, res){
   ShopController.getShopsByPromos(req, res);
 })
 
@@ -64,12 +65,30 @@ router.post('/setOrderDeliveredByClient', function(req, res){
   OrderController.setOrderDeliveredByClient(req, res);
 })
 
-router.post('/setOrderReadyByShop', function(req, res){
-  OrderController.setOrderReadyByShop(req, res);
-})
-
 router.post('/shareOrder', function(req, res){
   OrderController.shareOrder(req, res);
+})
+
+router.post('/insertPayment', function(req, res){
+  PaymentController.insertPayment(req, res);
+})
+
+router.post('/getPendingOrdersByClient', function(req, res){
+  OrderController.getClientPendingOrders(req, res);
+})
+
+router.post('/getAllOrdersByClient', function(req, res){
+  OrderController.getClientAllOrders(req, res);
+})
+
+router.post('/insertClientOrder', function(req, res){
+  OrderController.insertClientOrder(req, res);
+})
+
+
+//PARA LOCAL
+router.post('/setOrderReadyByShop', function(req, res){
+  OrderController.setOrderReadyByShop(req, res);
 })
 
 router.post('/getAllDisabledByShop', function(req, res){
@@ -82,10 +101,6 @@ router.post('/updateIngredientStatus', function(req, res){
 
 router.post('/updateProductStatus', function(req, res){
   ProductController.setProductStatus(req, res);
-})
-
-router.post('/insertPayment', function(req, res){
-  PaymentController.insertPayment(req, res);
 })
 
 router.post('/updateShopFeatures', function(req, res){
@@ -108,14 +123,6 @@ router.post('/insertShopSchedule', function(req, res){
   ShopController.insertShopSchedule(req, res);
 })
 
-router.post('/getPendingOrdersByClient', function(req, res){
-  OrderController.getClientPendingOrders(req, res);
-})
-
-router.post('/getAllOrdersByClient', function(req, res){
-  OrderController.getClientAllOrders(req, res);
-})
-
 router.post('/getPendingOrdersInOrderByShop', function(req, res){
   OrderController.getShopPendingOrdersByArrival(req, res);
 })
@@ -124,20 +131,8 @@ router.post('/getPendingOrdersMoreProductsByShop', function(req, res){
   OrderController.getShopPendingOrdersByProducts(req, res);
 })
 
-router.post('/getShopMenu', function(req, res){
-  ProductController.getShopMenu(req, res);
-})
-
-router.post('/insertClientOrder', function(req, res){
-  OrderController.insertClientOrder(req, res);
-})
-
 router.post('/insertShop', function(req, res){
   ShopController.insertShop(req, res);
-})
-
-router.post('/getShopPromos', function(req, res){
-  PromoController.getShopPromos(req, res);
 })
 
 router.post('/getTop10RequestedProductsByShop', function(req, res){
