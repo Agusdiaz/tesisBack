@@ -61,7 +61,7 @@ router.get('/getAllShopsAZ', function(req, res){
   ShopController.getAllShopsAZ(req, res);
 })
 
-router.get('/getAllOpenShops', function(req, res){ //DOCUMENTAR
+router.get('/getAllOpenShops', function(req, res){
   ShopController.getAllOpenShops(req, res);
 })
 
