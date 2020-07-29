@@ -136,6 +136,33 @@ exports.getAllShopsAZ = (req, res) => {
     })
 }
 
+exports.getAllOpenShops = (req, res) => {
+    ShopService.getOnlyOpenShops((error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).send('Error al buscar todos los locales abiertos')
+        }
+        else if (result.length == 0) {
+            return res.status(204).send('No hay locales abiertos')
+        }
+        else {
+            var finalResult = []
+            var long = result.length;
+            var i = 0;
+            result.map(obj => {
+                obj.horarios = []
+                asyncSchedule(obj.cuit, res, (r) => {
+                    obj.horarios.push(r)
+                    finalResult.push(obj)
+                    i++
+                    if (i == long)
+                        return res.json(finalResult)
+                })
+            })
+        }
+    })
+}
+
 exports.getShopsByPromos = (req, res) => {
     PromoService.getShopWithPromos((error, result) => {
         console.log(result)

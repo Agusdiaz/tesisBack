@@ -70,6 +70,17 @@ exports.getAllShopsOpenClose = (callback) => {
     });
 }
 
+exports.getOnlyOpenShops = (callback) => {
+    const sql = 'SELECT cuit, nombre, direccion, telefono, razonSocial, mail, mascotas, bebes, juegos, aireLibre, ' +
+        'libreHumo, wifi, demora, abierto FROM local WHERE nuevo = 0 AND habilitado = 1 and abierto = 1';
+    conMysql.query(sql, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 exports.getShopsByCUIT = (cuits, callback) => {
     const sql = 'SELECT cuit, nombre, direccion, telefono, razonSocial, mail, mascotas, bebes, juegos, aireLibre, ' +
         'libreHumo, wifi, demora, abierto FROM local WHERE cuit IN ? AND nuevo = 0 AND habilitado = 1';
