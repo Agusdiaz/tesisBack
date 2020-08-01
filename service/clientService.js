@@ -10,7 +10,7 @@ exports.createClient = (client, callback) => {
                 callback(null, result)
             }
             else {
-                let hashedPassword = bcrypt.hashSync(toString(client.contraseña), process.env.BCRYPT_ROUNDS || 10)
+                let hashedPassword = bcrypt.hashSync(client.contraseña.toString(), process.env.BCRYPT_ROUNDS || 10)
                 const sql = 'INSERT INTO cliente (mail, nombre, apellido, contraseña) VALUES ?'
                 var values = [
                     [client.mail, client.nombre, client.apellido, hashedPassword]
@@ -69,8 +69,8 @@ exports.validateUser = (user, callback) => {
 }
 
 exports.updateClient = (client, callback) => {
-    const sql = 'UPDATE cliente SET nombre= ?, apellido= ?, contraseña= ? WHERE mail= ?';
-    var values = [client.nombre, client.apellido, client.contraseña, client.mail]
+    const sql = 'UPDATE cliente SET nombre= ?, apellido= ? WHERE mail= ?';
+    var values = [client.nombre, client.apellido, client.mail]
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);

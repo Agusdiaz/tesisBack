@@ -5,10 +5,10 @@ exports.insertProductWithIngredients = (req, res) => {
     ProductService.validateNameAndCodeOfProduct(req.body.producto[0].nombre, req.body.producto[0].codigo, req.body.cuit, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al validar nombre y código del producto')
+            return res.status(500).json('Error al validar nombre y código del producto')
         }
         else if (result.length > 0)
-            return res.status(401).send('Nombre o código del producto repetidos')
+            return res.status(401).json('Nombre o código del producto repetidos')
         else {
             var names = []
             var codes = []
@@ -20,15 +20,15 @@ exports.insertProductWithIngredients = (req, res) => {
                 IngredientService.validateNameAndCodeOfIngredient(names, codes, req.body.cuit, (error, result) => {
                     if (error) {
                         console.log(error)
-                        return res.status(500).send('Error al validar nombre y codigo de los ingredientes')
+                        return res.status(500).json('Error al validar nombre y codigo de los ingredientes')
                     }
                     else if (result.length > 0)
-                        return res.status(401).send('Nombre o código de ingredientes repetidos')
+                        return res.status(401).json('Nombre o código de ingredientes repetidos')
                     else {
                         ProductService.createProduct(req.body.producto[0], req.body.cuit, (error, result) => {
                             if (error) {
                                 console.log(error)
-                                return res.status(500).send('Error al guardar producto')
+                                return res.status(500).json('Error al guardar producto')
                             }
                             else {
                                 var idProducto = result.insertId
@@ -38,12 +38,12 @@ exports.insertProductWithIngredients = (req, res) => {
                                         IngredientService.asociateIngredientAndProduct(obj, idProducto, obj.id, (error, result) => {
                                             if (error) {
                                                 console.log(error)
-                                                return res.status(500).send('Error al guardar ingrediente')
+                                                return res.status(500).json('Error al guardar ingrediente')
                                             }
                                             else {
                                                 i++
                                                 if (i == req.body.producto[0].ingredientes.length)
-                                                    return res.send('Producto con ingredientes guardado')
+                                                    return res.json('Producto con ingredientes guardado')
                                             }
                                         })
                                     }
@@ -51,12 +51,12 @@ exports.insertProductWithIngredients = (req, res) => {
                                         IngredientService.createIngredient(obj, idProducto, req.body.cuit, (error, result) => {
                                             if (error) {
                                                 console.log(error)
-                                                return res.status(500).send('Error al guardar ingrediente')
+                                                return res.status(500).json('Error al guardar ingrediente')
                                             }
                                             else {
                                                 i++
                                                 if (i == req.body.producto[0].ingredientes.length)
-                                                    return res.send('Producto con ingredientes guardado')
+                                                    return res.json('Producto con ingredientes guardado')
                                             }
                                         })
                                     }
@@ -70,9 +70,9 @@ exports.insertProductWithIngredients = (req, res) => {
                 ProductService.createProduct(req.body.producto[0], req.body.cuit, (error, result) => {
                     if (error) {
                         console.log(error)
-                        return res.status(500).send('Error al guardar producto')
+                        return res.status(500).json('Error al guardar producto')
                     }
-                    return res.send('Producto guardado')
+                    return res.json('Producto guardado')
                 })
             }
         }
@@ -84,7 +84,7 @@ exports.getAllDisabledByShop = (req, res) => {
     ProductService.getShopDisabledProducts(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar productos deshabilitados')
+            return res.status(500).json('Error al buscar productos deshabilitados')
         }
         else {
             if (result.length > 0)
@@ -92,10 +92,10 @@ exports.getAllDisabledByShop = (req, res) => {
             IngredientService.getShopDisabledIngredients(req.body, (error, result) => {
                 if (error) {
                     console.log(error)
-                    return res.status(500).send('Error al buscar ingredientes deshabilitados')
+                    return res.status(500).json('Error al buscar ingredientes deshabilitados')
                 }
                 else if (result.length == 0) {
-                    return res.status(204).send('No hay productos/ingredientes deshabilitados')
+                    return res.status(204).json('No hay productos/ingredientes deshabilitados')
                     //return res.json(finalResult)
                 }
                 else {
@@ -111,13 +111,13 @@ exports.setProductStatus = (req, res) => {
     ProductService.updateProductStatus(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al actualizar Producto')
+            return res.status(500).json('Error al actualizar Producto')
         }
         else if (result.affectedRows == 0) {
-            return res.status(404).send('Producto no encontrado')
+            return res.status(404).json('Producto no encontrado')
         }
         else
-            return res.send('Producto actualizado')
+            return res.json('Producto actualizado')
     })
 }
 
@@ -125,10 +125,10 @@ exports.getShopMenu = (req, res) => {
     ProductService.getProductsMenu(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar productos del menú')
+            return res.status(500).json('Error al buscar productos del menú')
         }
         else if (result.length == 0) {
-            return res.status(204).send('Local sin productos en menú')
+            return res.status(204).json('Local sin productos en menú')
         }
         else {
             var finalResult = []
@@ -152,7 +152,7 @@ function asyncIngredientsMenu(id, res, callback) {
     IngredientService.getIngredientsByProduct(id, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar ingredientes del menú')
+            return res.status(500).json('Error al buscar ingredientes del menú')
         }
         else if (result.length > 0) {
             var ingr = JSON.parse(JSON.stringify(result))

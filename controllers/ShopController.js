@@ -8,10 +8,10 @@ exports.insertShop = (req, res) => {
     ShopService.createShop(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al guardar local')
+            return res.status(500).json('Error al guardar local')
         }
         else if (result.length > 1)
-            return res.status(401).send('Mail existente')
+            return res.status(401).json('Mail existente')
         else {
             /*let token = jwt.sign({
                 id: result.insertId
@@ -31,10 +31,10 @@ exports.getClientFavourites = (req, res) => {
     ShopService.getFavourites(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar favoritos')
+            return res.status(500).json('Error al buscar favoritos')
         }
         else if (result.length == 0) {
-            return res.status(204).send('Cliente sin favoritos')
+            return res.status(204).json('Cliente sin favoritos')
         }
         else {
             var finalResult = []
@@ -42,6 +42,7 @@ exports.getClientFavourites = (req, res) => {
             var i = 0;
             result.map(obj => {
                 obj.horarios = []
+                obj.favorito = true
                 asyncSchedule(obj.cuit, res, (r) => {
                     obj.horarios.push(r)
                     finalResult.push(obj)
@@ -58,27 +59,26 @@ exports.setShopAsFavourite = (req, res) => {
     ShopService.createShopAsFavourite(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al guardar local como favorito')
+            return res.status(500).json('Error al guardar local como favorito')
         }
         else if (result.affectedRows == 0)
-            return res.status(401).send('El local ya es favorito')
+            return res.status(401).json('El local ya es favorito')
         else
-            return res.send('Local guardado como favorito')
+            return res.json('Local guardado como favorito')
     })
 }
 
 exports.deleteShopAsFavourite = (req, res) => {
     ShopService.deleteShopAsFavourite(req.body, (error, result) => {
-        console.log(result)
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al eliminar local como favorito')
+            return res.status(500).json('Error al eliminar local como favorito')
         }
         else if (result.affectedRows == 0) {
-            return res.status(204).send('Cliente no tiene local como favorito')
+            return res.status(204).json('Cliente no tiene local como favorito')
         }
         else
-            return res.send('Local eliminado como favorito')
+            return res.json('Local eliminado como favorito')
     })
 }
 
@@ -86,16 +86,19 @@ exports.getAllShopsOpenClose = (req, res) => {
     ShopService.getAllShopsOpenClose((error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar todos los locales')
+            return res.status(500).json('Error al buscar todos los locales')
         }
         else if (result.length == 0) {
-            return res.status(204).send('No hay locales')
+            return res.status(204).json('No hay locales')
         }
         else {
             var finalResult = []
             var long = result.length;
             var i = 0;
             result.map(obj => {
+                asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
+                    obj.favorito = r
+                })
                 obj.horarios = []
                 asyncSchedule(obj.cuit, res, (r) => {
                     obj.horarios.push(r)
@@ -113,16 +116,19 @@ exports.getAllShopsAZ = (req, res) => {
     ShopService.getAllShopsAZ((error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar todos los locales')
+            return res.status(500).json('Error al buscar todos los locales')
         }
         else if (result.length == 0) {
-            return res.status(204).send('No hay locales')
+            return res.status(204).json('No hay locales')
         }
         else {
             var finalResult = []
             var long = result.length;
             var i = 0;
             result.map(obj => {
+                asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
+                    obj.favorito = r
+                })
                 obj.horarios = []
                 asyncSchedule(obj.cuit, res, (r) => {
                     obj.horarios.push(r)
@@ -140,16 +146,19 @@ exports.getAllOpenShops = (req, res) => {
     ShopService.getOnlyOpenShops((error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar todos los locales abiertos')
+            return res.status(500).json('Error al buscar todos los locales abiertos')
         }
         else if (result.length == 0) {
-            return res.status(204).send('No hay locales abiertos')
+            return res.status(204).json('No hay locales abiertos')
         }
         else {
             var finalResult = []
             var long = result.length;
             var i = 0;
             result.map(obj => {
+                asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
+                    obj.favorito = r
+                })
                 obj.horarios = []
                 asyncSchedule(obj.cuit, res, (r) => {
                     obj.horarios.push(r)
@@ -168,10 +177,10 @@ exports.getShopsByPromos = (req, res) => {
         console.log(result)
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar local por promoción')
+            return res.status(500).json('Error al buscar local por promoción')
         }
         else if (result.length == 0) {
-            return res.status(204).send('No existen locales con promociones')
+            return res.status(204).json('No existen locales con promociones')
         }
         else {
             var finalResult = []
@@ -193,7 +202,7 @@ exports.getShopsByPromos = (req, res) => {
                                 finalRta.push(obj)
                             if (i == long) {
                                 if (finalRta.length == 0) {
-                                    return res.status(204).send('No existen locales con promociones')
+                                    return res.status(204).json('No existen locales con promociones')
                                 }
                                 else {
                                     var arrLocales = []
@@ -204,16 +213,19 @@ exports.getShopsByPromos = (req, res) => {
                                     ShopService.getShopsByCUIT(arrLocales, (error, result) => {
                                         if (error) {
                                             console.log(error)
-                                            return res.status(500).send('Error al buscar locales por CUIT')
+                                            return res.status(500).json('Error al buscar locales por CUIT')
                                         }
                                         else if (result.length == 0) {
-                                            return res.status(204).send('No existen locales con esos CUIT')
+                                            return res.status(204).json('No existen locales con esos CUIT')
                                         }
                                         else {
                                             var finalResult = []
                                             var long = result.length;
                                             var i = 0;
                                             result.map(obj => {
+                                                asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
+                                                    obj.favorito = r
+                                                })
                                                 obj.horarios = []
                                                 asyncSchedule(obj.cuit, res, (r) => {
                                                     obj.horarios.push(r)
@@ -239,16 +251,19 @@ exports.getShopByName = (req, res) => {
     ShopService.getShopByName(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar local por nombre')
+            return res.status(500).json('Error al buscar local por nombre')
         }
         else if (result.length == 0) {
-            return res.status(204).send('No existen locales con ese nombre')
+            return res.status(204).json('No existen locales con ese nombre')
         }
         else {
             var finalResult = []
             var long = result.length;
             var i = 0;
             result.map(obj => {
+                asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
+                    obj.favorito = r
+                })
                 obj.horarios = []
                 asyncSchedule(obj.cuit, res, (r) => {
                     obj.horarios.push(r)
@@ -266,16 +281,19 @@ exports.getShopByAddress = (req, res) => {
     ShopService.getShopByAddress(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar local por dirección')
+            return res.status(500).json('Error al buscar local por dirección')
         }
         else if (result.length == 0) {
-            return res.status(204).send('No existen locales con esa dirección')
+            return res.status(204).json('No existen locales con esa dirección')
         }
         else {
             var finalResult = []
             var long = result.length;
             var i = 0;
             result.map(obj => {
+                asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
+                    obj.favorito = r
+                })
                 obj.horarios = []
                 asyncSchedule(obj.cuit, res, (r) => {
                     obj.horarios.push(r)
@@ -293,13 +311,13 @@ exports.setShopFeatures = (req, res) => {
     ShopService.updateShopFeatures(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al actualizar local')
+            return res.status(500).json('Error al actualizar local')
         }
         else if (result.affectedRows == 0) {
-            return res.status(404).send('Local no encontrado')
+            return res.status(404).json('Local no encontrado')
         }
         else
-            return res.send('Local actualizado')
+            return res.json('Local actualizado')
     })
 }
 
@@ -307,13 +325,13 @@ exports.setShopDelay = (req, res) => {
     ShopService.updateDelayShop(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al actualizar demora del local')
+            return res.status(500).json('Error al actualizar demora del local')
         }
         else if (result.affectedRows == 0) {
-            return res.status(404).send('Local no encontrado')
+            return res.status(404).json('Local no encontrado')
         }
         else
-            return res.send('Demora del local actualizada')
+            return res.json('Demora del local actualizada')
     })
 }
 
@@ -323,15 +341,15 @@ exports.insertShopSchedule = (req, res) => {
         ShopService.createShopShedule(obj, (error, result) => {
             if (error) {
                 console.log(error)
-                return res.status(500).send('Error al crear horarios del local')
+                return res.status(500).json('Error al crear horarios del local')
             }
             else if (result.affectedRows == 0) {
-                return res.status(404).send('Local no encontrado')
+                return res.status(404).json('Local no encontrado')
             }
             else {
                 i++
                 if (i == req.body.length)
-                    return res.send('Horarios del local creados')
+                    return res.json('Horarios del local creados')
             }
         })
     })
@@ -343,15 +361,15 @@ exports.deleteShopSchedule = (req, res) => {
         ShopService.deleteShopSchedule(obj.cuit, obj.diaSemana, (error, result) => {
             if (error) {
                 console.log(error)
-                return res.status(500).send('Error al eliminar horarios del local')
+                return res.status(500).json('Error al eliminar horarios del local')
             }
             else if (result.affectedRows == 0) {
-                return res.status(404).send('Local no encontrado')
+                return res.status(404).json('Local no encontrado')
             }
             else {
                 i++
                 if (i == req.body.length)
-                    return res.send('Horarios del local eliminados')
+                    return res.json('Horarios del local eliminados')
             }
         })
     })
@@ -363,7 +381,7 @@ exports.setShopSchedule = (req, res) => {
         ShopService.deleteShopSchedule(obj.cuit, obj.diaSemana, (error, result) => {
             if (error) {
                 console.log(error)
-                return res.status(500).send('Error al eliminar horarios del local')
+                return res.status(500).json('Error al eliminar horarios del local')
             }
         })
     })
@@ -371,12 +389,12 @@ exports.setShopSchedule = (req, res) => {
         ShopService.createShopShedule(obj, (error, result) => {
             if (error) {
                 console.log(error)
-                return res.status(500).send('Error al actualizar horarios del local')
+                return res.status(500).json('Error al actualizar horarios del local')
             }
             else {
                 i++
                 if (i == req.body.length)
-                    return res.send('Horarios del local actualizados')
+                    return res.json('Horarios del local actualizados')
             }
         })
     })
@@ -386,10 +404,10 @@ exports.getTop10RequestedProductsByShop = (req, res) => {
     OrderService.getTopRequestedProducts(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar productos más pedidos del local')
+            return res.status(500).json('Error al buscar productos más pedidos del local')
         }
         else if (result.length == 0) {
-            return res.status(204).send('No hay pedidos realizados')
+            return res.status(204).json('No hay pedidos realizados')
         }
         else
             return res.json(result)
@@ -400,10 +418,10 @@ exports.getTopRequestedHoursByShop = (req, res) => {
     OrderService.getOrdersTopHours(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar horarios con más pedidos del local')
+            return res.status(500).json('Error al buscar horarios con más pedidos del local')
         }
         else if (result.length == 0) {
-            return res.status(204).send('No hay pedidos realizados')
+            return res.status(204).json('No hay pedidos realizados')
         }
         else {
             var hoursResult = [{ hora: 00, cantidad: 0 }, { hora: 01, cantidad: 0 }, { hora: 02, cantidad: 0 }, { hora: 03, cantidad: 0 }, { hora: 04, cantidad: 0 },
@@ -423,10 +441,10 @@ exports.getLast6MonthOrdersByShop = (req, res) => {
     OrderService.getLast6MonthOrdersAmount(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar pedidos de los últimos 6 meses del local')
+            return res.status(500).json('Error al buscar pedidos de los últimos 6 meses del local')
         }
         else if (result.length == 0) {
-            return res.status(204).send('No hay pedidos realizados')
+            return res.status(204).json('No hay pedidos realizados')
         }
         else {
             var months = [{ mes: 'Enero', nroMes: 1, cantidad: 0 }, { mes: 'Febrero', nroMes: 2, cantidad: 0 }, { mes: 'Marzo', nroMes: 3, cantidad: 0 },
@@ -466,7 +484,7 @@ function asyncValidateProductsPromo(id, res, callback) {
     PromoService.getProductsPromo(id, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar productos en promoción')
+            return res.status(500).json('Error al buscar productos en promoción')
         }
         else if (result.length > 0) {
             var i = 0
@@ -492,7 +510,7 @@ function asyncSchedule(cuit, res, callback) {
     ShopService.getShopShedule(cuit, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar horarios del local')
+            return res.status(500).json('Error al buscar horarios del local')
         }
         else if (result.length > 0) {
             var times = JSON.parse(JSON.stringify(result))
@@ -503,5 +521,18 @@ function asyncSchedule(cuit, res, callback) {
             callback(resTimes)
         } else
             callback()
+    })
+}
+
+function asyncIsFavourite(cliente, shop, res, callback){
+    ShopService.checkIfShopIsFavourite(cliente, shop, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al chequear si local es favorito')
+        }
+        else if (result.length > 0)
+            callback(true)
+        else
+            callback(false)
     })
 }

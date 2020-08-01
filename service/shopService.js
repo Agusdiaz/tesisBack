@@ -11,7 +11,7 @@ exports.createShop = (shop, callback) => {
                 callback(null, result)
             }
             else {
-                let hashedPassword = bcrypt.hashSync(toString(shop.contraseña), process.env.BCRYPT_ROUNDS || 10)
+                let hashedPassword = bcrypt.hashSync(shop.contraseña.toString(), process.env.BCRYPT_ROUNDS || 10)
                 const sql = 'INSERT INTO local (cuit, nombre, direccion, telefono, razonSocial, mail, contraseña) VALUES ?';
                 var values = [[shop.cuit, shop.nombre, shop.direccion, shop.telefono, shop.razonSocial, shop.mail, hashedPassword]]
                 conMysql.query(sql, [values], (err, result) => {
@@ -37,8 +37,19 @@ exports.getFavourites = (client, callback) => {
     });
 }
 
+exports.checkIfShopIsFavourite = (client, shop, callback) => {
+    const sql = 'SELECT * FROM favorito WHERE cliente = ? AND local = ?';
+    var values = [client, shop]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 exports.createShopAsFavourite = (body, callback) => {
-    const sql = 'INSERT INTO favorito (cliente, local) SELECT ? , ? FROM favorito WHERE NOT EXISTS (SELECT * FROM favorito WHERE cliente=? AND local = ?)';
+    const sql = 'INSERT INTO favorito (cliente, local) SELECT ? , ? FROM favorito WHERE NOT EXISTS (SELECT * FROM favorito WHERE cliente = ? AND local = ?) LIMIT 1';
     var values = [body.mail, body.cuit, body.mail, body.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -185,7 +196,7 @@ exports.updateNewShop = (shop, callback) => {
 }
 
 exports.createShopShedule = (shop, callback) => {
-    const sql = 'INSERT INTO horariolocal (local, diaSemana, horaAbre, horaCierra, horaExtendida) VALUES ?'; 
+    const sql = 'INSERT INTO horariolocal (local, diaSemana, horaAbre, horaCierra, horaExtendida) VALUES ?';
     var values = [
         [shop.cuit, shop.diaSemana, shop.horaAbre, shop.horaCierra, (shop.horaExtendida != null) ? shop.horaExtendida : 0]
     ]
@@ -209,7 +220,7 @@ exports.deleteShopSchedule = (cuit, diaSemana, callback) => {
 }
 
 exports.getShopShedule = (cuit, callback) => {
-    const sql = 'SELECT diaSemana, horaAbre, horaCierra, horaExtendida FROM horariolocal WHERE local = ? ORDER BY diaSemana, horaAbre ASC'; 
+    const sql = 'SELECT diaSemana, horaAbre, horaCierra, horaExtendida FROM horariolocal WHERE local = ? ORDER BY diaSemana, horaAbre ASC';
     conMysql.query(sql, [cuit], (err, result) => {
         if (err)
             callback(err);
@@ -231,10 +242,10 @@ exports.validateOpenShop = (CUIT, callback) => {
 
 exports.checkSchedules = (CUIT, callback) => {
     var actualDay = new Date().getDay() + 1
-    var prevDay = (actualDay == 1) ? 7 : actualDay-1
+    var prevDay = (actualDay == 1) ? 7 : actualDay - 1
     const sql = 'SELECT * FROM horariolocal WHERE local = ? AND ( (diaSemana = ? AND horaAbre <= current_time() AND horaCierra >= ' +
-    'current_time()) OR (diaSemana = ? AND horaExtendida = 1 AND horaCierra >= current_time()) OR (diaSemana = ? AND horaExtendida = 1 ' +
-    'AND horaCierra <= current_time()))'
+        'current_time()) OR (diaSemana = ? AND horaExtendida = 1 AND horaCierra >= current_time()) OR (diaSemana = ? AND horaExtendida = 1 ' +
+        'AND horaCierra <= current_time()))'
     conMysql.query(sql, [CUIT, actualDay, prevDay, actualDay], (err, result) => {
         if (err)
             callback(err);

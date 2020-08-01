@@ -106,9 +106,9 @@ exports.shareOrder = (body, callback) => {
 }
 
 exports.getClientPendingOrders = (client, callback) => {
-    const sql = 'SELECT numero, nombre, etapa, propina, total, fecha FROM pendiente INNER JOIN pedido ON pendiente.pedido = pedido.numero ' + 
-    'INNER JOIN local ON pedido.local = local.cuit WHERE pendiente.cliente = ?';
-    var values = [client.mail]
+    const sql = 'SELECT numero, nombre, etapa, propina, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha FROM pedido INNER JOIN local ' + 
+    'ON pedido.local = local.cuit WHERE cliente = ? AND etapa != ?';
+    var values = [client.mail, 'entregado']
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);

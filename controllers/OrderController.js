@@ -10,22 +10,22 @@ exports.setOrderDeliveredByClient = (req, res) => {
     OrderService.deleteOrderPendingByClient(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al eliminar pedido pendiente')
+            return res.status(500).json('Error al eliminar pedido pendiente')
         }
         else if (result.affectedRows == 0) {
-            return res.status(404).send('Pedido no encontrado')
+            return res.status(404).json('Pedido no encontrado')
         }
         else {
             OrderService.updateOrderDelivered(req.body, (error, result) => {
                 if (error) {
                     console.log(error)
-                    return res.status(500).send('Error al actualizar etapa pedido')
+                    return res.status(500).json('Error al actualizar etapa pedido')
                 }
                 else if (result.affectedRows == 0) {
-                    return res.status(404).send('Pedido no encontrado')
+                    return res.status(404).json('Pedido no encontrado')
                 }
                 else
-                    return res.send('Etapa pedido actualizada')
+                    return res.json('Etapa pedido actualizada')
             })
         }
     })
@@ -35,22 +35,22 @@ exports.setOrderReadyByShop = (req, res) => {
     OrderService.deleteOrderPendingByShop(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al eliminar local de pedido pendiente')
+            return res.status(500).json('Error al eliminar local de pedido pendiente')
         }
         else if (result.affectedRows == 0) {
-            return res.status(404).send('Pedido no encontrado')
+            return res.status(404).json('Pedido no encontrado')
         }
         else {
             OrderService.updateOrderReady(req.body, (error, result) => {
                 if (error) {
                     console.log(error)
-                    return res.status(500).send('Error al actualizar etapa y fecha del pedido')
+                    return res.status(500).json('Error al actualizar etapa y fecha del pedido')
                 }
                 else if (result.affectedRows == 0) {
-                    return res.status(404).send('Pedido no encontrado')
+                    return res.status(404).json('Pedido no encontrado')
                 }
                 else
-                    return res.send('Etapa y fecha del pedido actualizada')
+                    return res.json('Etapa y fecha del pedido actualizada')
             })
         }
     })
@@ -60,16 +60,16 @@ exports.shareOrder = (req, res) => {
     ClientService.validateClient(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al validar cliente')
+            return res.status(500).json('Error al validar cliente')
         }
         else if (result.length == 0) {
-            return res.status(404).send('Cliente no encontrado')
+            return res.status(404).json('Cliente no encontrado')
         }
         else {
             OrderService.validateOrderClient(req.body, (error, result) => {
                 if (error) {
                     console.log(error)
-                    return res.status(500).send('Error al validar cliente y pedido')
+                    return res.status(500).json('Error al validar cliente y pedido')
                 }
                 else if (result.length > 0) {
                     return res.json('Cliente y pedido ya existentes')
@@ -78,7 +78,7 @@ exports.shareOrder = (req, res) => {
                     OrderService.shareOrder(req.body, (error, result) => {
                         if (error) {
                             console.log(error)
-                            return res.status(500).send('Error al compartir pedido')
+                            return res.status(500).json('Error al compartir pedido')
                         }
                         else
                             return res.json('Pedido compartido')
@@ -93,10 +93,10 @@ exports.getClientPendingOrders = (req, res) => {
     OrderService.getClientPendingOrders(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar pedidos pendientes')
+            return res.status(500).json('Error al buscar pedidos pendientes')
         }
         else if (result.length == 0) {
-            return res.status(204).send('Cliente sin pedidos pendientes')
+            return res.status(204).json('Cliente sin pedidos pendientes')
         }
         else {
             var finalResult = []
@@ -121,10 +121,10 @@ exports.getClientAllOrders = (req, res) => {
     OrderService.getClientAllOrders(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar historial pedidos')
+            return res.status(500).json('Error al buscar historial pedidos')
         }
         else if (result.length == 0) {
-            return res.status(204).send('Cliente sin pedidos')
+            return res.status(204).json('Cliente sin pedidos')
         }
         else {
             var finalResult = []
@@ -148,10 +148,10 @@ exports.getShopPendingOrdersByArrival = (req, res) => {
     OrderService.getShopPendingOrdersByArrival(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar pedidos pendientes')
+            return res.status(500).json('Error al buscar pedidos pendientes')
         }
         else if (result.length == 0) {
-            return res.status(204).send('Local sin pedidos pendientes')
+            return res.status(204).json('Local sin pedidos pendientes')
         }
         else {
             var finalResult = []
@@ -175,10 +175,10 @@ exports.getShopPendingOrdersByProducts = (req, res) => {
     OrderService.getShopPendingOrdersByProducts(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar pedidos pendientes')
+            return res.status(500).json('Error al buscar pedidos pendientes')
         }
         else if (result.length == 0) {
-            return res.status(204).send('Local sin pedidos pendientes')
+            return res.status(204).json('Local sin pedidos pendientes')
         }
         else {
             var finalResult = []
@@ -205,16 +205,16 @@ exports.insertClientOrder = (req, res) => {
     ShopService.validateOpenShop(req.body.cuit, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al validar si el local esta abierto')
+            return res.status(500).json('Error al validar si el local esta abierto')
         }
         else if (result.length == 0)
-            return res.status(401).send('Local cerrado')
+            return res.status(401).json('Local cerrado')
         else {
             if (req.body.promociones != undefined) {
                 validatePromoWithProductsAndIngredients(req.body.promociones, (error, rPromo, rProd, rIngr) => {
                     if (error) {
                         console.log(error)
-                        return res.status(500).send('Error al validar promociones con productos e ingredientes en pedido')
+                        return res.status(500).json('Error al validar promociones con productos e ingredientes en pedido')
                     }
                     if (rPromo.length > 0) {
                         unavailablePromos.push(rPromo)
@@ -232,34 +232,34 @@ exports.insertClientOrder = (req, res) => {
                     validateProductsAndIngredients(req.body.productos, unavailableProducts, unavailableIngredients, (error, rProd, rIngr) => {
                         if (error) {
                             console.log(error)
-                            return res.status(500).send('Error al validar productos e ingredientes en pedido')
+                            return res.status(500).json('Error al validar productos e ingredientes en pedido')
                         }
                         else if (rProd != null && rIngr != null && unavailablePromos.length > 0) {
-                            return res.status(401).send('Promociones con id=' + unavailablePromos + ' no disponibles\nProductos con id=' + rProd + ' no disponibles\nIngredientes con id=' + rIngr + ' no disponibles')
+                            return res.status(401).json('Promociones con id=' + unavailablePromos + ' no disponibles\nProductos con id=' + rProd + ' no disponibles\nIngredientes con id=' + rIngr + ' no disponibles')
                         }
                         else if (rProd != null && rIngr != null && unavailablePromos.length == 0) {
-                            return res.status(401).send('Productos con id=' + rProd + ' no disponibles\nIngredientes con id=' + rIngr + ' no disponibles')
+                            return res.status(401).json('Productos con id=' + rProd + ' no disponibles\nIngredientes con id=' + rIngr + ' no disponibles')
                         }
                         else if (rProd != null && rIngr == null && unavailablePromos.length > 0) {
-                            return res.status(401).send('Promociones con id=' + unavailablePromos + ' no disponibles\nProductos con id=' + rProd + ' no disponibles')
+                            return res.status(401).json('Promociones con id=' + unavailablePromos + ' no disponibles\nProductos con id=' + rProd + ' no disponibles')
                         }
                         else if (rProd == null && rIngr != null && unavailablePromos.length > 0) {
-                            return res.status(401).send('Promociones con id=' + unavailablePromos + ' no disponibles\nIngredientes con id=' + rIngr + ' no disponibles')
+                            return res.status(401).json('Promociones con id=' + unavailablePromos + ' no disponibles\nIngredientes con id=' + rIngr + ' no disponibles')
                         }
                         else if (rProd == null && rIngr == null && unavailablePromos.length > 0) {
-                            return res.status(401).send('Promociones con id=' + unavailablePromos + ' no disponibles')
+                            return res.status(401).json('Promociones con id=' + unavailablePromos + ' no disponibles')
                         }
                         else if (rProd != null && rIngr == null && unavailablePromos.length == 0) {
-                            return res.status(401).send('Productos con id=' + rProd + ' no disponibles')
+                            return res.status(401).json('Productos con id=' + rProd + ' no disponibles')
                         }
                         else if (rProd == null && rIngr != null && unavailablePromos.length == 0) {
-                            return res.status(401).send('Ingredientes con id=' + rIngr + ' no disponibles')
+                            return res.status(401).json('Ingredientes con id=' + rIngr + ' no disponibles')
                         }
                         else {
                             OrderService.createClientOrder(req.body, (error, result) => {
                                 if (error) {
                                     console.log(error)
-                                    return res.status(500).send('Error al crear pedido')
+                                    return res.status(500).json('Error al crear pedido')
                                 }
                                 else {
                                     var orderNumber = result.insertId
@@ -269,7 +269,7 @@ exports.insertClientOrder = (req, res) => {
                                         PromoService.createPromoForOrder(obj, orderNumber, (error, result) => {
                                             if (error) {
                                                 console.log(error)
-                                                return res.status(500).send('Error al guardar promociones en pedido')
+                                                return res.status(500).json('Error al guardar promociones en pedido')
                                             }
                                             else {
                                                 iPromo++
@@ -285,7 +285,7 @@ exports.insertClientOrder = (req, res) => {
                                             ProductService.createProductForOrder(obj, orderNumber, (error, result) => {
                                                 if (error) {
                                                     console.log(error)
-                                                    return res.status(500).send('Error al guardar producto en pedido')
+                                                    return res.status(500).json('Error al guardar producto en pedido')
                                                 }
                                                 else {
                                                     if (longIngr > 0) {
@@ -295,7 +295,7 @@ exports.insertClientOrder = (req, res) => {
                                                             IngredientService.createIngredientForOrder(obj, idPedidoProducto, idProducto, (error, result) => {
                                                                 if (error) {
                                                                     console.log(error)
-                                                                    return res.status(500).send('Error al guardar ingrediente en pedido')
+                                                                    return res.status(500).json('Error al guardar ingrediente en pedido')
                                                                 }
                                                                 else {
                                                                     iIngr++
@@ -304,10 +304,10 @@ exports.insertClientOrder = (req, res) => {
                                                                         OrderService.createPendingOrder(req.body.mail, req.body.cuit, orderNumber, (error, result) => {
                                                                             if (error) {
                                                                                 console.log(error)
-                                                                                return res.status(500).send('Error al crear pedido pendiente')
+                                                                                return res.status(500).json('Error al crear pedido pendiente')
                                                                             }
                                                                             else {
-                                                                                return res.send('Pedido creado')
+                                                                                return res.json('Pedido creado')
                                                                             }
                                                                         })
                                                                     }
@@ -321,10 +321,10 @@ exports.insertClientOrder = (req, res) => {
                                                             OrderService.createPendingOrder(req.body.mail, req.body.cuit, orderNumber, (error, result) => {
                                                                 if (error) {
                                                                     console.log(error)
-                                                                    return res.status(500).send('Error al crear pedido pendiente')
+                                                                    return res.status(500).json('Error al crear pedido pendiente')
                                                                 }
                                                                 else {
-                                                                    return res.send('Pedido creado')
+                                                                    return res.json('Pedido creado')
                                                                 }
                                                             })
                                                         }
@@ -337,10 +337,10 @@ exports.insertClientOrder = (req, res) => {
                                         OrderService.createPendingOrder(req.body.mail, req.body.cuit, orderNumber, (error, result) => {
                                             if (error) {
                                                 console.log(error)
-                                                return res.status(500).send('Error al crear pedido pendiente')
+                                                return res.status(500).json('Error al crear pedido pendiente')
                                             }
                                             else {
-                                                return res.send('Pedido creado')
+                                                return res.json('Pedido creado')
                                             }
                                         })
                                     }
@@ -355,22 +355,22 @@ exports.insertClientOrder = (req, res) => {
                     console.log(rProd, '   ', rIngr)
                     if (error) {
                         console.log(error)
-                        return res.status(500).send('Error al validar productos e ingredientes en pedido')
+                        return res.status(500).json('Error al validar productos e ingredientes en pedido')
                     }
                     else if (rProd != null && rIngr != null) {
-                        return res.status(401).send('Productos con id=' + rProd + ' no disponibles\nIngredientes con id=' + rIngr + ' no disponibles')
+                        return res.status(401).json('Productos con id=' + rProd + ' no disponibles\nIngredientes con id=' + rIngr + ' no disponibles')
                     }
                     else if (rProd != null && rIngr == null) {
-                        return res.status(401).send('Productos con id=' + rProd + ' no disponibles')
+                        return res.status(401).json('Productos con id=' + rProd + ' no disponibles')
                     }
                     else if (rProd == null && rIngr != null) {
-                        return res.status(401).send('Ingredientes con id=' + rIngr + ' no disponibles')
+                        return res.status(401).json('Ingredientes con id=' + rIngr + ' no disponibles')
                     }
                     else {
                         OrderService.createClientOrder(req.body, (error, result) => {
                             if (error) {
                                 console.log(error)
-                                return res.status(500).send('Error al crear pedido')
+                                return res.status(500).json('Error al crear pedido')
                             }
                             else {
                                 var orderNumber = result.insertId
@@ -382,7 +382,7 @@ exports.insertClientOrder = (req, res) => {
                                     ProductService.createProductForOrder(obj, orderNumber, (error, result) => {
                                         if (error) {
                                             console.log(error)
-                                            return res.status(500).send('Error al guardar producto en pedido')
+                                            return res.status(500).json('Error al guardar producto en pedido')
                                         }
                                         else {
                                             if (longIngr > 0) {
@@ -392,7 +392,7 @@ exports.insertClientOrder = (req, res) => {
                                                     IngredientService.createIngredientForOrder(obj, idPedidoProducto, idProducto, (error, result) => {
                                                         if (error) {
                                                             console.log(error)
-                                                            return res.status(500).send('Error al guardar ingrediente en pedido')
+                                                            return res.status(500).json('Error al guardar ingrediente en pedido')
                                                         }
                                                         else {
                                                             iIngr++
@@ -401,10 +401,10 @@ exports.insertClientOrder = (req, res) => {
                                                                 OrderService.createPendingOrder(req.body.mail, req.body.cuit, orderNumber, (error, result) => {
                                                                     if (error) {
                                                                         console.log(error)
-                                                                        return res.status(500).send('Error al crear pedido pendiente')
+                                                                        return res.status(500).json('Error al crear pedido pendiente')
                                                                     }
                                                                     else {
-                                                                        return res.send('Pedido creado')
+                                                                        return res.json('Pedido creado')
                                                                     }
                                                                 })
                                                             }
@@ -418,10 +418,10 @@ exports.insertClientOrder = (req, res) => {
                                                     OrderService.createPendingOrder(req.body.mail, req.body.cuit, orderNumber, (error, result) => {
                                                         if (error) {
                                                             console.log(error)
-                                                            return res.status(500).send('Error al crear pedido pendiente')
+                                                            return res.status(500).json('Error al crear pedido pendiente')
                                                         }
                                                         else {
-                                                            return res.send('Pedido creado')
+                                                            return res.json('Pedido creado')
                                                         }
                                                     })
                                                 }
@@ -435,7 +435,7 @@ exports.insertClientOrder = (req, res) => {
                 })
             }
             else
-                return res.status(401).send('El pedido debe tener promociones o productos seleccionados')
+                return res.status(401).json('El pedido debe tener promociones o productos seleccionados')
         }
     })
 }
@@ -444,7 +444,7 @@ function asyncProductsForClient(num, res, callback) {
     ProductService.getProductsOrder(num, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar productos en pedido')
+            return res.status(500).json('Error al buscar productos en pedido')
         }
         else if (result.length > 0) {
             var prod = JSON.parse(JSON.stringify(result))
@@ -463,7 +463,7 @@ function asyncProductsForShop(num, res, callback) {
     ProductService.getProductsOrder(num, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar productos en pedido')
+            return res.status(500).json('Error al buscar productos en pedido')
         }
         else if (result.length > 0) {
             var i = 0
@@ -489,7 +489,7 @@ function asyncIngredients(num, res, callback) {
     IngredientService.getIngredientsOrder(num, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).send('Error al buscar ingredientes en pedido')
+            return res.status(500).json('Error al buscar ingredientes en pedido')
         }
         else if (result.length > 0) {
             var ingr = JSON.parse(JSON.stringify(result))

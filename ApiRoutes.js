@@ -12,7 +12,11 @@ router.post('/login', function(req, res){
   ClientController.loginUser(req, res);
 })
 
-router.post('/getShopMenu', function(req, res){
+router.post('/verifyToken', function(req, res){
+  auth.verifyToken(req, res); 
+})
+
+router.post('/getShopMenu', function(req, res){ //auth.middleware,
   ProductController.getShopMenu(req, res);
 })
 
@@ -49,19 +53,19 @@ router.post('/getShopByAddress', function(req, res){
   ShopController.getShopByAddress(req, res);
 })
 
-router.get('/getShopByPromo', function(req, res){
+router.post('/getShopByPromo', function(req, res){
   ShopController.getShopsByPromos(req, res);
 })
 
-router.get('/getAllShopsOpenClose', function(req, res){
+router.post('/getAllShopsOpenClose', function(req, res){
   ShopController.getAllShopsOpenClose(req, res);
 })
 
-router.get('/getAllShopsAZ', function(req, res){
+router.post('/getAllShopsAZ', function(req, res){
   ShopController.getAllShopsAZ(req, res);
 })
 
-router.get('/getAllOpenShops', function(req, res){
+router.post('/getAllOpenShops', function(req, res){
   ShopController.getAllOpenShops(req, res);
 })
 
