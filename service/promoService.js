@@ -41,7 +41,7 @@ exports.createPromoForOrder = (promo, orderNum, callback) => {
 }
 
 exports.getShopPromos = (shop, callback) => {
-    const sql = 'SELECT id, nombre, detalle, precio, valida FROM promocion WHERE local = ?';
+    const sql = 'SELECT id, nombre, detalle, precio, valida FROM promocion WHERE local = ? ORDER BY valida DESC';
     var values = [shop.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)

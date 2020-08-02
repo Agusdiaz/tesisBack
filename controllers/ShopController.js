@@ -174,7 +174,6 @@ exports.getAllOpenShops = (req, res) => {
 
 exports.getShopsByPromos = (req, res) => {
     PromoService.getShopWithPromos((error, result) => {
-        console.log(result)
         if (error) {
             console.log(error)
             return res.status(500).json('Error al buscar local por promoción')

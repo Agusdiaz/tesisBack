@@ -10,7 +10,7 @@ exports.setOrderDeliveredByClient = (req, res) => {
     OrderService.deleteOrderPendingByClient(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).json('Error al eliminar pedido pendiente')
+            return res.status(500).json('Error al actualizar pedido') //Error al eliminar pedido pendiente
         }
         else if (result.affectedRows == 0) {
             return res.status(404).json('Pedido no encontrado')
@@ -19,13 +19,13 @@ exports.setOrderDeliveredByClient = (req, res) => {
             OrderService.updateOrderDelivered(req.body, (error, result) => {
                 if (error) {
                     console.log(error)
-                    return res.status(500).json('Error al actualizar etapa pedido')
+                    return res.status(500).json('Error al actualizar pedido')
                 }
                 else if (result.affectedRows == 0) {
                     return res.status(404).json('Pedido no encontrado')
                 }
                 else
-                    return res.json('Etapa pedido actualizada')
+                    return res.json('Pedido actualizado')
             })
         }
     })
@@ -63,7 +63,7 @@ exports.shareOrder = (req, res) => {
             return res.status(500).json('Error al validar cliente')
         }
         else if (result.length == 0) {
-            return res.status(404).json('Cliente no encontrado')
+            return res.status(404).json('Usuario no encontrado')
         }
         else {
             OrderService.validateOrderClient(req.body, (error, result) => {
@@ -72,7 +72,7 @@ exports.shareOrder = (req, res) => {
                     return res.status(500).json('Error al validar cliente y pedido')
                 }
                 else if (result.length > 0) {
-                    return res.json('Cliente y pedido ya existentes')
+                    return res.json('Ya le compartiste el pedido a ese usuario')
                 }
                 else {
                     OrderService.shareOrder(req.body, (error, result) => {

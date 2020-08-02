@@ -130,7 +130,6 @@ exports.getShopPromos = (req, res) => {
                                     return res.status(204).json('Local sin promociones')
                                 }
                                 else {
-                                    console.log(finalRta.length)
                                     finalResult = []
                                     long = finalRta.length;
                                     i = 0;
@@ -139,8 +138,9 @@ exports.getShopPromos = (req, res) => {
                                             obj.horarios.push(r)
                                             finalResult.push(obj)
                                             i++
-                                            if (i == long)
+                                            if (i == long){
                                                 return res.json(finalResult)
+                                            }
                                         })
                                     })
                                 }
