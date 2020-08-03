@@ -1,4 +1,5 @@
 const ClientService = require('../service/clientService');
+const ShopController = require('./ShopController')
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 
@@ -43,14 +44,40 @@ exports.loginUser = (req, res) => {
                 }, process.env.SECRET || 'token-secret', {
                     expiresIn: 86400 // expires in 24 hours
                 });
-                let sendJson = { //AGREGAR PARA LOCAL
-                    token: token,
-                    mail: result[0].mail,
-                    nombre: result[0].nombre,
-                    apellido: result[0].apellido,
-                    nuevo: result[0].nuevo,
+                if(result[0].cuit !== undefined){
+                    ShopController.asyncSchedule(result[0].cuit, res, (r) => {
+                        var horarios = []
+                        horarios.push(r)
+                        let sendJson = {
+                            token: token,
+                            mail: result[0].mail,
+                            nombre: result[0].nombre,
+                            nuevo: result[0].nuevo,
+                            cuit: result[0].cuit,
+                            direccion: result[0].direccion,
+                            telefono: result[0].telefono,
+                            mascotas: result[0].mascotas,
+                            bebes: result[0].bebes,
+                            juegos: result[0].juegos,
+                            aireLibre: result[0].aireLibre,
+                            libreHumo: result[0].libreHumo,
+                            wifi: result[0].wifi,
+                            demora: result[0].demora,
+                            abierto: result[0].abierto,
+                            horarios: horarios,
+                        }
+                        return res.json(sendJson)
+                    })
                 }
-                return res.json(sendJson)
+                else{
+                    let sendJson = {
+                        token: token,
+                        mail: result[0].mail,
+                        nombre: result[0].nombre,
+                        apellido: result[0].apellido,
+                    }
+                    return res.json(sendJson)
+                }
             }
             else
                 return res.status(401).json('Contraseña inválida')

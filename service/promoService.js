@@ -129,7 +129,7 @@ exports.getAllPromos = (callback) => {
 }
 
 exports.getPromoHours = (idPromo, callback) => {
-    const sql = 'SELECT diaSemana, horaAbre, horaCierra, horaExtendida FROM validezpromocion WHERE promocion = ? ORDER BY diaSemana, horaAbre ASC'; 
+    const sql = 'SELECT id, diaSemana, horaAbre, horaCierra, horaExtendida FROM validezpromocion WHERE promocion = ? ORDER BY diaSemana, horaAbre ASC'; 
     conMysql.query(sql, [idPromo], (err, result) => {
         if (err)
             callback(err);

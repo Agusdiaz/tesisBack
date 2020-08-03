@@ -138,7 +138,7 @@ exports.getShopPromos = (req, res) => {
                                             obj.horarios.push(r)
                                             finalResult.push(obj)
                                             i++
-                                            if (i == long){
+                                            if (i == long) {
                                                 return res.json(finalResult)
                                             }
                                         })
@@ -206,6 +206,9 @@ function asyncIngredientsPromo(num, res, callback) {
 }
 
 function asyncPromoHours(idPromo, res, callback) {
+    var days = [{ id: 1, dia: 'Domingo', horas: '' }, { id: 2, dia: 'Lunes', horas: '' }, { id: 3, dia: 'Martes', horas: '' },
+    { id: 4, dia: 'Miércoles', horas: '' }, { id: 5, dia: 'Jueves', horas: '' }, { id: 6, dia: 'Viernes', horas: '' },
+    { id: 7, dia: 'Sábado', horas: '' }]
     PromoService.getPromoHours(idPromo, (error, result) => {
         if (error) {
             console.log(error)
@@ -213,12 +216,16 @@ function asyncPromoHours(idPromo, res, callback) {
         }
         else if (result.length > 0) {
             var times = JSON.parse(JSON.stringify(result))
-            var resTimes = []
-            resTimes = times.map(it => {
-                return it
-            })
+            var resTimes = days.filter(item => {
+                return times.map(item2 => {
+                    if (item.id === item2.diaSemana){
+                        item.horas+=item2.horaAbre + ' - ' + item2.horaCierra + ' '
+                    }
+                    return item
+                })
+            });
             callback(resTimes)
         } else
-            callback()
+            callback(days)
     })
 }
