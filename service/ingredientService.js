@@ -83,9 +83,21 @@ exports.getIngredientsByProduct = (prodId, callback) => {
     });
 }
 
-exports.getIngredientsByProductPromo = (prodId, callback) => {
+exports.getIngredientsByProductPromoInMakeOrder = (prodId, callback) => {
     const sql = 'SELECT ingrediente.id, nombre, codigo, precio, detalle, disponible, cantidad, opcion FROM ingrediente INNER JOIN ' +
-        'productoingrediente ON ingrediente.id = productoingrediente.ingrediente WHERE productoingrediente.producto = ?';
+    'productoingrediente ON ingrediente.id = productoingrediente.ingrediente WHERE productoingrediente.producto = ?';
+    var values = [prodId]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getIngredientsByProductPromoInGetOrder = (prodId, callback) => {
+    const sql = 'SELECT ingrediente.id, nombre, codigo, precio, detalle, disponible, cantidad, agregado FROM ingrediente INNER JOIN ' +
+    'pedidopromocioningrediente ON ingrediente.id = pedidopromocioningrediente.ingrediente WHERE pedidopromocioningrediente.producto = ?';
     var values = [prodId]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -131,6 +143,19 @@ exports.createIngredientForOrder = (ingredient, idPedidoProducto, idProducto, ca
     const sql = 'INSERT INTO pedidoingrediente (pedidoProducto, producto, ingrediente, cantidad, agregado) VALUES ?';
     var values = [
         [idPedidoProducto, idProducto, ingredient.idIngrediente, ingredient.cantidad, ingredient.agregado]
+    ]
+    conMysql.query(sql, [values], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.createIngredientPromoForOrder = (ingredient, idPedidoPromocion, idProducto, callback) => {
+    const sql = 'INSERT INTO pedidopromocioningrediente (pedidoPromocion, producto, ingrediente, cantidad, agregado) VALUES ?';
+    var values = [
+        [idPedidoPromocion, idProducto, ingredient.idIngrediente, ingredient.cantidad, ingredient.agregado]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)

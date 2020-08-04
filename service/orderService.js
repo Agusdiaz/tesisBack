@@ -18,7 +18,7 @@ exports.createPendingOrder = (mail, cuit, num, callback) => {
     const sql = 'INSERT INTO pendiente (cliente, local, pedido) SELECT ?, ?, ? FROM pendiente WHERE NOT EXISTS (SELECT * FROM pendiente ' +
     'WHERE cliente = ? AND local = ?  AND pedido = ?) LIMIT 1';
     var values = [mail, cuit, num, mail, cuit, num]
-    conMysql.query(sql, [values], (err, result) => {
+    conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);
         else
@@ -129,9 +129,9 @@ exports.getClientAllOrders = (client, callback) => {
     });
 }
 
-exports.getShopPendingOrdersByArrival = (shop, callback) => {
+exports.getShopDeliveredOrdersByArrival = (shop, callback) => {
     const sql = 'SELECT numero, cliente, takeAway, total, fecha FROM pedido WHERE local = ? AND etapa = ? ORDER BY fecha ASC';
-    var values = [shop.cuit, 'pendiente']
+    var values = [shop.cuit, 'entregado']
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);
@@ -141,14 +141,16 @@ exports.getShopPendingOrdersByArrival = (shop, callback) => {
 }
 
 exports.getShopPendingOrdersByProducts = (shop, callback) => {
-    const sql = 'SELECT numero, cliente, takeAway, total, fecha, SUM(cantidad) as cantProductos FROM pedido INNER JOIN ' + 
-    'pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND etapa = ? GROUP BY numero ORDER BY cantProductos DESC';
-    var values = [shop.cuit, 'pendiente']
-    conMysql.query(sql, values, (err, result) => {
+    const sql = 'SELECT numero, cliente, takeAway, total, fecha, SUM(cantidad) AS cantProductos FROM pedido INNER JOIN ' + 
+    'pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND etapa = ? GROUP BY numero ORDER BY cantProductos DESC; ' +
+    'SELECT numero, cliente, takeAway, total, fecha, (SUM(promocionproducto.cantidad) * pedidopromocion.cantidad) AS cantProductos ' +
+    'FROM pedido INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN promocionproducto ON pedidopromocion.promocion ' +
+    '= promocionproducto.promocion WHERE local = ? AND etapa = ? GROUP BY numero ORDER BY cantProductos DESC;'
+    conMysql.query(sql, [shop.cuit, 'pendiente', shop.cuit, 'pendiente'], (err, result) => {
         if (err)
             callback(err);
         else
-            callback(null, result);
+            callback(null, result);       
     });
 }
 

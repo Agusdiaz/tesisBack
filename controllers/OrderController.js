@@ -4,7 +4,6 @@ const ShopService = require('../service/shopService');
 const ProductService = require('../service/productService');
 const IngredientService = require('../service/ingredientService');
 const PromoService = require('../service/promoService');
-const { compareSync } = require('bcrypt');
 
 exports.setOrderDeliveredByClient = (req, res) => {
     OrderService.deleteOrderPendingByClient(req.body, (error, result) => {
@@ -100,17 +99,22 @@ exports.getClientPendingOrders = (req, res) => {
         }
         else {
             var finalResult = []
-            var long = result.length;
-            var i = 0;
+            var long = result.length
+            var iProd = 0
+            var iProm = 0
             result.map(obj => {
+                obj.promociones = []
                 obj.productos = []
-                asyncProductsForClient(obj.numero, res, (r) => {
-                    obj.productos.push(r)
-                    //console.log('2 - ', obj)
-                    finalResult.push(obj)
-                    i++
-                    if (i == long)
-                        return res.json(finalResult) //console.log(finalResult[i].productos[0])
+                asyncPromosOrderByShop(obj.numero, 'pendiente', res, (r) => {
+                    obj.promociones.push(r)
+                    iProm++
+                    asyncProductsForShop(obj.numero, res, (r) => {
+                        obj.productos.push(r)
+                        finalResult.push(obj)
+                        iProd++
+                        if (iProd == long)
+                            return res.json(finalResult)
+                    })
                 })
             })
         }
@@ -128,16 +132,55 @@ exports.getClientAllOrders = (req, res) => {
         }
         else {
             var finalResult = []
-            var long = result.length;
-            var i = 0;
+            var long = result.length
+            var iProd = 0
+            var iProm = 0
             result.map(obj => {
+                obj.promociones = []
                 obj.productos = []
-                asyncProductsForClient(obj.numero, res, (r) => {
-                    obj.productos.push(r)
-                    finalResult.push(obj)
-                    i++
-                    if (i == long)
-                        return res.json(finalResult)
+                asyncPromosOrderByShop(obj.numero, 'entregado', res, (r) => {
+                    obj.promociones.push(r)
+                    iProm++
+                    asyncProductsForShop(obj.numero, res, (r) => {
+                        obj.productos.push(r)
+                        finalResult.push(obj)
+                        iProd++
+                        if (iProd == long)
+                            return res.json(finalResult)
+                    })
+                })
+            })
+        }
+    })
+}
+
+exports.getShopDeliveredOrdersByArrival = (req, res) => {
+    OrderService.getShopDeliveredOrdersByArrival(req.body, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al buscar pedidos pendientes')
+        }
+        else if (result.length == 0) {
+            return res.status(204).json('Local sin pedidos pendientes')
+        }
+        else {
+            var finalResult = []
+            var long = result.length
+            var iProd = 0
+            var iProm = 0
+            result.map(obj => {
+                obj.promociones = []
+                obj.productos = []
+                asyncPromosOrderByShop(obj.numero, 'entregado', res, (r) => {
+                    obj.promociones.push(r)
+                    iProm++
+                    asyncProductsForShop(obj.numero, res, (r) => {
+                        obj.productos.push(r)
+                        finalResult.push(obj)
+                        iProd++
+                        if (iProd == long)
+                            return res.json(finalResult)
+                    })
                 })
             })
         }
@@ -155,43 +198,83 @@ exports.getShopPendingOrdersByArrival = (req, res) => {
         }
         else {
             var finalResult = []
-            var long = result.length;
-            var i = 0;
+            var long = result.length
+            var iProd = 0
+            var iProm = 0
             result.map(obj => {
+                obj.promociones = []
                 obj.productos = []
-                asyncProductsForShop(obj.numero, res, (r) => {
-                    obj.productos.push(r)
-                    finalResult.push(obj)
-                    i++
-                    if (i == long)
-                        return res.json(finalResult)
+                asyncPromosOrderByShop(obj.numero, 'pendiente', res, (r) => {
+                    obj.promociones.push(r)
+                    iProm++
+                    asyncProductsForShop(obj.numero, res, (r) => {
+                        obj.productos.push(r)
+                        finalResult.push(obj)
+                        iProd++
+                        if (iProd == long)
+                            return res.json(finalResult)
+                    })
                 })
             })
         }
     })
 }
 
-exports.getShopPendingOrdersByProducts = (req, res) => {
+exports.getShopPendingOrdersByProducts = (req, res) => { //NO ESTA ORDENADO POR CANT DE PRODUCTOS
     OrderService.getShopPendingOrdersByProducts(req.body, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al buscar pedidos pendientes')
         }
-        else if (result.length == 0) {
+        else if (result[0].length == 0 && result[1].length == 0) {
             return res.status(204).json('Local sin pedidos pendientes')
         }
         else {
+            var newResult = []
+            if (result[0].length > 0 && result[1].length > 0) {
+                var joinArray = result[0].concat(result[1])
+                newResult = joinArray.reduce((unique, o) => {
+                    if (!unique.some(obj => obj.numero === o.numero)) {
+                        unique.push(o);
+                    }
+                    return unique;
+                }, []);
+                newResult = newResult.map(obj0 => {
+                    return result[1].map((obj1) => {
+                        if (obj0.numero === obj1.numero && (result[0].filter(it => (it.numero === obj1.numero)).length > 0)) {
+                            obj0.cantProductos = obj0.cantProductos + obj1.cantProductos
+                        }
+                        return obj0
+                    })
+                });
+                /*newResult.sort(function(a, b){
+                    return a.cantProductos - b.cantProductos
+                })
+                console.log('---------------------------------- ', newResult)*/
+            }
+            else if (result[0].length > 0)
+                newResult = result[0]
+            else
+                newResult = result[1]
             var finalResult = []
-            var long = result.length;
-            var i = 0;
-            result.map(obj => {
-                obj.productos = []
-                asyncProductsForShop(obj.numero, res, (r) => {
-                    obj.productos.push(r)
-                    finalResult.push(obj)
-                    i++
-                    if (i == long)
-                        return res.json(finalResult)
+            var long = newResult.length
+            var iProd = 0
+            var iProm = 0
+            newResult.map(obj0 => {
+                obj0.map(obj => {
+                    obj.promociones = []
+                    obj.productos = []
+                    asyncPromosOrderByShop(obj.numero, 'pendiente', res, (r) => {
+                        obj.promociones.push(r)
+                        iProm++
+                        asyncProductsForShop(obj.numero, res, (r) => {
+                            obj.productos.push(r)
+                            finalResult.push(obj)
+                            iProd++
+                            if (iProd == long)
+                                return res.json(finalResult)
+                        })
+                    })
                 })
             })
         }
@@ -272,7 +355,19 @@ exports.insertClientOrder = (req, res) => {
                                                 return res.status(500).json('Error al guardar promociones en pedido')
                                             }
                                             else {
+                                                var idPedPromo = result.insertId
                                                 iPromo++
+                                                obj.productos.map(obj => {
+                                                    var idProd = obj.idProducto
+                                                    obj.ingredientes.map(obj => {
+                                                        IngredientService.createIngredientPromoForOrder(obj, idPedPromo, idProd, (error, result) => {
+                                                            if (error) {
+                                                                console.log(error)
+                                                                return res.status(500).json('Error al guardar ingredientes en pedido promoción ingredientes')
+                                                            }
+                                                        })
+                                                    })
+                                                })
                                             }
                                         })
                                     })
@@ -352,7 +447,6 @@ exports.insertClientOrder = (req, res) => {
             }
             else if (req.body.productos != null) {
                 validateProductsAndIngredients(req.body.productos, unavailableProducts, unavailableIngredients, (error, rProd, rIngr) => {
-                    console.log(rProd, '   ', rIngr)
                     if (error) {
                         console.log(error)
                         return res.status(500).json('Error al validar productos e ingredientes en pedido')
@@ -459,6 +553,59 @@ function asyncProductsForClient(num, res, callback) {
     })
 }
 
+function asyncPromosOrderByShop(num, stage, res, callback) {
+    PromoService.getOrderPromos(num, stage, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al buscar promociones en pedido')
+        }
+        else if (result.length > 0) {
+            var i = 0
+            var prom = JSON.parse(JSON.stringify(result))
+            var resProm = []
+            resProm = prom.map(it => {
+                it.productos = []
+                asyncProductsPromo(it.id, res, (r) => {
+                    it.productos.push(r)
+                    i++
+                    if (i == prom.length)
+                        callback(resProm)
+                })
+                return it
+            })
+        }
+        else
+            callback(null)
+    })
+}
+
+function asyncProductsPromo(num, res, callback) {
+    PromoService.getProductsPromo(num, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al buscar productos en pedido promocion')
+        }
+        else if (result.length > 0) {
+            var i = 0
+            var prod = JSON.parse(JSON.stringify(result))
+            var resProd = []
+            resProd = prod.map(it => {
+                it.ingredientes = []
+                asyncIngredientsOrderProductPromo(it.id, res, (r) => {
+                    //console.log(r)
+                    it.ingredientes.push(r)
+                    i++
+                    if (i == prod.length)
+                        callback(resProd)
+                })
+                return it
+            })
+        }
+        else
+            callback(null)
+    })
+}
+
 function asyncProductsForShop(num, res, callback) {
     ProductService.getProductsOrder(num, (error, result) => {
         if (error) {
@@ -471,7 +618,7 @@ function asyncProductsForShop(num, res, callback) {
             var resProd = []
             resProd = prod.map(it => {
                 it.ingredientes = []
-                asyncIngredients(it.id, res, (r) => {
+                asyncIngredientsOrderProduct(it.idPP, res, (r) => {
                     it.ingredientes.push(r)
                     i++
                     if (i == prod.length)
@@ -481,11 +628,11 @@ function asyncProductsForShop(num, res, callback) {
             })
         }
         else
-            callback()
+            callback(null)
     })
 }
 
-function asyncIngredients(num, res, callback) {
+function asyncIngredientsOrderProduct(num, res, callback) {
     IngredientService.getIngredientsOrder(num, (error, result) => {
         if (error) {
             console.log(error)
@@ -500,7 +647,26 @@ function asyncIngredients(num, res, callback) {
             callback(resIngr)
         }
         else
-            callback()
+            callback(null)
+    })
+}
+
+function asyncIngredientsOrderProductPromo(num, res, callback) {
+    IngredientService.getIngredientsByProductPromoInGetOrder(num, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al buscar ingredientes en pedido')
+        }
+        else if (result.length > 0) {
+            console.log(result)
+            var ingr = JSON.parse(JSON.stringify(result))
+            var resIngr = []
+            resIngr = ingr.map(it => {
+                return it
+            })
+            callback(resIngr)
+        } else
+            callback(null)
     })
 }
 
@@ -515,49 +681,52 @@ function validateProductsAndIngredients(list, unavailableProducts, unavailableIn
             })
         })
     }
-    ProductService.validateProductsAndIngredients(products, ingredients, (error, result) => {
-        if (error) {
-            callback(error)
-        }
-        else if (result.length == 0) {
-            callback(null, null, null)
-        }
-        else if (result.length > 0 && result[1] == undefined) {
-            var rP = []
-            result.map(obj => {
-                rP.push(obj.id)
-            })
-            callback(null, rP, null)
-        }
-        else if (result[0].length == 0 && result[1].length == 0) {
-            callback(null, null, null)
-        }
-        else if (result[0].length == 0 && result[1].length > 0) {
-            var rI = []
-            result[1].map(obj => {
-                rI.push(obj.id)
-            })
-            callback(null, null, result[1])
-        }
-        else if (result[0].length > 0 && result[1].length == 0) {
-            var rP = []
-            result[0].map(obj => {
-                rP.push(obj.id)
-            })
-            callback(null, rP, null)
-        }
-        else {
-            var rP = []
-            result[0].map(obj => {
-                rP.push(obj.id)
-            })
-            var rI = []
-            result[1].map(obj => {
-                rI.push(obj.id)
-            })
-            callback(null, rP, rI)
-        }
-    })
+    if (products.length > 0) {
+        ProductService.validateProductsAndIngredients(products, ingredients, (error, result) => {
+            if (error) {
+                callback(error)
+            }
+            else if (result.length == 0) {
+                callback(null, null, null)
+            }
+            else if (result.length > 0 && result[1] == undefined) {
+                var rP = []
+                result.map(obj => {
+                    rP.push(obj.id)
+                })
+                callback(null, rP, null)
+            }
+            else if (result[0].length == 0 && result[1].length == 0) {
+                callback(null, null, null)
+            }
+            else if (result[0].length == 0 && result[1].length > 0) {
+                var rI = []
+                result[1].map(obj => {
+                    rI.push(obj.id)
+                })
+                callback(null, null, result[1])
+            }
+            else if (result[0].length > 0 && result[1].length == 0) {
+                var rP = []
+                result[0].map(obj => {
+                    rP.push(obj.id)
+                })
+                callback(null, rP, null)
+            }
+            else {
+                var rP = []
+                result[0].map(obj => {
+                    rP.push(obj.id)
+                })
+                var rI = []
+                result[1].map(obj => {
+                    rI.push(obj.id)
+                })
+                callback(null, rP, rI)
+            }
+        })
+    } else
+        callback(null, null, null)
 }
 
 function validatePromoWithProductsAndIngredients(list, callback) {
@@ -593,7 +762,7 @@ function validatePromoWithProductsAndIngredients(list, callback) {
                     var i = 0
                     var long = promoProducts.length
                     promoProducts.map(obj => {
-                        IngredientService.getIngredientsByProductPromo(obj, (error, result) => {
+                        IngredientService.getIngredientsByProductPromoInMakeOrder(obj, (error, result) => {
                             i++
                             if (error) {
                                 console.log(error)

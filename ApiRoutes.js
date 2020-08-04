@@ -139,6 +139,10 @@ router.post('/getPendingOrdersMoreProductsByShop', function(req, res){
   OrderController.getShopPendingOrdersByProducts(req, res);
 })
 
+router.post('/getDeliveredOrdersInOrderByShop', function(req, res){ //DOCUMENTAR
+  OrderController.getShopDeliveredOrdersByArrival(req, res);
+})
+
 router.post('/insertShop', function(req, res){
   ShopController.insertShop(req, res);
 })

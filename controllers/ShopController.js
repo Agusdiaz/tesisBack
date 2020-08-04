@@ -310,13 +310,13 @@ exports.setShopFeatures = (req, res) => {
     ShopService.updateShopFeatures(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).json('Error al actualizar local')
+            return res.status(500).json('Error al actualizar características')
         }
         else if (result.affectedRows == 0) {
             return res.status(404).json('Local no encontrado')
         }
         else
-            return res.json('Local actualizado')
+            return res.json('Características actualizadas')
     })
 }
 

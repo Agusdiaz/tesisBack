@@ -63,7 +63,7 @@ exports.getShopWithPromos = (callback) => {
 
 exports.getProductsPromo = (promoID, callback) => {
     const sql = 'SELECT producto.id, nombre, cantidad, disponible, codigo, precio, detalle, condicion, tipo FROM promocionproducto ' +
-        'INNER JOIN producto ON producto = producto.id WHERE promocion = ?;';
+        'INNER JOIN producto ON producto = producto.id WHERE promocion = ?';
     var values = [promoID]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -146,6 +146,18 @@ exports.validatePromos = (promos, callback) => {
         else
             callback(null, result)
     })
+}
+
+exports.getOrderPromos = (orderNum, stage, callback) => {
+    const sql = 'SELECT promocion.id, nombre, precio FROM pedido INNER JOIN pedidopromocion ON pedido.numero = ' +
+    'pedidopromocion.pedido INNER JOIN promocion ON promocion.id = pedidopromocion.promocion WHERE pedido.numero = ? AND etapa = ?';
+    var values = [orderNum, stage]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
 }
 
 exports.checkHours = (idPromo, callback) => {
