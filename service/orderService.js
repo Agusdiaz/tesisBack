@@ -106,7 +106,7 @@ exports.shareOrder = (body, callback) => {
 }
 
 exports.getClientPendingOrders = (client, callback) => {
-    const sql = 'SELECT numero, nombre, etapa, propina, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha FROM pendiente INNER ' + 
+    const sql = 'SELECT numero, nombre, direccion, etapa, propina, takeAway, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha FROM pendiente INNER ' + 
     'JOIN pedido ON pendiente.pedido = pedido.numero INNER JOIN local ON pedido.local = local.cuit WHERE pendiente.cliente = ? AND etapa != ? ORDER BY etapa ASC, fecha DESC';
     var values = [client.mail, 'entregado']
     conMysql.query(sql, values, (err, result) => {
@@ -118,7 +118,7 @@ exports.getClientPendingOrders = (client, callback) => {
 }
 
 exports.getClientAllOrders = (client, callback) => {
-    const sql = 'SELECT numero, nombre, direccion, etapa, propina, total, fecha FROM pedido INNER JOIN local ON pedido.local = local.cuit WHERE ' +
+    const sql = 'SELECT numero, nombre, direccion, etapa, takeAway, propina, total, fecha FROM pedido INNER JOIN local ON pedido.local = local.cuit WHERE ' +
     'pedido.cliente = ? AND pedido.etapa = ? ORDER BY fecha DESC';
     var values = [client.mail, 'entregado']
     conMysql.query(sql, values, (err, result) => {
@@ -130,8 +130,19 @@ exports.getClientAllOrders = (client, callback) => {
 }
 
 exports.getShopDeliveredOrdersByArrival = (shop, callback) => {
-    const sql = 'SELECT numero, cliente, takeAway, total, fecha FROM pedido WHERE local = ? AND etapa = ? ORDER BY fecha ASC';
-    var values = [shop.cuit, 'entregado']
+    const sql = 'SELECT numero, cliente, etapa, takeAway, total, fecha FROM pedido WHERE local = ? AND etapa IN ? ORDER BY etapa DESC, fecha DESC';
+    var values = [shop.cuit, [['listo', 'entregado']]]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getShopPendingOrdersByArrival = (shop, callback) => {
+    const sql = 'SELECT numero, cliente, etapa, takeAway, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha FROM pedido WHERE local = ? AND etapa = ? ORDER BY fecha DESC';
+    var values = [shop.cuit, 'pendiente']
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);
@@ -141,9 +152,9 @@ exports.getShopDeliveredOrdersByArrival = (shop, callback) => {
 }
 
 exports.getShopPendingOrdersByProducts = (shop, callback) => {
-    const sql = 'SELECT numero, cliente, takeAway, total, fecha, SUM(cantidad) AS cantProductos FROM pedido INNER JOIN ' + 
+    const sql = 'SELECT numero, cliente, etapa, takeAway, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, SUM(cantidad) AS cantProductos FROM pedido INNER JOIN ' + 
     'pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND etapa = ? GROUP BY numero ORDER BY cantProductos DESC; ' +
-    'SELECT numero, cliente, takeAway, total, fecha, (SUM(promocionproducto.cantidad) * pedidopromocion.cantidad) AS cantProductos ' +
+    'SELECT numero, cliente, takeAway, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, (SUM(promocionproducto.cantidad) * pedidopromocion.cantidad) AS cantProductos ' +
     'FROM pedido INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN promocionproducto ON pedidopromocion.promocion ' +
     '= promocionproducto.promocion WHERE local = ? AND etapa = ? GROUP BY numero ORDER BY cantProductos DESC;'
     conMysql.query(sql, [shop.cuit, 'pendiente', shop.cuit, 'pendiente'], (err, result) => {

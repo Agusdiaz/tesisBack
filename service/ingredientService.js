@@ -59,7 +59,7 @@ exports.updateIngredientStatus = (ingredient, callback) => {
 }
 
 exports.getIngredientsOrder = (orderNum, callback) => {
-    const sql = 'SELECT nombre, pedidoingrediente.cantidad, agregado FROM pedidoproducto INNER JOIN pedidoingrediente ON pedidoproducto.id = ' +
+    const sql = 'SELECT ingrediente.id, nombre, pedidoingrediente.cantidad, agregado FROM pedidoproducto INNER JOIN pedidoingrediente ON pedidoproducto.id = ' +
         'pedidoingrediente.pedidoProducto INNER JOIN ingrediente ON pedidoingrediente.ingrediente = ingrediente.id WHERE ' +
         'pedidoingrediente.pedidoProducto = ?';
     var values = [orderNum]

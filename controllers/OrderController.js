@@ -158,10 +158,10 @@ exports.getShopDeliveredOrdersByArrival = (req, res) => {
     OrderService.getShopDeliveredOrdersByArrival(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).json('Error al buscar pedidos pendientes')
+            return res.status(500).json('Error al buscar pedidos entregados')
         }
         else if (result.length == 0) {
-            return res.status(204).json('Local sin pedidos pendientes')
+            return res.status(204).json('Local sin pedidos entregados')
         }
         else {
             var finalResult = []
@@ -260,8 +260,7 @@ exports.getShopPendingOrdersByProducts = (req, res) => { //NO ESTA ORDENADO POR 
             var long = newResult.length
             var iProd = 0
             var iProm = 0
-            newResult.map(obj0 => {
-                obj0.map(obj => {
+            newResult.map(obj => {
                     obj.promociones = []
                     obj.productos = []
                     asyncPromosOrderByShop(obj.numero, 'pendiente', res, (r) => {
@@ -275,7 +274,6 @@ exports.getShopPendingOrdersByProducts = (req, res) => { //NO ESTA ORDENADO POR 
                                 return res.json(finalResult)
                         })
                     })
-                })
             })
         }
     })
@@ -583,7 +581,7 @@ function asyncProductsPromo(num, res, callback) {
     PromoService.getProductsPromo(num, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).json('Error al buscar productos en pedido promocion')
+            return res.status(500).json('Error al buscar productos en pedido promoción')
         }
         else if (result.length > 0) {
             var i = 0
