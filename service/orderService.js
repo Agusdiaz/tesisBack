@@ -119,7 +119,7 @@ exports.getClientPendingOrders = (client, callback) => {
 
 exports.getClientAllOrders = (client, callback) => {
     const sql = 'SELECT numero, nombre, direccion, etapa, takeAway, propina, total, fecha FROM pedido INNER JOIN local ON pedido.local = local.cuit WHERE ' +
-    'pedido.cliente = ? AND pedido.etapa = ? ORDER BY fecha DESC';
+    'pedido.cliente = ? AND pedido.etapa = ? ORDER BY fecha ASC';
     var values = [client.mail, 'entregado']
     conMysql.query(sql, values, (err, result) => {
         if (err)

@@ -219,7 +219,7 @@ function asyncPromoHours(idPromo, res, callback) {
             var resTimes = days.filter(item => {
                 return times.map(item2 => {
                     if (item.id === item2.diaSemana){
-                        item.horas+=item2.horaAbre + ' - ' + item2.horaCierra + ' '
+                        item.horas+=item2.horaAbre.substring(0, 5) + ' - ' + item2.horaCierra.substring(0, 5) + '\n'
                     }
                     return item
                 })

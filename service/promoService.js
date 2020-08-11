@@ -149,7 +149,7 @@ exports.validatePromos = (promos, callback) => {
 }
 
 exports.getOrderPromos = (orderNum, stage, callback) => {
-    const sql = 'SELECT promocion.id, nombre, precio FROM pedido INNER JOIN pedidopromocion ON pedido.numero = ' +
+    const sql = 'SELECT promocion.id, nombre, precio, pedidopromocion.cantidad FROM pedido INNER JOIN pedidopromocion ON pedido.numero = ' +
     'pedidopromocion.pedido INNER JOIN promocion ON promocion.id = pedidopromocion.promocion WHERE pedido.numero = ? AND etapa = ?';
     var values = [orderNum, stage]
     conMysql.query(sql, values, (err, result) => {

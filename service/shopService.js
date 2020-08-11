@@ -72,7 +72,7 @@ exports.deleteShopAsFavourite = (body, callback) => {
 
 exports.getAllShopsOpenClose = (callback) => {
     const sql = 'SELECT cuit, nombre, direccion, telefono, razonSocial, mail, mascotas, bebes, juegos, aireLibre, ' +
-        'libreHumo, wifi, demora, abierto FROM local WHERE nuevo = 0 AND habilitado = 1 ORDER BY abierto DESC';
+        'libreHumo, wifi, demora, abierto FROM local WHERE nuevo = 0 AND habilitado = 1 ORDER BY abierto DESC, nombre ASC';
     conMysql.query(sql, (err, result) => {
         if (err)
             callback(err);

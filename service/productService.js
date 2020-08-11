@@ -14,7 +14,7 @@ exports.createProduct = (body, CUIT, callback) => {
 }
 
 exports.getProductsOrder = (orderNum, callback) => {
-    const sql = 'SELECT producto.id AS idProd, nombre, precio, cantidad, pedidoproducto.id AS idPP FROM pedidoproducto INNER JOIN producto ON pedidoproducto.producto = producto.id ' +
+    const sql = 'SELECT producto.id, nombre, precio, cantidad, pedidoproducto.id AS idPP FROM pedidoproducto INNER JOIN producto ON pedidoproducto.producto = producto.id ' +
         'WHERE pedidoproducto.pedido = ?';
     var values = [orderNum]
     conMysql.query(sql, values, (err, result) => {

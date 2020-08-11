@@ -80,27 +80,38 @@ exports.insertProductWithIngredients = (req, res) => {
 }
 
 exports.getAllDisabledByShop = (req, res) => {
-    var finalResult = []
+    var finalResult = {}
+    finalResult.productos = []
+    finalResult.ingredientes = []
     ProductService.getShopDisabledProducts(req.body, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al buscar productos deshabilitados')
         }
         else {
-            if (result.length > 0)
-                finalResult.push(result)
+            if (result.length > 0){
+                result.map(obj => {
+                    obj.ingredientes = []
+                    asyncIngredientsMenu(obj.id, res, (r) => {
+                        obj.ingredientes.push(r)
+                        finalResult.productos.push(obj)
+                    })
+                })
+            }
             IngredientService.getShopDisabledIngredients(req.body, (error, result) => {
                 if (error) {
                     console.log(error)
                     return res.status(500).json('Error al buscar ingredientes deshabilitados')
                 }
-                else if (result.length == 0) {
-                    return res.status(204).json('No hay productos/ingredientes deshabilitados')
-                    //return res.json(finalResult)
-                }
-                else {
-                    finalResult.push(result)
-                    return res.json(finalResult)
+                else{
+                    if (result.length > 0){
+                        result.map(obj => {
+                            finalResult.ingredientes.push(obj)
+                        })
+                    }
+                    if(finalResult.productos.length === 0 && finalResult.ingredientes.length === 0)
+                        return res.status(204).json('Local sin productos y/o ingredientes deshabilitados')
+                    else return res.json(finalResult)
                 }
             })
         }
