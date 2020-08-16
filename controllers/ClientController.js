@@ -8,7 +8,7 @@ exports.insertClient = (req, res) => {
         //console.log(result.length)
         if (error) {
             console.log(error)
-            return res.status(500).json('Error al guardar cliente')
+            return res.status(500).json('Error al registrar usuario')
         }
         else if (result.length > 1)
             return res.status(401).json('Mail existente')
@@ -21,6 +21,8 @@ exports.insertClient = (req, res) => {
             let sendJson = {
                 token: token,
                 mail: req.body.mail,
+                nombre: req.body.nombre,
+                apellido: req.body.apellido
             }
             return res.status(200).json(sendJson)
         }

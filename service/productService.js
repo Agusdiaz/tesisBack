@@ -1,9 +1,9 @@
 var conMysql = require('../mysqlConnection');
 
 exports.createProduct = (body, CUIT, callback) => {
-    const sql = 'INSERT INTO producto (nombre, codigo, precio, detalle, condicion, tipo, local) VALUES ?';
+    const sql = 'INSERT INTO producto (nombre, codigo, precio, detalle, condicion, tipo, tope, selectivo, local) VALUES ?';
     var values = [
-        [body.nombre, body.codigo, body.precio, body.detalle, body.condicion, body.tipo, CUIT]
+        [body.nombre, body.codigo, body.precio, body.detalle, body.condicion, body.tipo, body.tope, body.selectivo, CUIT]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -14,8 +14,8 @@ exports.createProduct = (body, CUIT, callback) => {
 }
 
 exports.getProductsOrder = (orderNum, callback) => {
-    const sql = 'SELECT producto.id, nombre, precio, cantidad, pedidoproducto.id AS idPP FROM pedidoproducto INNER JOIN producto ON pedidoproducto.producto = producto.id ' +
-        'WHERE pedidoproducto.pedido = ?';
+    const sql = 'SELECT producto.id, nombre, precio, cantidad, modificado, pedidoproducto.id AS idPP FROM pedidoproducto INNER JOIN ' + 
+    'producto ON pedidoproducto.producto = producto.id WHERE pedidoproducto.pedido = ?';
     var values = [orderNum]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -37,7 +37,7 @@ exports.getProductsMenu = (local, callback) => {
 }
 
 exports.getShopDisabledProducts = (shop, callback) => {
-    const sql = 'SELECT id, nombre, precio, detalle, condicion FROM producto WHERE local = ? AND disponible = 0;';
+    const sql = 'SELECT id, nombre, precio, detalle, condicion, tope, selectivo FROM producto WHERE local = ? AND disponible = 0;';
     var values = [shop.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -100,9 +100,9 @@ exports.validateProductsAndIngredients = (products, ingredients, callback) => {
 }
 
 exports.createProductForOrder = (product, orderNum, callback) => {
-    const sql = 'INSERT INTO pedidoproducto (pedido, producto, cantidad) VALUES ?';
+    const sql = 'INSERT INTO pedidoproducto (pedido, producto, cantidad, modificado) VALUES ?';
     var values = [
-        [orderNum, product.idProducto, product.cantidad]
+        [orderNum, product.idProducto, product.cantidad, (product.modificado) ? product.modificado : 0]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)

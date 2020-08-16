@@ -16,7 +16,7 @@ exports.createIngredient = (body, idProd, CUIT, callback) => {
 exports.asociateIngredientAndProduct = (body, idProd, idIngr, callback) => {
     const sql = 'INSERT INTO productoingrediente (producto, ingrediente, cantidad, opcion) VALUES ?';
     values = [
-        [idProd, idIngr, body.cantidad, (body.opcion != null) ? body.opcion : false]
+        [idProd, idIngr, (body.opcion === 1) ? 0 : body.cantidad, (body.opcion != null) ? body.opcion : false]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -59,7 +59,7 @@ exports.updateIngredientStatus = (ingredient, callback) => {
 }
 
 exports.getIngredientsOrder = (orderNum, callback) => {
-    const sql = 'SELECT ingrediente.id, nombre, pedidoingrediente.cantidad, agregado FROM pedidoproducto INNER JOIN pedidoingrediente ON pedidoproducto.id = ' +
+    const sql = 'SELECT ingrediente.id, nombre, pedidoingrediente.cantidad FROM pedidoproducto INNER JOIN pedidoingrediente ON pedidoproducto.id = ' +
         'pedidoingrediente.pedidoProducto INNER JOIN ingrediente ON pedidoingrediente.ingrediente = ingrediente.id WHERE ' +
         'pedidoingrediente.pedidoProducto = ?';
     var values = [orderNum]
@@ -96,7 +96,7 @@ exports.getIngredientsByProductPromoInMakeOrder = (prodId, callback) => {
 }
 
 exports.getIngredientsByProductPromoInGetOrder = (prodId, callback) => {
-    const sql = 'SELECT ingrediente.id, nombre, codigo, precio, detalle, disponible, cantidad, agregado FROM ingrediente INNER JOIN ' +
+    const sql = 'SELECT ingrediente.id, nombre, codigo, precio, detalle, disponible, cantidad FROM ingrediente INNER JOIN ' +
     'pedidopromocioningrediente ON ingrediente.id = pedidopromocioningrediente.ingrediente WHERE pedidopromocioningrediente.producto = ?';
     var values = [prodId]
     conMysql.query(sql, values, (err, result) => {
@@ -140,9 +140,9 @@ exports.validateIngredient = (ingredient, callback) => {
 }
 
 exports.createIngredientForOrder = (ingredient, idPedidoProducto, idProducto, callback) => {
-    const sql = 'INSERT INTO pedidoingrediente (pedidoProducto, producto, ingrediente, cantidad, agregado) VALUES ?';
+    const sql = 'INSERT INTO pedidoingrediente (pedidoProducto, producto, ingrediente, cantidad) VALUES ?';
     var values = [
-        [idPedidoProducto, idProducto, ingredient.idIngrediente, ingredient.cantidad, ingredient.agregado]
+        [idPedidoProducto, idProducto, ingredient.idIngrediente, ingredient.cantidad]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -153,9 +153,9 @@ exports.createIngredientForOrder = (ingredient, idPedidoProducto, idProducto, ca
 }
 
 exports.createIngredientPromoForOrder = (ingredient, idPedidoPromocion, idProducto, callback) => {
-    const sql = 'INSERT INTO pedidopromocioningrediente (pedidoPromocion, producto, ingrediente, cantidad, agregado) VALUES ?';
+    const sql = 'INSERT INTO pedidopromocioningrediente (pedidoPromocion, producto, ingrediente, cantidad) VALUES ?';
     var values = [
-        [idPedidoPromocion, idProducto, ingredient.idIngrediente, ingredient.cantidad, ingredient.agregado]
+        [idPedidoPromocion, idProducto, ingredient.idIngrediente, ingredient.cantidad]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
