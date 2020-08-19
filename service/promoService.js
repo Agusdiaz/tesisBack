@@ -62,7 +62,7 @@ exports.getShopWithPromos = (callback) => {
 }
 
 exports.getProductsPromo = (promoID, callback) => {
-    const sql = 'SELECT producto.id, nombre, cantidad, disponible, codigo, precio, detalle, condicion, tipo FROM promocionproducto ' +
+    const sql = 'SELECT producto.id, nombre, cantidad, disponible, codigo, precio, detalle, condicion, tipo, tope, selectivo FROM promocionproducto ' +
         'INNER JOIN producto ON producto = producto.id WHERE promocion = ?';
     var values = [promoID]
     conMysql.query(sql, values, (err, result) => {

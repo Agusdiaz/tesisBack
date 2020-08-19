@@ -11,21 +11,23 @@ exports.setOrderDeliveredByClient = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al actualizar pedido') //Error al eliminar pedido pendiente
         }
-        else if (result.affectedRows == 0) {
-            return res.status(404).json('Pedido no encontrado')
-        }
+        /*   /* else if (result.affectedRows == 0) {
+              return res.status(404).json('Pedido no encontrado')
+          } */
         else {
-            OrderService.updateOrderDelivered(req.body, (error, result) => {
-                if (error) {
-                    console.log(error)
-                    return res.status(500).json('Error al actualizar pedido')
-                }
-                else if (result.affectedRows == 0) {
-                    return res.status(404).json('Pedido no encontrado')
-                }
-                else
-                    return res.json('Pedido actualizado')
-            })
+            if (result.affectedRows !== 0) {
+                OrderService.updateOrderDelivered(req.body, (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return res.status(500).json('Error al actualizar pedido')
+                    }
+                    else if (result.affectedRows == 0) {
+                        return res.status(404).json('Pedido no encontrado')
+                    }
+                    else
+                        return res.json('Pedido actualizado')
+                })
+            }
         }
     })
 }
@@ -36,21 +38,23 @@ exports.setOrderReadyByShop = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al eliminar local de pedido pendiente')
         }
-        else if (result.affectedRows == 0) {
-            return res.status(404).json('Pedido no encontrado')
-        }
+        /*  else if (result.affectedRows == 0) {
+             return res.status(404).json('Pedido no encontrado')
+         } */
         else {
-            OrderService.updateOrderReady(req.body, (error, result) => {
-                if (error) {
-                    console.log(error)
-                    return res.status(500).json('Error al actualizar etapa y fecha del pedido')
-                }
-                else if (result.affectedRows == 0) {
-                    return res.status(404).json('Pedido no encontrado')
-                }
-                else
-                    return res.json('Etapa y fecha del pedido actualizada')
-            })
+            if (result.affectedRows !== 0) {
+                OrderService.updateOrderReady(req.body, (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return res.status(500).json('Error al actualizar etapa y fecha del pedido')
+                    }
+                    else if (result.affectedRows == 0) {
+                        return res.status(404).json('Pedido no encontrado')
+                    }
+                    else
+                        return res.json('Etapa y fecha del pedido actualizada')
+                })
+            }
         }
     })
 }
@@ -261,19 +265,19 @@ exports.getShopPendingOrdersByProducts = (req, res) => { //NO ESTA ORDENADO POR 
             var iProd = 0
             var iProm = 0
             newResult.map(obj => {
-                    obj.promociones = []
-                    obj.productos = []
-                    asyncPromosOrderByShop(obj.numero, 'pendiente', res, (r) => {
-                        obj.promociones.push(r)
-                        iProm++
-                        asyncProductsForShop(obj.numero, res, (r) => {
-                            obj.productos.push(r)
-                            finalResult.push(obj)
-                            iProd++
-                            if (iProd == long)
-                                return res.json(finalResult)
-                        })
+                obj.promociones = []
+                obj.productos = []
+                asyncPromosOrderByShop(obj.numero, 'pendiente', res, (r) => {
+                    obj.promociones.push(r)
+                    iProm++
+                    asyncProductsForShop(obj.numero, res, (r) => {
+                        obj.productos.push(r)
+                        finalResult.push(obj)
+                        iProd++
+                        if (iProd == long)
+                            return res.json(finalResult)
                     })
+                })
             })
         }
     })
@@ -291,7 +295,7 @@ exports.insertClientOrder = (req, res) => {
         else if (result.length == 0)
             return res.status(401).json('Local cerrado')
         else {
-            if (req.body.promociones != undefined) {
+            if (req.body.promociones.length > 0) {
                 validatePromoWithProductsAndIngredients(req.body.promociones, (error, rPromo, rProd, rIngr) => {
                     if (error) {
                         console.log(error)
@@ -369,7 +373,7 @@ exports.insertClientOrder = (req, res) => {
                                             }
                                         })
                                     })
-                                    if (req.body.productos != undefined) {
+                                    if (req.body.productos.length > 0) {
                                         var longProd = req.body.productos.length
                                         var iProd = 0
                                         req.body.productos.forEach(obj => {
@@ -443,7 +447,7 @@ exports.insertClientOrder = (req, res) => {
                     })
                 })
             }
-            else if (req.body.productos != null) {
+            else if (req.body.productos.length > 0) {
                 validateProductsAndIngredients(req.body.productos, unavailableProducts, unavailableIngredients, (error, rProd, rIngr) => {
                     if (error) {
                         console.log(error)
@@ -656,7 +660,6 @@ function asyncIngredientsOrderProductPromo(num, res, callback) {
             return res.status(500).json('Error al buscar ingredientes en pedido')
         }
         else if (result.length > 0) {
-            console.log(result)
             var ingr = JSON.parse(JSON.stringify(result))
             var resIngr = []
             resIngr = ingr.map(it => {
