@@ -2,8 +2,8 @@ const ShopService = require('../service/shopService');
 const PromoService = require('../service/promoService');
 const cron = require('node-cron');
 
-cron.schedule('* * * * *', checkAllShopsSchedules) //Cada 1 minuto - Cada 5 segs "*/10 * * * * *"
-cron.schedule('* * * * *', checkAllPromosHours)
+//cron.schedule('* * * * *', checkAllShopsSchedules) //Cada 1 minuto - Cada 5 segs "*/10 * * * * *"
+//cron.schedule('* * * * *', checkAllPromosHours)
 
 function checkAllShopsSchedules() {
     console.log('Chequeo horarios de los locales')

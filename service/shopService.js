@@ -230,9 +230,9 @@ exports.getShopShedule = (cuit, callback) => {
     });
 }
 
-exports.validateOpenShop = (CUIT, callback) => {
+exports.validateOpenShop = (cuit, callback) => {
     const sql = 'SELECT * FROM local WHERE cuit = ? AND abierto = 1';
-    var values = [CUIT]
+    var values = [cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);
@@ -241,13 +241,13 @@ exports.validateOpenShop = (CUIT, callback) => {
     });
 }
 
-exports.checkSchedules = (CUIT, callback) => {
+exports.checkSchedules = (cuit, callback) => {
     var actualDay = new Date().getDay() + 1
     var prevDay = (actualDay == 1) ? 7 : actualDay - 1
     const sql = 'SELECT * FROM horariolocal WHERE local = ? AND ( (diaSemana = ? AND horaAbre <= current_time() AND horaCierra >= ' +
         'current_time()) OR (diaSemana = ? AND horaExtendida = 1 AND horaCierra >= current_time()) OR (diaSemana = ? AND horaExtendida = 1 ' +
         'AND horaCierra <= current_time()))'
-    conMysql.query(sql, [CUIT, actualDay, prevDay, actualDay], (err, result) => {
+    conMysql.query(sql, [cuit, actualDay, prevDay, actualDay], (err, result) => {
         if (err)
             callback(err);
         else

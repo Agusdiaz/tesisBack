@@ -133,7 +133,7 @@ exports.getShopPromos = (req, res) => {
                                     finalResult = []
                                     long = finalRta.length;
                                     i = 0;
-                                    result.map(obj => {
+                                    finalRta.map(obj => {
                                         asyncPromoHours(obj.id, res, (r) => {
                                             obj.horarios.push(r)
                                             finalResult.push(obj)
