@@ -170,7 +170,9 @@ function asyncValidateProductsPromo(id, res, callback) {
                 }
                 it.ingredientes = []
                 asyncIngredientsPromo(it.id, res, (r) => {
-                    it.ingredientes.push(r)
+                    if (it.selectivo === 1 && r.length === 0)
+                        dispo = false
+                    else it.ingredientes.push(r)
                     i++
                     if (i == prod.length && dispo)
                         callback(resProd)
@@ -201,7 +203,7 @@ function asyncIngredientsPromo(num, res, callback) {
             callback(resIngr)
         }
         else
-            callback()
+            callback([])
     })
 }
 

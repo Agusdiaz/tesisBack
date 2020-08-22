@@ -89,7 +89,7 @@ exports.getAllDisabledByShop = (req, res) => {
             return res.status(500).json('Error al buscar productos deshabilitados')
         }
         else {
-            if (result.length > 0){
+            if (result.length > 0) {
                 result.map(obj => {
                     obj.ingredientes = []
                     asyncIngredientsMenu(obj.id, res, (r) => {
@@ -103,13 +103,13 @@ exports.getAllDisabledByShop = (req, res) => {
                     console.log(error)
                     return res.status(500).json('Error al buscar ingredientes deshabilitados')
                 }
-                else{
-                    if (result.length > 0){
+                else {
+                    if (result.length > 0) {
                         result.map(obj => {
                             finalResult.ingredientes.push(obj)
                         })
                     }
-                    if(finalResult.productos.length === 0 && finalResult.ingredientes.length === 0)
+                    if (finalResult.productos.length === 0 && finalResult.ingredientes.length === 0)
                         return res.status(204).json('Local sin productos y/o ingredientes deshabilitados')
                     else return res.json(finalResult)
                 }
@@ -148,8 +148,12 @@ exports.getShopMenu = (req, res) => {
             result.map(obj => {
                 obj.ingredientes = []
                 asyncIngredientsMenu(obj.id, res, (r) => {
-                    obj.ingredientes.push(r)
-                    finalResult.push(obj)
+                    if (obj.selectivo === 1 && r.length === 0) {
+
+                    } else {
+                        obj.ingredientes.push(r)
+                        finalResult.push(obj)
+                    }
                     i++
                     if (i == long)
                         return res.json(finalResult)
@@ -174,6 +178,6 @@ function asyncIngredientsMenu(id, res, callback) {
             callback(resIngr)
         }
         else
-            callback()
+            callback([])
     })
 }

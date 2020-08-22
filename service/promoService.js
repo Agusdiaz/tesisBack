@@ -27,9 +27,9 @@ exports.createProductPromo = (product, idPromo, callback) => {
 }
 
 exports.createPromoForOrder = (promo, orderNum, callback) => {
-    const sql = 'INSERT INTO pedidopromocion (pedido, promocion, cantidad) VALUES ?';
+    const sql = 'INSERT INTO pedidopromocion (pedido, promocion, cantidad, modificado) VALUES ?';
     var values = [
-        [orderNum, promo.idPromo, promo.cantidad]
+        [orderNum, promo.idPromo, promo.cantidad, promo.modificado]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -149,8 +149,8 @@ exports.validatePromos = (promos, callback) => {
 }
 
 exports.getOrderPromos = (orderNum, stage, callback) => {
-    const sql = 'SELECT promocion.id, nombre, precio, pedidopromocion.cantidad FROM pedido INNER JOIN pedidopromocion ON pedido.numero = ' +
-    'pedidopromocion.pedido INNER JOIN promocion ON promocion.id = pedidopromocion.promocion WHERE pedido.numero = ? AND etapa = ?';
+    const sql = 'SELECT promocion.id, nombre, precio, pedidopromocion.cantidad, modificado, pedidopromocion.id AS idPP ' + 
+    'FROM pedido INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN promocion ON promocion.id = pedidopromocion.promocion WHERE pedido.numero = ? AND etapa = ?';
     var values = [orderNum, stage]
     conMysql.query(sql, values, (err, result) => {
         if (err)

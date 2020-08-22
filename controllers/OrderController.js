@@ -557,7 +557,7 @@ function asyncPromosOrderByShop(num, stage, res, callback) {
             var resProm = []
             resProm = prom.map(it => {
                 it.productos = []
-                asyncProductsPromo(it.id, res, (r) => {
+                asyncProductsPromo(it.id, it.idPP, res, (r) => {
                     it.productos.push(r)
                     i++
                     if (i == prom.length)
@@ -571,7 +571,7 @@ function asyncPromosOrderByShop(num, stage, res, callback) {
     })
 }
 
-function asyncProductsPromo(num, res, callback) {
+function asyncProductsPromo(num, idPP, res, callback) {
     PromoService.getProductsPromo(num, (error, result) => {
         if (error) {
             console.log(error)
@@ -583,8 +583,7 @@ function asyncProductsPromo(num, res, callback) {
             var resProd = []
             resProd = prod.map(it => {
                 it.ingredientes = []
-                asyncIngredientsOrderProductPromo(it.id, res, (r) => {
-                    //console.log(r)
+                asyncIngredientsOrderProductPromo(it.id, idPP, res, (r) => {
                     it.ingredientes.push(r)
                     i++
                     if (i == prod.length)
@@ -643,8 +642,8 @@ function asyncIngredientsOrderProduct(num, res, callback) {
     })
 }
 
-function asyncIngredientsOrderProductPromo(num, res, callback) {
-    IngredientService.getIngredientsByProductPromoInGetOrder(num, (error, result) => {
+function asyncIngredientsOrderProductPromo(num, idPP, res, callback) {
+    IngredientService.getIngredientsByProductPromoInGetOrder(num, idPP, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al buscar ingredientes en pedido')
@@ -726,7 +725,7 @@ function validatePromoWithProductsAndIngredients(list, callback) {
     var promoProducts = []
     var promoIngredients = []
     list.forEach(obj => {
-        promos.push(obj.idPromo)
+        promos.push(obj)
     })
     PromoService.validatePromos(promos, (error, result) => {
         if (error) {
@@ -736,41 +735,19 @@ function validatePromoWithProductsAndIngredients(list, callback) {
         else if (result.length > 0) {
             result.map(obj => {
                 unavailablePromos.push(obj.id)
-                const index = promos.indexOf(obj.id);
-                promos.splice(index, 1)
+                promos = promos.filter(p => p.idPromo !== obj.id)
             })
         }
-        if (promos.length > 0) { //TODO ESTA DISPONIBLE
-            PromoService.getProductsPromos(promos, (error, result) => {
-                if (error) {
-                    console.log(error)
-                    callback(error)
-                }
-                else if (result.length > 0) {
-                    result.map(obj => {
-                        promoProducts.push(obj.id)
+        if (promos.length > 0) {
+            promos.forEach(promo => {
+                promo.productos.forEach(prod => {
+                    promoProducts.push(prod.idProducto)
+                    prod.ingredientes.forEach(ing => {
+                        promoIngredients.push(ing.idIngrediente)
                     })
-                    var i = 0
-                    var long = promoProducts.length
-                    promoProducts.map(obj => {
-                        IngredientService.getIngredientsByProductPromoInMakeOrder(obj, (error, result) => {
-                            i++
-                            if (error) {
-                                console.log(error)
-                                callback(error)
-                            }
-                            else if (result.length > 0) {
-                                result.map(obj => {
-                                    promoIngredients.push(obj.id)
-                                })
-                            }
-                            if (i == long) {
-                                callback(null, unavailablePromos, promoProducts, promoIngredients)
-                            }
-                        })
-                    })
-                }
+                })
             })
+            callback(null, unavailablePromos, promoProducts, promoIngredients)
         }
         else
             callback(null, unavailablePromos, promoProducts, promoIngredients)
