@@ -183,7 +183,7 @@ router.post('/deletePromoHours', function(req, res){
   PromoController.deletePromoHours(req, res);
 })
 
-router.post('/validateIngredientName', function(req, res){ //NO ESTA DOCUMENTADO - cuit + name
+router.post('/validateIngredientName', function(req, res){
   IngredientController.validateIngredientName(req, res);
 })
 

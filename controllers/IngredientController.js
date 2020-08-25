@@ -38,6 +38,6 @@ exports.validateIngredientName = (req, res) => {
             return res.json('Nombre de ingrediente valido')
         }
         else
-            return res.status(401).json('Ese nombre para el ingrediente ya existe')
+            return res.status(401).json('Ya existe un ingrediente con ese nombre')
     })
 }

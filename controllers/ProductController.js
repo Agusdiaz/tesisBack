@@ -10,56 +10,39 @@ exports.insertProductWithIngredients = (req, res) => {
         else if (result.length > 0)
             return res.status(401).json('Nombre o código del producto repetidos')
         else {
-            var names = []
-            var codes = []
             if (req.body.producto.ingredientes != null) {
-                req.body.producto.ingredientes.map(obj => {
-                    names.push(obj.nombre)
-                    codes.push(obj.codigo)
-                })
-                IngredientService.validateNameAndCodeOfIngredient(names, codes, req.body.cuit, (error, result) => {
+                ProductService.createProduct(req.body.producto, req.body.cuit, (error, result) => {
                     if (error) {
                         console.log(error)
-                        return res.status(500).json('Error al validar nombre y codigo de los ingredientes')
+                        return res.status(500).json('Error al guardar producto')
                     }
-                    else if (result.length > 0)
-                        return res.status(401).json('Nombre o código de ingredientes repetidos')
                     else {
-                        ProductService.createProduct(req.body.producto, req.body.cuit, (error, result) => {
-                            if (error) {
-                                console.log(error)
-                                return res.status(500).json('Error al guardar producto')
-                            }
-                            else {
-
-                                var idProducto = result.insertId
-                                var i = 0
-                                req.body.producto.ingredientes.map(obj => {
-                                    if (obj.id != null) {
-                                        IngredientService.asociateIngredientAndProduct(obj, idProducto, obj.id, (error, result) => {
-                                            if (error) {
-                                                console.log(error)
-                                                return res.status(500).json('Error al guardar ingrediente')
-                                            }
-                                            else {
-                                                i++
-                                                if (i == req.body.producto.ingredientes.length)
-                                                    return res.json('Producto con ingredientes guardado')
-                                            }
-                                        })
+                        var idProducto = result.insertId
+                        var i = 0
+                        req.body.producto.ingredientes.map(obj => {
+                            if (obj.id != null) {
+                                IngredientService.asociateIngredientAndProduct(obj, idProducto, obj.id, (error, result) => {
+                                    if (error) {
+                                        console.log(error)
+                                        return res.status(500).json('Error al guardar ingrediente')
                                     }
                                     else {
-                                        IngredientService.createIngredient(obj, idProducto, req.body.cuit, (error, result) => {
-                                            if (error) {
-                                                console.log(error)
-                                                return res.status(500).json('Error al guardar ingrediente')
-                                            }
-                                            else {
-                                                i++
-                                                if (i == req.body.producto.ingredientes.length)
-                                                    return res.json('Producto con ingredientes guardado')
-                                            }
-                                        })
+                                        i++
+                                        if (i == req.body.producto.ingredientes.length)
+                                            return res.json('Producto con ingredientes guardado')
+                                    }
+                                })
+                            }
+                            else {
+                                IngredientService.createIngredient(obj, idProducto, req.body.cuit, (error, result) => {
+                                    if (error) {
+                                        console.log(error)
+                                        return res.status(500).json('Error al guardar ingrediente')
+                                    }
+                                    else {
+                                        i++
+                                        if (i == req.body.producto.ingredientes.length)
+                                            return res.json('Producto con ingredientes guardado')
                                     }
                                 })
                             }

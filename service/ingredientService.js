@@ -1,9 +1,9 @@
 var conMysql = require('../mysqlConnection');
 
 exports.createIngredient = (body, idProd, CUIT, callback) => {
-    const sql = 'INSERT INTO ingrediente (nombre, codigo, precio, detalle, local) VALUES ?'
+    const sql = 'INSERT INTO ingrediente (nombre, codigo, detalle, local) VALUES ?'
     var values = [
-        [body.nombre, body.codigo, body.precio, body.detalle, CUIT]
+        [body.nombre, body.codigo, body.detalle, CUIT]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -14,9 +14,9 @@ exports.createIngredient = (body, idProd, CUIT, callback) => {
 }
 
 exports.asociateIngredientAndProduct = (body, idProd, idIngr, callback) => {
-    const sql = 'INSERT INTO productoingrediente (producto, ingrediente, cantidad, opcion) VALUES ?';
+    const sql = 'INSERT INTO productoingrediente (producto, ingrediente, cantidad, opcion, precio) VALUES ?';
     values = [
-        [idProd, idIngr, (body.opcion === 1) ? 0 : body.cantidad, (body.opcion != null) ? body.opcion : false]
+        [idProd, idIngr, body.cantidad, body.opcion, body.precio]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -119,7 +119,7 @@ exports.getUnavailableIngredientsByProductsPromo = (promos, callback) => {
 }
 
 exports.getIngredientsByShop = (shop, callback) => {
-    const sql = 'SELECT id, nombre, codigo, precio, detalle, disponible FROM ingrediente WHERE local = ? AND disponible = 1';
+    const sql = 'SELECT id, nombre, codigo, detalle, disponible FROM ingrediente WHERE local = ? AND disponible = 1';
     var values = [shop.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -165,9 +165,9 @@ exports.createIngredientPromoForOrder = (ingredient, idPedidoPromocion, idProduc
     });
 }
 
-exports.validateNameOfIngredient = (body) => {
+exports.validateNameOfIngredient = (body, callback) => {
     const sql = 'SELECT * FROM ingrediente WHERE local = ? AND nombre = ?';
-    conMysql.query(sql, [body.cuit, body.name], (err, result) => {
+    conMysql.query(sql, [body.cuit, body.nombre], (err, result) => {
         if (err)
             callback(err);
         else
