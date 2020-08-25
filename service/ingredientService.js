@@ -165,6 +165,16 @@ exports.createIngredientPromoForOrder = (ingredient, idPedidoPromocion, idProduc
     });
 }
 
+exports.validateNameOfIngredient = (body) => {
+    const sql = 'SELECT * FROM ingrediente WHERE local = ? AND nombre = ?';
+    conMysql.query(sql, [body.cuit, body.name], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 /*exports.getIngredientByShop = (id, CUIT, callback) => {
     const sql = 'SELECT * FROM ingrediente WHERE local = ? AND id = ?';
     var values = [CUIT, id]

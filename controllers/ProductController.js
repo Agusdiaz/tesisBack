@@ -2,7 +2,7 @@ const ProductService = require('../service/productService')
 const IngredientService = require('../service/ingredientService')
 
 exports.insertProductWithIngredients = (req, res) => {
-    ProductService.validateNameAndCodeOfProduct(req.body.producto[0].nombre, req.body.producto[0].codigo, req.body.cuit, (error, result) => {
+    ProductService.validateNameAndCodeOfProduct(req.body.producto.nombre, req.body.producto.codigo, req.body.cuit, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al validar nombre y código del producto')
@@ -12,8 +12,8 @@ exports.insertProductWithIngredients = (req, res) => {
         else {
             var names = []
             var codes = []
-            if (req.body.producto[0].ingredientes != null) {
-                req.body.producto[0].ingredientes.map(obj => {
+            if (req.body.producto.ingredientes != null) {
+                req.body.producto.ingredientes.map(obj => {
                     names.push(obj.nombre)
                     codes.push(obj.codigo)
                 })
@@ -25,15 +25,16 @@ exports.insertProductWithIngredients = (req, res) => {
                     else if (result.length > 0)
                         return res.status(401).json('Nombre o código de ingredientes repetidos')
                     else {
-                        ProductService.createProduct(req.body.producto[0], req.body.cuit, (error, result) => {
+                        ProductService.createProduct(req.body.producto, req.body.cuit, (error, result) => {
                             if (error) {
                                 console.log(error)
                                 return res.status(500).json('Error al guardar producto')
                             }
                             else {
+
                                 var idProducto = result.insertId
                                 var i = 0
-                                req.body.producto[0].ingredientes.map(obj => {
+                                req.body.producto.ingredientes.map(obj => {
                                     if (obj.id != null) {
                                         IngredientService.asociateIngredientAndProduct(obj, idProducto, obj.id, (error, result) => {
                                             if (error) {
@@ -42,7 +43,7 @@ exports.insertProductWithIngredients = (req, res) => {
                                             }
                                             else {
                                                 i++
-                                                if (i == req.body.producto[0].ingredientes.length)
+                                                if (i == req.body.producto.ingredientes.length)
                                                     return res.json('Producto con ingredientes guardado')
                                             }
                                         })
@@ -55,7 +56,7 @@ exports.insertProductWithIngredients = (req, res) => {
                                             }
                                             else {
                                                 i++
-                                                if (i == req.body.producto[0].ingredientes.length)
+                                                if (i == req.body.producto.ingredientes.length)
                                                     return res.json('Producto con ingredientes guardado')
                                             }
                                         })
@@ -67,7 +68,7 @@ exports.insertProductWithIngredients = (req, res) => {
                 })
             }
             else {
-                ProductService.createProduct(req.body.producto[0], req.body.cuit, (error, result) => {
+                ProductService.createProduct(req.body.producto, req.body.cuit, (error, result) => {
                     if (error) {
                         console.log(error)
                         return res.status(500).json('Error al guardar producto')
