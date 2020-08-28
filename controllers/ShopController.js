@@ -355,48 +355,44 @@ exports.insertShopSchedule = (req, res) => {
 }
 
 exports.deleteShopSchedule = (req, res) => {
-    var i = 0
-    req.body.map(obj => {
-        ShopService.deleteShopSchedule(obj.cuit, obj.diaSemana, (error, result) => {
-            if (error) {
-                console.log(error)
-                return res.status(500).json('Error al eliminar horarios del local')
-            }
-            else if (result.affectedRows == 0) {
-                return res.status(404).json('Local no encontrado')
-            }
-            else {
-                i++
-                if (i == req.body.length)
-                    return res.json('Horarios del local eliminados')
-            }
-        })
+    ShopService.deleteShopSchedule(req.body.cuit, req.body.diaSemana, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al eliminar horarios del local')
+        }
+        else if (result.affectedRows == 0) {
+            return res.status(404).json('Local no encontrado')
+        }
+        else {
+            return res.json('Horarios del local eliminados')
+        }
     })
 }
 
 exports.setShopSchedule = (req, res) => {
+    ShopService.deleteShopSchedule(req.body.cuit, req.body.diaSemana, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al eliminar horarios del local')
+        }
+    })
     var i = 0
-    req.body.map(obj => {
-        ShopService.deleteShopSchedule(obj.cuit, obj.diaSemana, (error, result) => {
-            if (error) {
-                console.log(error)
-                return res.status(500).json('Error al eliminar horarios del local')
-            }
+    var long = req.body.horas.length
+    if (req.body.horas.length > 0) {
+        req.body.horas.map(obj => {
+            ShopService.createShopShedule(req.body.cuit, req.body.diaSemana, obj, (error, result) => {
+                if (error) {
+                    console.log(error)
+                    return res.status(500).json('Error al actualizar horarios del local')
+                }
+                else {
+                    i++
+                    if (i == long)
+                        return res.json('Horarios del local actualizados')
+                }
+            })
         })
-    })
-    req.body.map(obj => {
-        ShopService.createShopShedule(obj, (error, result) => {
-            if (error) {
-                console.log(error)
-                return res.status(500).json('Error al actualizar horarios del local')
-            }
-            else {
-                i++
-                if (i == req.body.length)
-                    return res.json('Horarios del local actualizados')
-            }
-        })
-    })
+    } else return res.json('Horarios del local actualizados')
 }
 
 exports.getTop10RequestedProductsByShop = (req, res) => {
@@ -518,8 +514,8 @@ exports.asyncSchedule = (cuit, res, callback) => {
             var times = JSON.parse(JSON.stringify(result))
             var resTimes = days.filter(item => {
                 return times.map(item2 => {
-                    if (item.id === item2.diaSemana){
-                        item.horas+=item2.horaAbre.substring(0, 5) + ' - ' + item2.horaCierra.substring(0, 5) + '\n'
+                    if (item.id === item2.diaSemana) {
+                        item.horas += item2.horaAbre.substring(0, 5) + ' - ' + item2.horaCierra.substring(0, 5) + '\n'
                     }
                     return item
                 })
@@ -530,7 +526,7 @@ exports.asyncSchedule = (cuit, res, callback) => {
     })
 }
 
-function asyncIsFavourite(cliente, shop, res, callback){
+function asyncIsFavourite(cliente, shop, res, callback) {
     ShopService.checkIfShopIsFavourite(cliente, shop, (error, result) => {
         if (error) {
             console.log(error)
@@ -540,5 +536,16 @@ function asyncIsFavourite(cliente, shop, res, callback){
             callback(true)
         else
             callback(false)
+    })
+}
+
+exports.updateNewField = (req, res) => {
+    ShopService.updateNewShop(req.body.cuit, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al actualizar campo nuevo')
+        } else {
+            return res.status(200).json('Campo nuevo actualizado')
+        }
     })
 }

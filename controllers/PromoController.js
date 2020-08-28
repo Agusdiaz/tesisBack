@@ -23,7 +23,7 @@ exports.insertPromoWithProducts = (req, res) => {
                         else {
                             i++
                             if (i == req.body.productos.length)
-                                return res.json('Promoción id=' + idPromocion + ' con productos guardada')
+                                return res.json('Promoción con productos guardada')
                         }
                     })
                 })

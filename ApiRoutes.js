@@ -187,5 +187,9 @@ router.post('/validateIngredientName', function(req, res){
   IngredientController.validateIngredientName(req, res);
 })
 
+router.post('/updateNewField', function(req, res){
+  ShopController.updateNewField(req, res);
+})
+
 
 module.exports = router;

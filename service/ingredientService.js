@@ -37,7 +37,7 @@ exports.validateNameAndCodeOfIngredient = (names, codes, CUIT, callback) => {
 }
 
 exports.getShopDisabledIngredients = (shop, callback) => {
-    const sql = 'SELECT id, nombre, precio, detalle FROM ingrediente WHERE local = ? AND disponible = 0;';
+    const sql = 'SELECT id, nombre, detalle FROM ingrediente WHERE local = ? AND disponible = 0;';
     var values = [shop.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)

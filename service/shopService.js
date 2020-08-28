@@ -185,21 +185,20 @@ exports.updateOpenCloseShop = (abierto, cuit, callback) => {
     });
 }
 
-exports.updateNewShop = (shop, callback) => {
+exports.updateNewShop = (cuit, callback) => {
     const sql = 'UPDATE local SET nuevo = 0 WHERE cuit = ?';
-    var values = [shop.cuit]
-    conMysql.query(sql, values, (err, result) => {
+    conMysql.query(sql, [cuit], (err, result) => {
         if (err)
             callback(err);
         else
-            callback(this);
+            callback(null, result);
     });
 }
 
-exports.createShopShedule = (shop, callback) => {
+exports.createShopShedule = (cuit, day, hours, callback) => {
     const sql = 'INSERT INTO horariolocal (local, diaSemana, horaAbre, horaCierra, horaExtendida) VALUES ?';
     var values = [
-        [shop.cuit, shop.diaSemana, shop.horaAbre, shop.horaCierra, (shop.horaExtendida != null) ? shop.horaExtendida : 0]
+        [cuit, day, hours.horaAbre, hours.horaCierra, hours.horaExtendida ]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
