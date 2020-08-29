@@ -1,6 +1,7 @@
 const ShopService = require('../service/shopService');
 const PromoService = require('../service/promoService');
 const OrderService = require('../service/orderService');
+const EventController = require('./EventController');
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 
@@ -378,7 +379,7 @@ exports.setShopSchedule = (req, res) => {
     })
     var i = 0
     var long = req.body.horas.length
-    if (req.body.horas.length > 0) {
+    if (long > 0) {
         req.body.horas.map(obj => {
             ShopService.createShopShedule(req.body.cuit, req.body.diaSemana, obj, (error, result) => {
                 if (error) {
@@ -387,12 +388,18 @@ exports.setShopSchedule = (req, res) => {
                 }
                 else {
                     i++
-                    if (i == long)
+                    if (i === long){
+                        EventController.checkAllShopsSchedules()
                         return res.json('Horarios del local actualizados')
+                    }
                 }
             })
         })
-    } else return res.json('Horarios del local actualizados')
+    } else{
+        EventController.checkAllShopsSchedules()
+        return res.json('Horarios del local actualizados')
+    } 
+    
 }
 
 exports.getTop10RequestedProductsByShop = (req, res) => {

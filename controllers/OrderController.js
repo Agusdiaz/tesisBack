@@ -224,7 +224,7 @@ exports.getShopPendingOrdersByArrival = (req, res) => {
     })
 }
 
-exports.getShopPendingOrdersByProducts = (req, res) => { //NO ESTA ORDENADO POR CANT DE PRODUCTOS
+exports.getShopPendingOrdersByProducts = (req, res) => {
     OrderService.getShopPendingOrdersByProducts(req.body, (error, result) => {
         if (error) {
             console.log(error)
@@ -251,10 +251,6 @@ exports.getShopPendingOrdersByProducts = (req, res) => { //NO ESTA ORDENADO POR 
                         return obj0
                     })
                 });
-                /*newResult.sort(function(a, b){
-                    return a.cantProductos - b.cantProductos
-                })
-                console.log('---------------------------------- ', newResult)*/
             }
             else if (result[0].length > 0)
                 newResult = result[0]
@@ -572,7 +568,7 @@ function asyncPromosOrderByShop(num, stage, res, callback) {
 }
 
 function asyncProductsPromo(num, idPP, res, callback) {
-    PromoService.getProductsPromo(num, (error, result) => {
+    PromoService.getOrderProductsPromo(num, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al buscar productos en pedido promoción')

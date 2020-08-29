@@ -26,7 +26,7 @@ exports.getProductsOrder = (orderNum, callback) => {
 }
 
 exports.getProductsMenu = (local, callback) => {
-    const sql = 'SELECT * FROM producto WHERE local = ? AND disponible = 1 ORDER BY tipo DESC;';
+    const sql = 'SELECT * FROM producto WHERE local = ? AND disponible = 1 ORDER BY nombre ASC;';
     var values = [local.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)

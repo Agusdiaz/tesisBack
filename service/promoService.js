@@ -41,7 +41,7 @@ exports.createPromoForOrder = (promo, orderNum, callback) => {
 }
 
 exports.getShopPromos = (shop, callback) => {
-    const sql = 'SELECT id, nombre, detalle, precio, valida FROM promocion WHERE local = ? ORDER BY valida DESC';
+    const sql = 'SELECT id, nombre, detalle, precio, valida FROM promocion WHERE local = ? ORDER BY valida DESC, nombre ASC';
     var values = [shop.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -73,9 +73,11 @@ exports.getProductsPromo = (promoID, callback) => {
     });
 }
 
-exports.getProductsPromos = (promos, callback) => {
-    const sql = 'SELECT producto.id FROM promocionproducto INNER JOIN producto ON producto = producto.id WHERE promocion IN ?';
-    conMysql.query(sql, [[promos]], (err, result) => {
+exports.getOrderProductsPromo = (promoID, callback) => {
+    const sql = 'SELECT producto.id, nombre, cantidad, disponible, codigo, precio, detalle, condicion, tipo, tope, selectivo FROM promocionproducto ' +
+        'INNER JOIN producto ON producto = producto.id WHERE promocion = ?';
+    var values = [promoID]
+    conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);
         else
@@ -94,10 +96,10 @@ exports.updateValidPromo = (valida, id, callback) => {
     });
 }
 
-exports.createPromoHours = (promo, callback) => {
+exports.createPromoHours = (idPromo, day, hours, callback) => {
     const sql = 'INSERT INTO validezpromocion (promocion, diaSemana, horaAbre, horaCierra, horaExtendida) VALUES ?'; 
     var values = [
-        [promo.idPromo, promo.diaSemana, promo.horaAbre, promo.horaCierra, (promo.horaExtendida != null) ? promo.horaExtendida : 0]
+        [idPromo, day, hours.horaAbre, hours.horaCierra, hours.horaExtendida]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)

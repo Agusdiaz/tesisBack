@@ -119,7 +119,7 @@ exports.getUnavailableIngredientsByProductsPromo = (promos, callback) => {
 }
 
 exports.getIngredientsByShop = (shop, callback) => {
-    const sql = 'SELECT id, nombre, codigo, detalle, disponible FROM ingrediente WHERE local = ? AND disponible = 1';
+    const sql = 'SELECT id, nombre, codigo, detalle, disponible FROM ingrediente WHERE local = ? AND disponible = 1 ORDER BY nombre ASC';
     var values = [shop.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)

@@ -1,8 +1,8 @@
 const PromoService = require('../service/promoService');
 const IngredientService = require('../service/ingredientService');
+const EventController = require('./EventController');
 
 exports.insertPromoWithProducts = (req, res) => {
-    console.log(req.body.productos)
     if (req.body.productos == null)
         return res.status(401).json('La promoción debe tener productos')
     else {
@@ -73,28 +73,34 @@ exports.deletePromoHours = (req, res) => {
 }
 
 exports.setPromoHours = (req, res) => {
+    PromoService.deletePromoHours(req.body.idPromo, req.body.diaSemana, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al eliminar horarios de la promoción')
+        }
+    })
     var i = 0
-    req.body.map(obj => {
-        PromoService.deletePromoHours(obj.idPromo, obj.diaSemana, (error, result) => {
-            if (error) {
-                console.log(error)
-                return res.status(500).json('Error al eliminar horarios de la promoción')
-            }
+    var long = req.body.horas.length
+    if (long > 0) {
+        req.body.horas.map(obj => {
+            PromoService.createPromoHours(req.body.idPromo, req.body.diaSemana, obj, (error, result) => {
+                if (error) {
+                    console.log(error)
+                    return res.status(500).json('Error al actualizar horarios de la promoción')
+                }
+                else {
+                    i++
+                    if (i === long){
+                        EventController.checkAllPromosHours()
+                        return res.json('Horarios de la promoción actualizados')
+                    }
+                }
+            })
         })
-    })
-    req.body.map(obj => {
-        PromoService.createPromoHours(obj, (error, result) => {
-            if (error) {
-                console.log(error)
-                return res.status(500).json('Error al actualizar horarios de la promoción')
-            }
-            else {
-                i++
-                if (i == req.body.length)
-                    return res.json('Horarios de la promoción actualizados')
-            }
-        })
-    })
+    } else{
+        EventController.checkAllPromosHours()
+        return res.json('Horarios de la promoción actualizados')
+    } 
 }
 
 exports.getShopPromos = (req, res) => {
@@ -220,8 +226,8 @@ function asyncPromoHours(idPromo, res, callback) {
             var times = JSON.parse(JSON.stringify(result))
             var resTimes = days.filter(item => {
                 return times.map(item2 => {
-                    if (item.id === item2.diaSemana){
-                        item.horas+=item2.horaAbre.substring(0, 5) + ' - ' + item2.horaCierra.substring(0, 5) + '\n'
+                    if (item.id === item2.diaSemana) {
+                        item.horas += item2.horaAbre.substring(0, 5) + ' - ' + item2.horaCierra.substring(0, 5) + '\n'
                     }
                     return item
                 })
