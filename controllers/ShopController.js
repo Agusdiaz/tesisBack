@@ -434,7 +434,9 @@ exports.getTopRequestedHoursByShop = (req, res) => {
             result.map(obj => {
                 hoursResult[obj.hora].cantidad = obj.cantidad
             })
-            return res.json(hoursResult)
+            var cant = []
+            hoursResult.map(it => cant.push(it.cantidad))
+            return res.json(cant)
         }
     })
 }
@@ -477,7 +479,9 @@ exports.getLast6MonthOrdersByShop = (req, res) => {
                         monthsResult[i].cantidad = obj.cantidad
                 }
             })
-            return res.json(monthsResult)
+            var cant = []
+            monthsResult.map(it => cant.push(it.cantidad))
+            return res.json(cant)
         }
     })
 }

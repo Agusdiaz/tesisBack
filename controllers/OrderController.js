@@ -634,7 +634,7 @@ function asyncIngredientsOrderProduct(num, res, callback) {
             callback(resIngr)
         }
         else
-            callback(null)
+            callback([])
     })
 }
 
@@ -652,7 +652,7 @@ function asyncIngredientsOrderProductPromo(num, idPP, res, callback) {
             })
             callback(resIngr)
         } else
-            callback(null)
+            callback([])
     })
 }
 

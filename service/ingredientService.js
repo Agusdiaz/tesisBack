@@ -96,7 +96,7 @@ exports.getIngredientsByProductPromoInMakeOrder = (prodId, callback) => {
 }
 
 exports.getIngredientsByProductPromoInGetOrder = (prodId, idPP, callback) => {
-    const sql = 'SELECT ingrediente.id, nombre, codigo, precio, detalle, disponible, cantidad FROM ingrediente INNER JOIN ' +
+    const sql = 'SELECT ingrediente.id, nombre, codigo, detalle, disponible, cantidad FROM ingrediente INNER JOIN ' +
     'pedidopromocioningrediente ON ingrediente.id = pedidopromocioningrediente.ingrediente WHERE pedidopromocioningrediente.producto = ? && pedidopromocioningrediente.pedidoPromocion = ?';
     var values = [prodId, idPP]
     conMysql.query(sql, values, (err, result) => {
