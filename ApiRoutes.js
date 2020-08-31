@@ -191,4 +191,37 @@ router.post('/updateNewField', auth.middleware, function(req, res){
   ShopController.updateNewField(req, res);
 })
 
+//MERCADO PAGO
+router.post('/createPayment', async (req, res) => { //auth.middleware
+  PaymentController.createPayment(req, res);
+})
+
+router.get('/getPayments', async (req, res) => { //auth.middleware
+  PaymentController.getPayments(req, res)
+})
+
+router.get('/payments/checkout/:id/:email/:description/:amount', async (req, res) => { //auth.middleware
+  PaymentController.checkout(req, res)
+})
+
+router.get('/payments/success', (req, res) => {
+  return res.render('success_screen')
+})
+
+router.get('/payments/pending', (req, res) => {
+  return res.render('pending_screen')
+})
+
+router.get('/payments/failure', (req, res) => {
+  return res.render('failure_screen')
+})
+
+/* app.use('/', async (req, res) => {
+  res.send()
+
+ // const data = await mercadopago.payment.get(req.body.data.id)
+
+  console.log(req.headers, req.body)
+}) */
+
 module.exports = router;
