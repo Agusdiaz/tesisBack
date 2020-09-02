@@ -16,7 +16,7 @@ router.post('/verifyToken', function(req, res){
   auth.verifyToken(req, res); 
 })
 
-router.post('/getShopMenu', auth.middleware, function(req, res){ //auth.middleware,
+router.post('/getShopMenu', auth.middleware, function(req, res){
   ProductController.getShopMenu(req, res);
 })
 
@@ -192,15 +192,7 @@ router.post('/updateNewField', auth.middleware, function(req, res){
 })
 
 //MERCADO PAGO
-router.post('/createPayment', async (req, res) => { //auth.middleware
-  PaymentController.createPayment(req, res);
-})
-
-router.get('/getPayments', async (req, res) => { //auth.middleware
-  PaymentController.getPayments(req, res)
-})
-
-router.get('/payments/checkout/:id/:email/:description/:amount', async (req, res) => { //auth.middleware
+router.get('/payments/checkout/:id/:email/:amount', async (req, res) => { //auth.middleware
   PaymentController.checkout(req, res)
 })
 
@@ -215,13 +207,5 @@ router.get('/payments/pending', (req, res) => {
 router.get('/payments/failure', (req, res) => {
   return res.render('failure_screen')
 })
-
-/* app.use('/', async (req, res) => {
-  res.send()
-
- // const data = await mercadopago.payment.get(req.body.data.id)
-
-  console.log(req.headers, req.body)
-}) */
 
 module.exports = router;
