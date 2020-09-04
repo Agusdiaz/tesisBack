@@ -1,10 +1,9 @@
 var conMysql = require('../mysqlConnection');
 
 exports.createClientOrder = (order, callback) => {
-    const sql = 'INSERT INTO pedido (cliente, local, total, fecha, etapa, takeAway, propina, comentario) VALUES ?';
-    var fecha = new Date()
+    const sql = 'INSERT INTO pedido (cliente, local, total, etapa, takeAway, propina, comentario) VALUES ?';
     var values = [
-        [order.mail, order.cuit, order.total, fecha, 'pendiente', order.takeAway, order.propina, order.comentario]
+        [order.mail, order.cuit, order.total, 'pendiente', order.takeAway, order.propina, order.comentario]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -26,9 +25,19 @@ exports.createPendingOrder = (mail, cuit, num, callback) => {
     });
 }
 
-exports.deletOrderByClient = (order, callback) => {
+exports.deletOrderByClient = (num, callback) => {
     const sql = 'DELETE FROM pedido WHERE numero = ?';
-    var values = [order.numero]
+    conMysql.query(sql, [num], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.aceptOrder = (numero, callback) => {
+    const sql = 'UPDATE pedido SET aceptado = ? WHERE numero = ?';
+    var values = [1, numero]
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);
@@ -82,6 +91,18 @@ exports.updateOrderReady = (order, callback) => {
     });
 }
 
+exports.updateOrderPayed = (num, callback) => {
+    var fecha = new Date()
+    const sql = 'UPDATE pedido SET fecha = ?, pagado = ? WHERE numero = ?';
+    var values = [fecha, 1, num]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 exports.validateOrderClient = (body, callback) => {
     const sql = 'SELECT * FROM pendiente WHERE cliente = ? AND pedido = ?';
     var values = [body.mail, body.numero]
@@ -106,7 +127,7 @@ exports.shareOrder = (body, callback) => {
 }
 
 exports.getClientPendingOrders = (client, callback) => {
-    const sql = 'SELECT numero, nombre, direccion, etapa, propina, takeAway, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario FROM pendiente INNER ' + 
+    const sql = 'SELECT numero, nombre, direccion, etapa, propina, takeAway, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario, aceptado FROM pendiente INNER ' + 
     'JOIN pedido ON pendiente.pedido = pedido.numero INNER JOIN local ON pedido.local = local.cuit WHERE pendiente.cliente = ? AND etapa != ? ORDER BY etapa ASC, fecha DESC';
     var values = [client.mail, 'entregado']
     conMysql.query(sql, values, (err, result) => {
@@ -141,8 +162,8 @@ exports.getShopDeliveredOrdersByArrival = (shop, callback) => {
 }
 
 exports.getShopPendingOrdersByArrival = (shop, callback) => {
-    const sql = 'SELECT numero, cliente, etapa, takeAway, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario FROM pedido ' +
-    'WHERE local = ? AND etapa = ? ORDER BY fecha DESC';
+    const sql = 'SELECT numero, cliente, etapa, takeAway, (total + propina) AS total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario, aceptado FROM pedido ' +
+    'WHERE local = ? AND etapa = ? AND pagado = 1 ORDER BY aceptado ASC, fecha DESC';
     var values = [shop.cuit, 'pendiente']
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -153,8 +174,8 @@ exports.getShopPendingOrdersByArrival = (shop, callback) => {
 }
 
 exports.getShopPendingOrdersByProducts = (shop, callback) => {
-    const sql = 'SELECT numero, cliente, etapa, takeAway, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario, SUM(cantidad) AS cantProductos FROM pedido INNER JOIN ' + 
-    'pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND etapa = ? GROUP BY numero ORDER BY cantProductos DESC; ' +
+    const sql = 'SELECT numero, cliente, etapa, takeAway, (total + propina) AS total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario, SUM(cantidad) AS '+ 
+    'cantProductos, aceptado FROM pedido INNER JOIN pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND etapa = ? AND pagado = 1 GROUP BY numero ORDER BY cantProductos DESC; ' +
     'SELECT numero, cliente, takeAway, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, (SUM(promocionproducto.cantidad) * pedidopromocion.cantidad) AS cantProductos ' +
     'FROM pedido INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN promocionproducto ON pedidopromocion.promocion ' +
     '= promocionproducto.promocion WHERE local = ? AND etapa = ? GROUP BY numero ORDER BY cantProductos DESC;'

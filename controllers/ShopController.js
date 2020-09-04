@@ -4,6 +4,7 @@ const OrderService = require('../service/orderService');
 const EventController = require('./EventController');
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
+const cons = require('consolidate');
 
 exports.insertShop = (req, res) => {
     ShopService.createShop(req.body, (error, result) => {
@@ -388,18 +389,36 @@ exports.setShopSchedule = (req, res) => {
                 }
                 else {
                     i++
-                    if (i === long){
+                    if (i === long) {
                         EventController.checkAllShopsSchedules()
                         return res.json('Horarios del local actualizados')
                     }
                 }
             })
         })
-    } else{
+    } else {
         EventController.checkAllShopsSchedules()
         return res.json('Horarios del local actualizados')
-    } 
-    
+    }
+}
+
+exports.validateSoonClosingShop = (req, res) => {
+    ShopService.validate10MinShopSchedule(req.body.cuit, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al validar pronto cierre del local')
+        } else {
+            var today = new Date();
+            var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+            //var d = new Date(new Date().getFullYear(),new Date().getMonth() , new Date().getDate())
+            result.map(obj => {
+                if(obj.horaCierra > time){
+                    var d = new Date(new Date().getFullYear(),new Date().getMonth() , new Date().getDate())
+                    return res.json(d.getTime())
+                }
+            })
+        }
+    })
 }
 
 exports.getTop10RequestedProductsByShop = (req, res) => {

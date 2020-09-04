@@ -398,7 +398,7 @@ exports.insertClientOrder = (req, res) => {
                                                                     return res.status(500).json('Error al crear pedido pendiente')
                                                                 }
                                                                 else {
-                                                                    return res.json('Pedido creado')
+                                                                    return res.json(orderNumber)
                                                                 }
                                                             })
                                                         }
@@ -412,7 +412,7 @@ exports.insertClientOrder = (req, res) => {
                                                                     return res.status(500).json('Error al crear pedido pendiente')
                                                                 }
                                                                 else {
-                                                                    return res.json('Pedido creado')
+                                                                    return res.json(orderNumber)
                                                                 }
                                                             })
                                                         }
@@ -428,7 +428,7 @@ exports.insertClientOrder = (req, res) => {
                                                 return res.status(500).json('Error al crear pedido pendiente')
                                             }
                                             else {
-                                                return res.json('Pedido creado')
+                                                return res.json(orderNumber)
                                             }
                                         })
                                     }
@@ -489,7 +489,7 @@ exports.insertClientOrder = (req, res) => {
                                                             return res.status(500).json('Error al crear pedido pendiente')
                                                         }
                                                         else {
-                                                            return res.json('Pedido creado')
+                                                            return res.json(orderNumber)
                                                         }
                                                     })
                                                 }
@@ -503,7 +503,7 @@ exports.insertClientOrder = (req, res) => {
                                                             return res.status(500).json('Error al crear pedido pendiente')
                                                         }
                                                         else {
-                                                            return res.json('Pedido creado')
+                                                            return res.json(orderNumber)
                                                         }
                                                     })
                                                 }
@@ -522,22 +522,23 @@ exports.insertClientOrder = (req, res) => {
     })
 }
 
-function asyncProductsForClient(num, res, callback) {
-    ProductService.getProductsOrder(num, (error, result) => {
+exports.deleteClientOrder = (req, res) => {
+    OrderService.deletOrderByClient(req.body.numero, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).json('Error al buscar productos en pedido')
+            return res.status(500).json('Error al cancelar pedido. Inténtalo nuevamente')
         }
-        else if (result.length > 0) {
-            var prod = JSON.parse(JSON.stringify(result))
-            var resProd = []
-            resProd = prod.map(it => {
-                return it
-            })
-            callback(resProd)
+        else return res.json('Pedido cancelado exitosamente')
+    })
+}
+
+exports.aceptClientOrder = (req, res) => {
+    OrderService.aceptOrder(req.body.numero, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al aceptar pedido. Inténtalo nuevamente')
         }
-        else
-            callback()
+        else return res.json('El pedido fue aceptado')
     })
 }
 

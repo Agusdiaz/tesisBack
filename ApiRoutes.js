@@ -93,6 +93,14 @@ router.post('/insertClientOrder', auth.middleware, function(req, res){
   OrderController.insertClientOrder(req, res);
 })
 
+router.post('/deleteClientOrder', auth.middleware, function(req, res){
+  OrderController.deleteClientOrder(req, res);
+})
+
+router.post('/validateClosingShop', function(req, res){ //DOCUMENTAR
+  ShopController.validateSoonClosingShop(req, res);
+})
+
 
 //PARA LOCAL
 router.post('/insertShop', function(req, res){
@@ -147,6 +155,10 @@ router.post('/getDeliveredOrdersByShop', auth.middleware, function(req, res){
   OrderController.getShopDeliveredOrdersByArrival(req, res);
 })
 
+router.post('/aceptClientOrder', auth.middleware, function(req, res){
+  OrderController.aceptClientOrder(req, res);
+})
+
 router.post('/getTop10RequestedProductsByShop', auth.middleware, function(req, res){
   ShopController.getTop10RequestedProductsByShop(req, res);
 })
@@ -191,13 +203,13 @@ router.post('/updateNewField', auth.middleware, function(req, res){
   ShopController.updateNewField(req, res);
 })
 
-//MERCADO PAGO
-router.get('/payments/checkout/:id/:email/:amount', async (req, res) => { //auth.middleware
-  PaymentController.checkout(req, res)
+//MERCADO PAGO - SIN DOCUMENTAR
+router.get('/payments/checkout/:number/:mail/:total/:cuit', auth.middleware, async (req, res) => {
+  PaymentController.makePayment(req, res);
 })
 
-router.get('/payments/success', (req, res) => {
-  return res.render('success_screen')
+router.get('/payments/success/:number/:mail/:total/:cuit', (req, res) => {
+  PaymentController.insertPayment(req, res);
 })
 
 router.get('/payments/pending', (req, res) => {
@@ -206,6 +218,10 @@ router.get('/payments/pending', (req, res) => {
 
 router.get('/payments/failure', (req, res) => {
   return res.render('failure_screen')
+})
+
+router.get('/payments/refund/:numero', auth.middleware, async (req, res) => {
+  PaymentController.makeRefund(req, res);
 })
 
 module.exports = router;

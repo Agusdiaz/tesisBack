@@ -1,57 +1,96 @@
 const PaymentService = require('../service/paymentService')
+const OrderService = require('../service/orderService')
 var mercadopago = require('mercadopago');
+const cons = require('consolidate');
 
 exports.insertPayment = (req, res) => {
-    PaymentService.createPayment(req.body, (error, result) => {
+    var idPago = req.query.collection_id
+    const { number, mail, total, cuit } = req.params;
+    PaymentService.createPayment(number, mail, total, cuit, idPago, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).json('Error al crear pago')
         }
-        else
-            return res.json('Pago creado')
+        else {
+            OrderService.updateOrderPayed(number, (error, result) => {
+                if (error) {
+                    console.log(error)
+                }
+                else {
+                    return res.render('success_screen')
+                }
+            })
+        }
     })
 }
 
 const getFullUrl = (req) => {
     const url = req.protocol + '://' + req.get('host');
-    console.log(url)
+    //console.log(url)
     return url;
 }
 
-exports.checkout = async (req, res) => {
+exports.makePayment = async (req, res) => {
     mercadopago.configure({
         sandbox: true,
         access_token: process.env.MP_ACCESS_TOKEN || "TEST-2746523765714151-090119-0f853f59b4dfeccdbffa8ef9e5eb26d6-637291628"
     });
-    const { id, email, amount } = req.params;
-
+    const { number, mail, total, cuit } = req.params;
     const purchaseOrder = {
         items: [
             item = {
-                id: id,
+                id: number,
                 title: 'Compra por Flamma',
                 description: 'Compra por Flamma',
                 quantity: 1,
                 currency_id: 'ARS',
-                unit_price: parseFloat(amount)
+                unit_price: parseFloat(total)
             }
         ],
         payer: {
-            email: email //'test_user_52338529@testuser.com'
+            email: 'a@mail.com' //mail
         },
         auto_return: "all",
-        external_reference: id,
+        external_reference: number,
         back_urls: {
-            success: getFullUrl(req) + "/payments/success",
+            success: getFullUrl(req) + `/payments/success/${number}/${mail}/${total}/${cuit}`,
             pending: getFullUrl(req) + "/payments/pending",
             failure: getFullUrl(req) + "/payments/failure",
         }
     }
-
     try {
         const preference = await mercadopago.preferences.create(purchaseOrder);
         return res.redirect(`${preference.body.init_point}`);
     } catch (err) {
         return res.send(err.message);
     }
+}
+
+exports.makeRefund = async (req, res) => {
+    const { numero } = req.params;
+    PaymentService.getPaymentId(numero, async (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al cancelar pedido. Inténtalo nuevamente')
+        }
+        else {
+            var idPago = result[0].idPago
+            mercadopago.configure({
+                sandbox: true,
+                access_token: process.env.MP_ACCESS_TOKEN || "TEST-2746523765714151-090119-0f853f59b4dfeccdbffa8ef9e5eb26d6-637291628"
+            });
+            try {
+                const refund = await mercadopago.payment.refund(idPago)
+                OrderService.deletOrderByClient(numero, (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return res.status(500).json('Error al cancelar pedido. Inténtalo nuevamente')
+                    }
+                    else return res.json('Pedido cancelado exitosamente')
+                })
+            } catch (err) {
+                console.log(err)
+                return res.json('error')
+            }
+        }
+    })
 }
