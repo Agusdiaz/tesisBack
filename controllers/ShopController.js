@@ -406,16 +406,23 @@ exports.validateSoonClosingShop = (req, res) => {
     ShopService.validate10MinShopSchedule(req.body.cuit, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).json('Error al validar pronto cierre del local')
+            return res.status(500).json('Error al validar cierre del local')
         } else {
+            var i = 0
+            var rta = false
             var today = new Date();
-            var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-            //var d = new Date(new Date().getFullYear(),new Date().getMonth() , new Date().getDate())
+            var actualDay = new Date().getDay() + 1
             result.map(obj => {
-                if(obj.horaCierra > time){
-                    var d = new Date(new Date().getFullYear(),new Date().getMonth() , new Date().getDate())
-                    return res.json(d.getTime())
-                }
+                    i++
+                    var date = (obj.diaSemana === actualDay && obj.horaExtendida === 0) ? new Date() : (obj.diaSemana === actualDay) ? 
+                    new Date(new Date().setDate(new Date().getDate() + 1)) : new Date(new Date().setDate(new Date().getDate() - 1))
+                    date.setHours(obj.horaCierra.substring(0, 2))
+                    date.setMinutes(obj.horaCierra.substring(3, 5))
+                    date.setSeconds('00')
+                    var diff = date - today
+                    var minutes = Math.floor((diff / 1000) / 60);
+                    if(minutes <= 10 && minutes >= 0) rta = true
+                    if(i === result.length) return res.json(rta)
             })
         }
     })

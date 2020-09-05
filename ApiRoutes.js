@@ -97,7 +97,7 @@ router.post('/deleteClientOrder', auth.middleware, function(req, res){
   OrderController.deleteClientOrder(req, res);
 })
 
-router.post('/validateClosingShop', function(req, res){ //DOCUMENTAR
+router.post('/validateClosingShop', function(req, res){
   ShopController.validateSoonClosingShop(req, res);
 })
 

@@ -258,7 +258,7 @@ exports.validate10MinShopSchedule = (cuit, callback) => {
     var actualDay = new Date().getDay() + 1
     var prevDay = (actualDay === 1) ? 7 : actualDay - 1
     const sql = 'SELECT * FROM horariolocal WHERE local = ? AND (diaSemana = ? OR (diaSemana = ? AND horaExtendida = 1))'
-    conMysql.query(sql, [cuit, actualDay, prevDay, actualDay], (err, result) => {
+    conMysql.query(sql, [cuit, actualDay, prevDay], (err, result) => {
         if (err)
             callback(err);
         else

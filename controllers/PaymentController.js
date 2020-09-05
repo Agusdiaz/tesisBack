@@ -61,7 +61,8 @@ exports.makePayment = async (req, res) => {
         const preference = await mercadopago.preferences.create(purchaseOrder);
         return res.redirect(`${preference.body.init_point}`);
     } catch (err) {
-        return res.send(err.message);
+        console.log(err)
+        return res.json(err.message);
     }
 }
 
@@ -89,7 +90,7 @@ exports.makeRefund = async (req, res) => {
                 })
             } catch (err) {
                 console.log(err)
-                return res.json('error')
+                return res.json(err.message)
             }
         }
     })
