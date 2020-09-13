@@ -24,6 +24,10 @@ router.post('/getShopPromos', auth.middleware, function(req, res){
   PromoController.getShopPromos(req, res);
 })
 
+router.post('/changePassword', auth.middleware, function(req, res){
+  ClientController.changePassword(req, res);
+})
+
 //PARA CLIENTE
 router.post('/insertClient', function(req, res){
   ClientController.insertClient(req, res);
@@ -203,7 +207,16 @@ router.post('/updateNewField', auth.middleware, function(req, res){
   ShopController.updateNewField(req, res);
 })
 
-//MERCADO PAGO - SIN DOCUMENTAR
+router.post('/updateProductPrice', auth.middleware, function(req, res){
+  ProductController.setProductPrice(req, res);
+})
+
+router.post('/updatePromoPrice', auth.middleware, function(req, res){
+  PromoController.setPromoPrice(req, res);
+})
+
+
+//MERCADO PAGO
 router.get('/payments/checkout/:number/:mail/:total/:cuit', auth.middleware, async (req, res) => {
   PaymentController.makePayment(req, res);
 })

@@ -78,3 +78,15 @@ exports.updateClient = (client, callback) => {
             callback(null, result);
     });
 }
+
+exports.updateClientPassword = (user, callback) => {
+    let hashedPassword = bcrypt.hashSync(user.contraseña.toString(), process.env.BCRYPT_ROUNDS || 10)
+    const sql = 'UPDATE cliente SET contraseña= ? WHERE mail= ?';
+    var values = [hashedPassword, user.mail]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}

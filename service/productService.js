@@ -112,3 +112,14 @@ exports.createProductForOrder = (product, orderNum, callback) => {
         }
     });
 }
+
+exports.updateProductPrice = (product, callback) => {
+    const sql = 'UPDATE producto SET precio = ? WHERE id = ?';
+    var values = [product.precio, product.id]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}

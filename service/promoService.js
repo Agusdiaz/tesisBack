@@ -175,3 +175,14 @@ exports.checkHours = (idPromo, callback) => {
             callback(null, result);
     });
 }
+
+exports.updatePromoPrice = (promo, callback) => {
+    const sql = 'UPDATE promocion SET precio = ? WHERE id = ?';
+    var values = [promo.precio, promo.id]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}

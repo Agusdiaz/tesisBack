@@ -1,6 +1,7 @@
 const PromoService = require('../service/promoService');
 const IngredientService = require('../service/ingredientService');
 const EventController = require('./EventController');
+const ShopService = require('../service/shopService');
 
 exports.insertPromoWithProducts = (req, res) => {
     if (req.body.productos == null)
@@ -235,5 +236,27 @@ function asyncPromoHours(idPromo, res, callback) {
             callback(resTimes)
         } else
             callback(days)
+    })
+}
+
+exports.setPromoPrice = (req, res) => {
+    ShopService.validateOpenShop(req.body.cuit, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al validar cierre del local')
+        } else {
+            if(result[0].abierto === 0){
+                PromoService.updatePromoPrice(req.body, (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return res.status(500).json('Error al actualizar precio. Inténtelo nuevamente')
+                    }
+                    else if (result.affectedRows == 0)
+                        return res.status(404).json('Promoción no encontrada')
+                    else
+                        return res.json('Precio actualizado')
+                })
+            } else return res.status(401).json('Para realizar esta acción el local debe estar cerrado')
+        }
     })
 }

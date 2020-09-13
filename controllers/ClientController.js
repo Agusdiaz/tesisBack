@@ -1,5 +1,6 @@
 const ClientService = require('../service/clientService');
 const ShopController = require('./ShopController')
+const ShopService = require('../service/shopService')
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 
@@ -29,6 +30,40 @@ exports.insertClient = (req, res) => {
     })
 }
 
+exports.changePassword = (req, res) => {
+    ClientService.validateUser(req.body, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al buscar usuario')
+        }
+        else if (result.length == 0) {
+            return res.status(404).json('Usuario no encontrado')
+        }
+        else {
+            let password = bcrypt.compareSync(req.body.contraseña.toString(), result[0].contraseña)
+            if (!password) {
+                if(result[0].apellido){
+                ClientService.updateClientPassword(req.body, (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return res.status(500).json('Error al cambiar contraseña. Inténtelo nuevamente')
+                    } else
+                        return res.status(200).json('La contraseña se cambió exitosamente')
+                })
+            } else {
+                ShopService.updateShopPassword(req.body, (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return res.status(500).json('Error al cambiar contraseña. Inténtelo nuevamente')
+                    } else
+                        return res.status(200).json('La contraseña se cambió exitosamente')
+                })
+            }
+            } else return res.status(401).json('Error: La contraseña no puede ser igual a la anterior')
+        }
+    })
+}
+
 exports.loginUser = (req, res) => {
     ClientService.validateUser(req.body, (error, result) => {
         if (error) {
@@ -46,7 +81,7 @@ exports.loginUser = (req, res) => {
                 }, process.env.SECRET || 'token-secret', {
                     expiresIn: 86400 // expires in 24 hours
                 });
-                if(result[0].cuit !== undefined){
+                if (result[0].cuit !== undefined) {
                     ShopController.asyncSchedule(result[0].cuit, res, (r) => {
                         var horarios = []
                         horarios.push(r)
@@ -71,7 +106,7 @@ exports.loginUser = (req, res) => {
                         return res.json(sendJson)
                     })
                 }
-                else{
+                else {
                     let sendJson = {
                         token: token,
                         mail: result[0].mail,

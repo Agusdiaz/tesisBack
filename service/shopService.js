@@ -265,3 +265,15 @@ exports.validate10MinShopSchedule = (cuit, callback) => {
             callback(null, result);
     });
 }
+
+exports.updateShopPassword = (user, callback) => {
+    let hashedPassword = bcrypt.hashSync(user.contraseña.toString(), process.env.BCRYPT_ROUNDS || 10)
+    const sql = 'UPDATE local SET contraseña= ? WHERE mail= ?';
+    var values = [hashedPassword, user.mail]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}

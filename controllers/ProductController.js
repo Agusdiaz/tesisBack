@@ -1,5 +1,6 @@
-const ProductService = require('../service/productService')
-const IngredientService = require('../service/ingredientService')
+const ProductService = require('../service/productService');
+const IngredientService = require('../service/ingredientService');
+const ShopService = require('../service/shopService');
 
 exports.insertProductWithIngredients = (req, res) => {
     ProductService.validateNameAndCodeOfProduct(req.body.producto.nombre, req.body.producto.codigo, req.body.cuit, (error, result) => {
@@ -163,5 +164,27 @@ function asyncIngredientsMenu(id, res, callback) {
         }
         else
             callback([])
+    })
+}
+
+exports.setProductPrice = (req, res) => {
+    ShopService.validateOpenShop(req.body.cuit, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al validar cierre del local')
+        } else {
+            if(result[0].abierto === 0){
+                ProductService.updateProductPrice(req.body, (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return res.status(500).json('Error al actualizar precio. Inténtelo nuevamente')
+                    }
+                    else if (result.affectedRows == 0)
+                        return res.status(404).json('Producto no encontrado')
+                    else
+                        return res.json('Precio actualizado')
+                })
+            } else return res.status(401).json('Para realizar esta acción el local debe estar cerrado')
+        }
     })
 }
