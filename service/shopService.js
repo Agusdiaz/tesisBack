@@ -49,8 +49,8 @@ exports.checkIfShopIsFavourite = (client, shop, callback) => {
 }
 
 exports.createShopAsFavourite = (body, callback) => {
-    const sql = 'INSERT INTO favorito (cliente, local) SELECT ? , ? FROM favorito WHERE NOT EXISTS (SELECT cliente, local FROM favorito ' +
-    'WHERE cliente = ? AND local = ?) LIMIT 1';
+    const sql = 'INSERT INTO favorito (cliente, local) SELECT * FROM (SELECT ?, ?) AS tmp WHERE NOT EXISTS (SELECT cliente, local ' + 
+    'FROM favorito WHERE cliente = ? AND local = ?) LIMIT 1;'
     var values = [body.mail, body.cuit, body.mail, body.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)

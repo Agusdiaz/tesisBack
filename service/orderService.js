@@ -14,8 +14,8 @@ exports.createClientOrder = (order, callback) => {
 }
 
 exports.createPendingOrder = (mail, cuit, num, callback) => {
-    const sql = 'INSERT INTO pendiente (cliente, local, pedido) SELECT ?, ?, ? FROM pendiente WHERE NOT EXISTS '
-    + '(SELECT cliente, local, pedido FROM pendiente WHERE cliente = ? AND local = ?  AND pedido = ?) LIMIT 1';
+    const sql = 'INSERT INTO pendiente (cliente, local, pedido) SELECT * FROM (SELECT ?, ?, ?) AS tmp WHERE NOT EXISTS (SELECT cliente, ' +
+    'local, pedido FROM pendiente WHERE cliente = ? AND local = ? AND pedido = ?) LIMIT 1;';
     var values = [mail, cuit, num, mail, cuit, num]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -115,8 +115,8 @@ exports.validateOrderClient = (body, callback) => {
 }
 
 exports.shareOrder = (body, callback) => {
-    const sql = 'INSERT INTO pendiente (cliente, pedido) SELECT ? , ? FROM pendiente WHERE NOT EXISTS ' +
-    '(SELECT cliente, pedido FROM pendiente WHERE cliente = ? AND pedido = ?) LIMIT 1';
+    const sql = 'INSERT INTO pendiente (cliente, pedido) SELECT * FROM (SELECT ?, ?) AS tmp WHERE NOT EXISTS (SELECT cliente, pedido ' +
+    'FROM pendiente WHERE cliente = ? AND pedido = ?) LIMIT 1;';
     var values = [body.mail, body.numero, body.mail, body.numero]
     conMysql.query(sql, values, (err, result) => {
         if (err)

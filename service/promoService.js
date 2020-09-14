@@ -27,9 +27,9 @@ exports.createProductPromo = (product, idPromo, callback) => {
 }
 
 exports.createPromoForOrder = (promo, orderNum, callback) => {
-    const sql = 'INSERT INTO pedidopromocion (pedido, promocion, cantidad, modificado) VALUES ?';
+    const sql = 'INSERT INTO pedidopromocion (pedido, nombre, detalle, precio, cantidad, modificado) VALUES ?';
     var values = [
-        [orderNum, promo.idPromo, promo.cantidad, promo.modificado]
+        [orderNum, promo.nombre, promo.detalle, promo.precio, promo.cantidad, promo.modificado]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -74,8 +74,9 @@ exports.getProductsPromo = (promoID, callback) => {
 }
 
 exports.getOrderProductsPromo = (promoID, callback) => {
-    const sql = 'SELECT producto.id, nombre, cantidad, disponible, codigo, precio, detalle, condicion, tipo, tope, selectivo FROM promocionproducto ' +
-        'INNER JOIN producto ON producto = producto.id WHERE promocion = ?';
+    const sql = 'SELECT pedidopromocionproducto.id, pedidopromocionproducto.nombre, pedidopromocionproducto.precio, pedidopromocionproducto.detalle, ' +
+    'condicion, pedidopromocionproducto.cantidad, pedidopromocionproducto.modificado FROM pedidopromocion INNER JOIN pedidopromocionproducto ON ' +
+    'pedidopromocion.id = pedidopromocionproducto.pedidoPromocion WHERE pedidopromocion = ?';
     var values = [promoID]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -151,8 +152,8 @@ exports.validatePromos = (promos, callback) => {
 }
 
 exports.getOrderPromos = (orderNum, stage, callback) => {
-    const sql = 'SELECT promocion.id, nombre, precio, pedidopromocion.cantidad, modificado, pedidopromocion.id AS idPP ' + 
-    'FROM pedido INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN promocion ON promocion.id = pedidopromocion.promocion WHERE pedido.numero = ? AND etapa = ?';
+    const sql = 'SELECT pedidopromocion.id, nombre, precio, pedidopromocion.cantidad, modificado, detalle FROM pedido INNER JOIN ' + 
+    'pedidopromocion ON pedido.numero = pedidopromocion.pedido WHERE pedido.numero = ? AND etapa = ?';
     var values = [orderNum, stage]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -180,6 +181,16 @@ exports.updatePromoPrice = (promo, callback) => {
     const sql = 'UPDATE promocion SET precio = ? WHERE id = ?';
     var values = [promo.precio, promo.id]
     conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.deletePromo = (promo, callback) => {
+    const sql = 'DELETE FROM promocion WHERE id = ?';
+    conMysql.query(sql, [promo.id], (err, result) => {
         if (err)
             callback(err);
         else

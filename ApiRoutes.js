@@ -101,7 +101,7 @@ router.post('/deleteClientOrder', auth.middleware, function(req, res){
   OrderController.deleteClientOrder(req, res);
 })
 
-router.post('/validateClosingShop', function(req, res){
+router.post('/validateClosingShop', auth.middleware, function(req, res){
   ShopController.validateSoonClosingShop(req, res);
 })
 
@@ -213,6 +213,18 @@ router.post('/updateProductPrice', auth.middleware, function(req, res){
 
 router.post('/updatePromoPrice', auth.middleware, function(req, res){
   PromoController.setPromoPrice(req, res);
+})
+
+router.post('/deleteProduct', auth.middleware, function(req, res){
+  ProductController.deleteProduct(req, res);
+})
+
+router.post('/deletePromo', auth.middleware, function(req, res){
+  PromoController.deletePromo(req, res);
+})
+
+router.post('/deleteIngredient', auth.middleware, function(req, res){
+  IngredientController.deleteIngredient(req, res);
 })
 
 

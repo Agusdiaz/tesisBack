@@ -14,8 +14,7 @@ exports.createProduct = (body, CUIT, callback) => {
 }
 
 exports.getProductsOrder = (orderNum, callback) => {
-    const sql = 'SELECT producto.id, nombre, precio, cantidad, modificado, pedidoproducto.id AS idPP FROM pedidoproducto INNER JOIN ' + 
-    'producto ON pedidoproducto.producto = producto.id WHERE pedidoproducto.pedido = ?';
+    const sql = 'SELECT id, nombre, precio, detalle, cantidad, modificado, condicion FROM pedidoproducto WHERE pedido = ?';
     var values = [orderNum]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -100,9 +99,9 @@ exports.validateProductsAndIngredients = (products, ingredients, callback) => {
 }
 
 exports.createProductForOrder = (product, orderNum, callback) => {
-    const sql = 'INSERT INTO pedidoproducto (pedido, producto, cantidad, modificado) VALUES ?';
+    const sql = 'INSERT INTO pedidoproducto (pedido, nombre, precio, detalle, condicion, cantidad, modificado) VALUES ?';
     var values = [
-        [orderNum, product.idProducto, product.cantidad, (product.modificado) ? product.modificado : 0]
+        [orderNum, product.nombre, product.precio, product.detalle, product.condicion, product.cantidad, (product.modificado) ? product.modificado : 0]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -113,10 +112,34 @@ exports.createProductForOrder = (product, orderNum, callback) => {
     });
 }
 
+exports.createProductPromoForOrder = (product, idPedidoPromocion, callback) => {
+    const sql = 'INSERT INTO pedidopromocionproducto (pedidoPromocion, nombre, precio, detalle, condicion, cantidad, modificado) VALUES ?';
+    var values = [
+        [idPedidoPromocion, product.nombre, product.precio, product.detalle, product.condicion, product.cantidad, (product.modificado) ? product.modificado : 0]
+    ]
+    conMysql.query(sql, [values], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
 exports.updateProductPrice = (product, callback) => {
     const sql = 'UPDATE producto SET precio = ? WHERE id = ?';
     var values = [product.precio, product.id]
     conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.deleteProduct = (product, callback) => {
+    const sql = 'DELETE promocionproducto, promocion FROM promocionproducto INNER JOIN promocion ON promocionproducto.promocion = ' + 
+    'promocion.id WHERE promocionproducto.producto = ?; DELETE FROM producto WHERE id = ?;'
+    conMysql.query(sql, [product.id, product.id], (err, result) => {
         if (err)
             callback(err);
         else

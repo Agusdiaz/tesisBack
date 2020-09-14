@@ -356,14 +356,22 @@ exports.insertClientOrder = (req, res) => {
                                                 var idPedPromo = result.insertId
                                                 iPromo++
                                                 obj.productos.map(obj => {
-                                                    var idProd = obj.idProducto
-                                                    obj.ingredientes.map(obj => {
-                                                        IngredientService.createIngredientPromoForOrder(obj, idPedPromo, idProd, (error, result) => {
-                                                            if (error) {
-                                                                console.log(error)
-                                                                return res.status(500).json('Error al guardar ingredientes en pedido promoción ingredientes')
-                                                            }
-                                                        })
+                                                    ProductService.createProductPromoForOrder(obj, idPedPromo, (error, result) => {
+                                                        if (error) {
+                                                            console.log(error)
+                                                            return res.status(500).json('Error al guardar productos en pedido promoción productos')
+                                                        }
+                                                        else{
+                                                            obj.ingredientes.map(obj => {
+                                                                var idPedPromoProd = result.insertId
+                                                                IngredientService.createIngredientPromoForOrder(obj, idPedPromoProd, (error, result) => {
+                                                                    if (error) {
+                                                                        console.log(error)
+                                                                        return res.status(500).json('Error al guardar ingredientes en pedido promoción ingredientes')
+                                                                    }
+                                                                })
+                                                            })
+                                                        }
                                                     })
                                                 })
                                             }
@@ -381,9 +389,8 @@ exports.insertClientOrder = (req, res) => {
                                                 else {
                                                     if (obj.ingredientes.length > 0) {
                                                         var idPedidoProducto = result.insertId
-                                                        var idProducto = obj.idProducto
                                                         obj.ingredientes.forEach(obj => {
-                                                            IngredientService.createIngredientForOrder(obj, idPedidoProducto, idProducto, (error, result) => {
+                                                            IngredientService.createIngredientForOrder(obj, idPedidoProducto, (error, result) => {
                                                                 if (error) {
                                                                     console.log(error)
                                                                     return res.status(500).json('Error al guardar ingrediente en pedido')
@@ -471,17 +478,16 @@ exports.insertClientOrder = (req, res) => {
                                         }
                                         else {
                                             if (obj.ingredientes.length > 0) {
+                                                iProd++
                                                 var idPedidoProducto = result.insertId
-                                                var idProducto = obj.idProducto
                                                 obj.ingredientes.forEach(obj => {
-                                                    IngredientService.createIngredientForOrder(obj, idPedidoProducto, idProducto, (error, result) => {
+                                                    IngredientService.createIngredientForOrder(obj, idPedidoProducto, (error, result) => {
                                                         if (error) {
                                                             console.log(error)
                                                             return res.status(500).json('Error al guardar ingrediente en pedido')
                                                         }
                                                     })
                                                 })
-                                                iProd++
                                                 if (iProd == longProd) {
                                                     OrderService.createPendingOrder(req.body.mail, req.body.cuit, orderNumber, (error, result) => {
                                                         if (error) {
@@ -554,7 +560,7 @@ function asyncPromosOrderByShop(num, stage, res, callback) {
             var resProm = []
             resProm = prom.map(it => {
                 it.productos = []
-                asyncProductsPromo(it.id, it.idPP, res, (r) => {
+                asyncProductsPromo(it.id, res, (r) => {
                     it.productos.push(r)
                     i++
                     if (i == prom.length)
@@ -568,7 +574,7 @@ function asyncPromosOrderByShop(num, stage, res, callback) {
     })
 }
 
-function asyncProductsPromo(num, idPP, res, callback) {
+function asyncProductsPromo(num, res, callback) {
     PromoService.getOrderProductsPromo(num, (error, result) => {
         if (error) {
             console.log(error)
@@ -580,7 +586,7 @@ function asyncProductsPromo(num, idPP, res, callback) {
             var resProd = []
             resProd = prod.map(it => {
                 it.ingredientes = []
-                asyncIngredientsOrderProductPromo(it.id, idPP, res, (r) => {
+                asyncIngredientsOrderProductPromo(it.id, res, (r) => {
                     it.ingredientes.push(r)
                     i++
                     if (i == prod.length)
@@ -606,7 +612,7 @@ function asyncProductsForShop(num, res, callback) {
             var resProd = []
             resProd = prod.map(it => {
                 it.ingredientes = []
-                asyncIngredientsOrderProduct(it.idPP, res, (r) => {
+                asyncIngredientsOrderProduct(it.id, res, (r) => {
                     it.ingredientes.push(r)
                     i++
                     if (i == prod.length)
@@ -639,8 +645,8 @@ function asyncIngredientsOrderProduct(num, res, callback) {
     })
 }
 
-function asyncIngredientsOrderProductPromo(num, idPP, res, callback) {
-    IngredientService.getIngredientsByProductPromoInGetOrder(num, idPP, (error, result) => {
+function asyncIngredientsOrderProductPromo(num, res, callback) {
+    IngredientService.getIngredientsByProductPromoInGetOrder(num, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al buscar ingredientes en pedido')
