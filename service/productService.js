@@ -1,3 +1,4 @@
+const cons = require('consolidate');
 var conMysql = require('../mysqlConnection');
 
 exports.createProduct = (body, CUIT, callback) => {
@@ -125,9 +126,20 @@ exports.createProductPromoForOrder = (product, idPedidoPromocion, callback) => {
     });
 }
 
-exports.updateProductPrice = (product, callback) => {
-    const sql = 'UPDATE producto SET precio = ? WHERE id = ?';
-    var values = [product.precio, product.id]
+exports.deleteProduct = (product, callback) => {
+    const sql = 'DELETE promocionproducto, promocion FROM promocionproducto INNER JOIN promocion ON promocionproducto.promocion = ' + 
+    'promocion.id WHERE promocionproducto.producto = ?; DELETE FROM producto WHERE id = ?;'
+    conMysql.query(sql, [product.id, product.id], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.updateProduct = (product, callback) => {
+    const sql = 'UPDATE producto SET nombre = ?, precio = ?, detalle = ?, condicion = ?, tipo = ?, tope = ?, selectivo = ? WHERE id = ?';
+    var values = [product.nombre, product.precio, product.detalle, product.condicion, product.tipo, product.tope, product.selectivo, product.id]
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);
@@ -136,10 +148,9 @@ exports.updateProductPrice = (product, callback) => {
     });
 }
 
-exports.deleteProduct = (product, callback) => {
-    const sql = 'DELETE promocionproducto, promocion FROM promocionproducto INNER JOIN promocion ON promocionproducto.promocion = ' + 
-    'promocion.id WHERE promocionproducto.producto = ?; DELETE FROM producto WHERE id = ?;'
-    conMysql.query(sql, [product.id, product.id], (err, result) => {
+exports.validateNameOfExistentProduct = (name, id, CUIT, callback) => {
+    const sql = 'SELECT * FROM producto WHERE (nombre = ? AND id != ?) AND local = ?';
+    conMysql.query(sql, [name, id, CUIT], (err, result) => {
         if (err)
             callback(err);
         else

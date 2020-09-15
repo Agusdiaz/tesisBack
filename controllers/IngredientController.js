@@ -77,3 +77,36 @@ exports.deleteIngredient = (req, res) => {
         }
     })
 }
+
+exports.modifyIngredient = (req, res) => {
+    ShopService.validateOpenShop(req.body.cuit, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al validar cierre del local')
+        } else {
+            if (result[0].abierto === 1) {
+                IngredientService.validateNameOfExistentIngredient(req.body.ingrediente, req.body.cuit, (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return res.status(500).json('Error al validar nombre del ingrediente')
+                    }
+                    else if (result.length > 0) {
+                        return res.status(401).json('Ya existe un ingrediente con ese nombre')
+                    }
+                    else{
+                        IngredientService.updateIngredient(req.body.ingrediente, (error, result) => {
+                            if (error) {
+                                console.log(error)
+                                return res.status(500).json('Error al modificar ingrediente')
+                            }
+                            else {
+                                return res.json('Ingrediente modificado')
+                            }
+                        })
+                    }
+                        
+                })
+            } else return res.status(401).json({close: 'Para realizar esta acción el local debe estar cerrado'})
+        }
+    })
+}

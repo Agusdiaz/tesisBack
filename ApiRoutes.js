@@ -207,10 +207,6 @@ router.post('/updateNewField', auth.middleware, function(req, res){
   ShopController.updateNewField(req, res);
 })
 
-router.post('/updateProductPrice', auth.middleware, function(req, res){
-  ProductController.setProductPrice(req, res);
-})
-
 router.post('/updatePromoPrice', auth.middleware, function(req, res){
   PromoController.setPromoPrice(req, res);
 })
@@ -225,6 +221,14 @@ router.post('/deletePromo', auth.middleware, function(req, res){
 
 router.post('/deleteIngredient', auth.middleware, function(req, res){
   IngredientController.deleteIngredient(req, res);
+})
+
+router.post('/modifyProduct', auth.middleware, function(req, res){
+  ProductController.modifyProduct(req, res);
+})
+
+router.post('/modifyIngredient', auth.middleware, function(req, res){
+  IngredientController.modifyIngredient(req, res);
 })
 
 

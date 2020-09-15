@@ -185,3 +185,34 @@ exports.deleteIngredient = (ingredient, callback) => {
             callback(null, result);
     });
 }
+
+exports.deleteProductIngredients = (product, callback) => {
+    const sql = 'DELETE FROM productoingrediente WHERE producto = ?';
+    conMysql.query(sql, [product.id], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.updateIngredient = (ingredient, callback) => {
+    const sql = 'UPDATE ingrediente SET nombre = ?, detalle = ? WHERE id = ?';
+    var values = [ingredient.nombre, ingredient.detalle, ingredient.id]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.validateNameOfExistentIngredient = (ingredient, CUIT, callback) => {
+    const sql = 'SELECT * FROM ingrediente WHERE local = ? AND (nombre = ? AND id != ?)';
+    conMysql.query(sql, [CUIT, ingredient.nombre, ingredient.id], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
