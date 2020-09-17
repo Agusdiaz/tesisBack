@@ -231,6 +231,10 @@ router.post('/modifyIngredient', auth.middleware, function(req, res){
   IngredientController.modifyIngredient(req, res);
 })
 
+router.post('/modifyPromo', auth.middleware, function(req, res){
+  PromoController.modifyPromo(req, res);
+})
+
 
 //MERCADO PAGO
 router.get('/payments/checkout/:number/:mail/:total/:cuit', auth.middleware, async (req, res) => {

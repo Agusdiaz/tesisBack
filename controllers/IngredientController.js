@@ -50,13 +50,13 @@ exports.deleteIngredient = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al validar cierre del local')
         } else {
-            if(result[0].abierto === 0){
+            if(result[0].abierto === 0 || req.body.inicial){
                 IngredientService.deleteIngredient(req.body, (error, result) => {
                     if (error) {
                         console.log(error)
                         return res.status(500).json('Error al eliminar ingrediente. Inténtelo nuevamente')
                     }
-                    else{
+                    else if(result[0].length > 0){
                         var prod = JSON.parse(JSON.stringify(result[0]))
                         var iProd = 0
                         prod.map(obj => {
@@ -71,7 +71,7 @@ exports.deleteIngredient = (req, res) => {
                             }
                             if(iProd === prod.length) return res.json('Ingrediente eliminado')
                         })
-                    }
+                    }else return res.json('Ingrediente eliminado')
                 })
             } else return res.status(401).json('Para realizar esta acción el local debe estar cerrado')
         }
@@ -84,7 +84,7 @@ exports.modifyIngredient = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al validar cierre del local')
         } else {
-            if (result[0].abierto === 1) {
+            if (result[0].abierto === 0 || req.body.inicial) {
                 IngredientService.validateNameOfExistentIngredient(req.body.ingrediente, req.body.cuit, (error, result) => {
                     if (error) {
                         console.log(error)

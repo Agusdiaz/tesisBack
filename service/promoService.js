@@ -1,9 +1,9 @@
 var conMysql = require('../mysqlConnection');
 
-exports.createPromo = (promo, callback) => {
+exports.createPromo = (promo, CUIT, callback) => {
     const sql = 'INSERT INTO promocion (nombre, detalle, precio, local) VALUES ?';
     var values = [
-        [promo.nombre, promo.detalle, promo.precio, promo.cuit]
+        [promo.nombre, promo.detalle, promo.precio, CUIT]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -177,9 +177,19 @@ exports.checkHours = (idPromo, callback) => {
     });
 }
 
-exports.updatePromoPrice = (promo, callback) => {
-    const sql = 'UPDATE promocion SET precio = ? WHERE id = ?';
-    var values = [promo.precio, promo.id]
+exports.deletePromo = (promo, callback) => {
+    const sql = 'DELETE FROM promocion WHERE id = ?';
+    conMysql.query(sql, [promo.id], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.updatePromo = (promo, callback) => {
+    const sql = 'UPDATE promocion SET nombre = ?, precio = ?, detalle = ? WHERE id = ?';
+    var values = [promo.nombre, promo.precio, promo.detalle, promo.id]
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);
@@ -188,9 +198,9 @@ exports.updatePromoPrice = (promo, callback) => {
     });
 }
 
-exports.deletePromo = (promo, callback) => {
-    const sql = 'DELETE FROM promocion WHERE id = ?';
-    conMysql.query(sql, [promo.id], (err, result) => {
+exports.deletePromoProducts = (promoID, callback) => {
+    const sql = 'DELETE FROM promocionproducto WHERE promocion = ?';
+    conMysql.query(sql, [promoID], (err, result) => {
         if (err)
             callback(err);
         else

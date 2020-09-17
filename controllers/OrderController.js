@@ -288,7 +288,7 @@ exports.insertClientOrder = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al validar si el local esta abierto')
         }
-        else if (result.length == 0)
+        else if (result[0].abierto === 0)
             return res.status(405).json('Local cerrado')
         else {
             if (req.body.promociones.length > 0) {

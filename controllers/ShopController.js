@@ -447,11 +447,7 @@ exports.getTopRequestedHoursByShop = (req, res) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al buscar horarios con más pedidos del local')
-        }
-        else if (result.length == 0) {
-            return res.status(204).json('No hay pedidos realizados')
-        }
-        else {
+        } else {
             var hoursResult = [{ hora: 00, cantidad: 0 }, { hora: 01, cantidad: 0 }, { hora: 02, cantidad: 0 }, { hora: 03, cantidad: 0 }, { hora: 04, cantidad: 0 },
             { hora: 05, cantidad: 0 }, { hora: 06, cantidad: 0 }, { hora: 07, cantidad: 0 }, { hora: 08, cantidad: 0 }, { hora: 09, cantidad: 0 }, { hora: 10, cantidad: 0 },
             { hora: 11, cantidad: 0 }, { hora: 12, cantidad: 0 }, { hora: 13, cantidad: 0 }, { hora: 14, cantidad: 0 }, { hora: 15, cantidad: 0 }, { hora: 16, cantidad: 0 },
@@ -472,11 +468,7 @@ exports.getLast6MonthOrdersByShop = (req, res) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al buscar pedidos de los últimos 6 meses del local')
-        }
-        else if (result.length == 0) {
-            return res.status(204).json('No hay pedidos realizados')
-        }
-        else {
+        } else {
             var months = [{ mes: 'Enero', nroMes: 1, cantidad: 0 }, { mes: 'Febrero', nroMes: 2, cantidad: 0 }, { mes: 'Marzo', nroMes: 3, cantidad: 0 },
             { mes: 'Abril', nroMes: 4, cantidad: 0 }, { mes: 'Mayo', nroMes: 5, cantidad: 0 }, { mes: 'Junio', nroMes: 6, cantidad: 0 },
             { mes: 'Julio', nroMes: 7, cantidad: 0 }, { mes: 'Agosto', nroMes: 8, cantidad: 0 }, { mes: 'Septiembre', nroMes: 9, cantidad: 0 },
@@ -582,18 +574,7 @@ exports.updateNewField = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al actualizar campo nuevo')
         } else {
-            return res.status(200).json('Campo nuevo actualizado')
+            return res.status(200).json(result[1][0].abierto)
         }
     })
 }
-
-/*exports.isOpenShop = (req, res) => {
-    ShopService.validateOpenShop(req.body.cuit, (error, result) => {
-        if (error) {
-            console.log(error)
-            return res.status(500).json('Error al validar cierre del local')
-        } else {
-            return res.json((result[0].abierto === 0) ? false : true)
-        }
-    })
-}*/

@@ -4,10 +4,10 @@ const EventController = require('./EventController');
 const ShopService = require('../service/shopService');
 
 exports.insertPromoWithProducts = (req, res) => {
-    if (req.body.productos == null)
+    if (req.body.promocion.productos.length === 0)
         return res.status(401).json('La promoción debe tener productos')
     else {
-        PromoService.createPromo(req.body, (error, result) => {
+        PromoService.createPromo(req.body.promocion, req.body.cuit, (error, result) => {
             if (error) {
                 console.log(error)
                 return res.status(500).json('Error al guardar promoción')
@@ -15,7 +15,7 @@ exports.insertPromoWithProducts = (req, res) => {
             else {
                 var idPromocion = result.insertId
                 var i = 0
-                req.body.productos.map(obj => {
+                req.body.promocion.productos.map(obj => {
                     PromoService.createProductPromo(obj, idPromocion, (error, result) => {
                         if (error) {
                             console.log(error)
@@ -23,7 +23,7 @@ exports.insertPromoWithProducts = (req, res) => {
                         }
                         else {
                             i++
-                            if (i == req.body.productos.length)
+                            if (i == req.body.promocion.productos.length)
                                 return res.json('Promoción con productos guardada')
                         }
                     })
@@ -91,17 +91,17 @@ exports.setPromoHours = (req, res) => {
                 }
                 else {
                     i++
-                    if (i === long){
+                    if (i === long) {
                         EventController.checkAllPromosHours()
                         return res.json('Horarios de la promoción actualizados')
                     }
                 }
             })
         })
-    } else{
+    } else {
         EventController.checkAllPromosHours()
         return res.json('Horarios de la promoción actualizados')
-    } 
+    }
 }
 
 exports.getShopPromos = (req, res) => {
@@ -120,7 +120,8 @@ exports.getShopPromos = (req, res) => {
             result.map(obj => {
                 obj.horarios = []
                 obj.productos = []
-                asyncValidateProductsPromo(obj.id, res, (r) => {
+                asyncValidateProductsPromo(obj.id, res, (r, dispo) => {
+                    obj.habilitada = dispo
                     obj.productos.push(r)
                     finalResult.push(obj)
                     i++
@@ -130,27 +131,26 @@ exports.getShopPromos = (req, res) => {
                         var finalRta = []
                         finalResult.map(obj => {
                             i++
-                            if (obj.productos[0] != null)
-                                finalRta.push(obj)
+                            //if (obj.productos[0] != null)
+                            finalRta.push(obj)
                             if (i == long) {
-                                if (finalRta.length == 0) {
+                                /* if (finalRta.length == 0) {
                                     return res.status(204).json('Local sin promociones')
-                                }
-                                else {
-                                    finalResult = []
-                                    long = finalRta.length;
-                                    i = 0;
-                                    finalRta.map(obj => {
-                                        asyncPromoHours(obj.id, res, (r) => {
-                                            obj.horarios.push(r)
-                                            finalResult.push(obj)
-                                            i++
-                                            if (i == long) {
-                                                return res.json(finalResult)
-                                            }
-                                        })
+                                } */
+                                //else {
+                                finalResult = []
+                                long = finalRta.length;
+                                i = 0;
+                                finalRta.map(obj => {
+                                    asyncPromoHours(obj.id, res, (r) => {
+                                        obj.horarios.push(r)
+                                        finalResult.push(obj)
+                                        i++
+                                        if (i == long) {
+                                            return res.json(finalResult)
+                                        }
                                     })
-                                }
+                                })
                             }
                         })
                     }
@@ -172,26 +172,19 @@ function asyncValidateProductsPromo(id, res, callback) {
             var dispo = true
             var resProd = []
             resProd = prod.map(it => {
-                if (it.disponible == 0) {
-                    dispo = false
-                }
+                if (it.disponible == 0) dispo = false
                 it.ingredientes = []
                 asyncIngredientsPromo(it.id, res, (r) => {
-                    if (it.selectivo === 1 && r.length === 0)
-                        dispo = false
+                    if (it.selectivo === 1 && r.length === 0) dispo = false
                     else it.ingredientes.push(r)
                     i++
-                    if (i == prod.length && dispo)
-                        callback(resProd)
-
-                    else if (i == prod.length && !dispo)
-                        callback(null)
-
+                    if (i == prod.length) callback(resProd, dispo)
+                    //else if (i == prod.length && !dispo) callback(null)
                 })
                 return it
             })
         } else
-            callback()
+            callback([])
     })
 }
 
@@ -239,35 +232,13 @@ function asyncPromoHours(idPromo, res, callback) {
     })
 }
 
-exports.setPromoPrice = (req, res) => {
-    ShopService.validateOpenShop(req.body.cuit, (error, result) => {
-        if (error) {
-            console.log(error)
-            return res.status(500).json('Error al validar cierre del local')
-        } else {
-            if(result[0].abierto === 0){
-                PromoService.updatePromoPrice(req.body, (error, result) => {
-                    if (error) {
-                        console.log(error)
-                        return res.status(500).json('Error al actualizar precio. Inténtelo nuevamente')
-                    }
-                    else if (result.affectedRows == 0)
-                        return res.status(404).json('Promoción no encontrada')
-                    else
-                        return res.json('Precio actualizado')
-                })
-            } else return res.status(401).json('Para realizar esta acción el local debe estar cerrado')
-        }
-    })
-}
-
 exports.deletePromo = (req, res) => {
     ShopService.validateOpenShop(req.body.cuit, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al validar cierre del local')
         } else {
-            if(result[0].abierto === 0){
+            if (result[0].abierto === 0 || req.body.inicial) {
                 PromoService.deletePromo(req.body, (error, result) => {
                     if (error) {
                         console.log(error)
@@ -279,6 +250,47 @@ exports.deletePromo = (req, res) => {
                         return res.json('Promoción eliminada')
                 })
             } else return res.status(401).json('Para realizar esta acción el local debe estar cerrado')
+        }
+    })
+}
+
+exports.modifyPromo = (req, res) => {
+    ShopService.validateOpenShop(req.body.cuit, (error, result) => {
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al validar cierre del local')
+        } else {
+            if (result[0].abierto === 0 || req.body.inicial) {
+                PromoService.updatePromo(req.body.promocion, (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return res.status(500).json('Error al modificar promoción. Inténtelo nuevamente')
+                    }
+                    else {
+                        PromoService.deletePromoProducts(req.body.promocion.id, (error, result) => {
+                            if (error) {
+                                console.log(error)
+                                return res.status(500).json('Error al eliminar productos de la promoción')
+                            }
+                            else {
+                                var i = 0
+                                req.body.promocion.productos.map(obj => {
+                                    PromoService.createProductPromo(obj, req.body.promocion.id, (error, result) => {
+                                        if (error) {
+                                            console.log(error)
+                                            return res.status(500).json('Error al guardar promoción')
+                                        } else {
+                                            i++
+                                            if (i == req.body.promocion.productos.length)
+                                                return res.json('Promoción modificada')
+                                        }
+                                    })
+                                })
+                            }
+                        })
+                    }
+                })
+            } else return res.status(401).json({ close: 'Para realizar esta acción el local debe estar cerrado' })
         }
     })
 }

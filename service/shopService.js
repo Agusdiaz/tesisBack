@@ -186,8 +186,8 @@ exports.updateOpenCloseShop = (abierto, cuit, callback) => {
 }
 
 exports.updateNewShop = (cuit, callback) => {
-    const sql = 'UPDATE local SET nuevo = 0 WHERE cuit = ?';
-    conMysql.query(sql, [cuit], (err, result) => {
+    const sql = 'UPDATE local SET nuevo = 0 WHERE cuit = ?; SELECT abierto FROM local WHERE cuit = ?';
+    conMysql.query(sql, [cuit, cuit], (err, result) => {
         if (err)
             callback(err);
         else
@@ -230,7 +230,7 @@ exports.getShopShedule = (cuit, callback) => {
 }
 
 exports.validateOpenShop = (cuit, callback) => {
-    const sql = 'SELECT * FROM local WHERE cuit = ? AND abierto = 1';
+    const sql = 'SELECT abierto FROM local WHERE cuit = ?';
     var values = [cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)

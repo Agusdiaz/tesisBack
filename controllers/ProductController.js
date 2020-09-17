@@ -173,7 +173,7 @@ exports.deleteProduct = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al validar cierre del local')
         } else {
-            if (result[0].abierto === 1) {
+            if (result[0].abierto === 0 || req.body.inicial) {
                 ProductService.deleteProduct(req.body, (error, result) => {
                     if (error) {
                         console.log(error)
@@ -195,7 +195,7 @@ exports.modifyProduct = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al validar cierre del local')
         } else {
-            if (result[0].abierto === 0) {
+            if (result[0].abierto === 0 || req.body.inicial) {
                 ProductService.validateNameOfExistentProduct(req.body.producto.nombre, req.body.producto.id, req.body.cuit, (error, result) => {
                     if (error) {
                         console.log(error)
