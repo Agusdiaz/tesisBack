@@ -139,10 +139,6 @@ router.post('/deleteShopSchedule', auth.middleware, function(req, res){
   ShopController.deleteShopSchedule(req, res);
 })
 
-router.post('/updateShopDelay', auth.middleware, function(req, res){
-  ShopController.setShopDelay(req, res);
-})
-
 router.post('/insertShopSchedule', auth.middleware, function(req, res){
   ShopController.insertShopSchedule(req, res);
 })
@@ -163,7 +159,7 @@ router.post('/aceptClientOrder', auth.middleware, function(req, res){
   OrderController.aceptClientOrder(req, res);
 })
 
-router.post('/getTop10RequestedProductsByShop', auth.middleware, function(req, res){
+router.post('/getTop10RequestedProductsByShop', function(req, res){ //auth.middleware
   ShopController.getTop10RequestedProductsByShop(req, res);
 })
 
@@ -234,7 +230,6 @@ router.post('/modifyIngredient', auth.middleware, function(req, res){
 router.post('/modifyPromo', auth.middleware, function(req, res){
   PromoController.modifyPromo(req, res);
 })
-
 
 //MERCADO PAGO
 router.get('/payments/checkout/:number/:mail/:total/:cuit', auth.middleware, async (req, res) => {

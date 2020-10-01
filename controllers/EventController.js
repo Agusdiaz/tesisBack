@@ -1,4 +1,5 @@
 const ShopService = require('../service/shopService');
+const ShopController = require('../controllers/ShopController');
 const PromoService = require('../service/promoService');
 const cron = require('node-cron');
 
@@ -15,6 +16,7 @@ function checkAllShopsSchedules() {
         else if (result.length > 0) {
             result.map(obj => {
                 asyncSchedules(obj.cuit, obj.abierto)
+                if(obj.abierto === 1) ShopController.calculateDelay(obj.cuit)
             })
         }
     })
@@ -43,7 +45,6 @@ function asyncSchedules(cuit, abierto, callback) {
         }
         else {
             var estado = (result.length > 0) ? 1 : 0
-            //console.log('abierto   ', abierto, '    estado   ', estado)
             if (abierto != estado) {
                 ShopService.updateOpenCloseShop(estado, cuit, (error, result) => {
                     if (error) {
@@ -66,7 +67,6 @@ function asyncHours(idPromo, valida, callback) {
         }
         else {
             var estado = (result.length > 0) ? 1 : 0
-            //console.log('valida   ', valida, '    estado   ', estado)
             if (valida != estado) {
                 PromoService.updateValidPromo(estado, idPromo, (error, result) => {
                     if (error) {

@@ -98,6 +98,7 @@ exports.getAllShopsOpenClose = (req, res) => {
             var long = result.length;
             var i = 0;
             result.map(obj => {
+                obj.demora = (obj.demora <= 20) ? 'POCA' : (obj.demora > 20 && obj.demora <= 40) ? 'MEDIA' : 'ALTA'
                 asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
                     obj.favorito = r
                 })
@@ -128,6 +129,7 @@ exports.getAllShopsAZ = (req, res) => {
             var long = result.length;
             var i = 0;
             result.map(obj => {
+                obj.demora = (obj.demora <= 20) ? 'POCA' : (obj.demora > 20 && obj.demora <= 40) ? 'MEDIA' : 'ALTA'
                 asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
                     obj.favorito = r
                 })
@@ -158,6 +160,7 @@ exports.getAllOpenShops = (req, res) => {
             var long = result.length;
             var i = 0;
             result.map(obj => {
+                obj.demora = (obj.demora <= 20) ? 'POCA' : (obj.demora > 20 && obj.demora <= 40) ? 'MEDIA' : 'ALTA'
                 asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
                     obj.favorito = r
                 })
@@ -224,6 +227,7 @@ exports.getShopsByPromos = (req, res) => {
                                             var long = result.length;
                                             var i = 0;
                                             result.map(obj => {
+                                                obj.demora = (obj.demora <= 20) ? 'POCA' : (obj.demora > 20 && obj.demora <= 40) ? 'MEDIA' : 'ALTA'
                                                 asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
                                                     obj.favorito = r
                                                 })
@@ -262,6 +266,7 @@ exports.getShopByName = (req, res) => {
             var long = result.length;
             var i = 0;
             result.map(obj => {
+                obj.demora = (obj.demora <= 20) ? 'POCA' : (obj.demora > 20 && obj.demora <= 40) ? 'MEDIA' : 'ALTA'
                 asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
                     obj.favorito = r
                 })
@@ -292,6 +297,7 @@ exports.getShopByAddress = (req, res) => {
             var long = result.length;
             var i = 0;
             result.map(obj => {
+                obj.demora = (obj.demora <= 20) ? 'POCA' : (obj.demora > 20 && obj.demora <= 40) ? 'MEDIA' : 'ALTA'
                 asyncIsFavourite(req.body.mail, obj.cuit, res, (r) => {
                     obj.favorito = r
                 })
@@ -322,8 +328,47 @@ exports.setShopFeatures = (req, res) => {
     })
 }
 
-exports.setShopDelay = (req, res) => {
-    ShopService.updateDelayShop(req.body, (error, result) => {
+exports.calculateDelay = (cuit) => {
+    var date = new Date()
+    var today = date.getDay();
+    var initialHour = date.getHours()
+    var endHour = initialHour + 1
+    if (today === 0) today = 6
+    else today--
+    ShopService.getDelay(cuit, today, initialHour, endHour, (error, result) => { //2, 00, 23
+        if (error) {
+            console.log(error)
+            return res.status(500).json('Error al calcular demora del local')
+        } if (result.length === 0)
+            setShopDelay(req.body.cuit, 0, res)
+        else {
+            var totalDelay = 0
+            var cant = 0
+            var cantNull = 0
+            var areOrders = false
+            result.map(obj => {
+                if (date.getFullYear() === obj.fecha.getFullYear() && date.getMonth() === obj.fecha.getMonth() && date.getDate() === obj.fecha.getDate())
+                    areOrders = true
+                if (obj.dif !== null) {
+                    totalDelay += obj.dif
+                    cant++
+                } else cantNull++
+            })
+            if (cant > 0) {
+                totalDelay = totalDelay / cant
+                if (cantNull > 0) {
+                    totalDelay += totalDelay * cantNull
+                    totalDelay = totalDelay / (cant + cantNull)
+                }
+            }
+            if (!areOrders && cantNull === 0) totalDelay = 0
+            setShopDelay(cuit, totalDelay)
+        }
+    })
+}
+
+function setShopDelay(cuit, delay) {
+    ShopService.updateDelayShop(cuit, delay, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al actualizar demora del local')
@@ -331,8 +376,10 @@ exports.setShopDelay = (req, res) => {
         else if (result.affectedRows == 0) {
             return res.status(404).json('Local no encontrado')
         }
-        else
-            return res.json('Demora del local actualizada')
+        else {
+            console.log('Se actualizó el local cuit=' + cuit + ' a demora=' + delay)
+            //return res.json('Demora del local actualizada')
+        }
     })
 }
 
@@ -413,16 +460,16 @@ exports.validateSoonClosingShop = (req, res) => {
             var today = new Date();
             var actualDay = new Date().getDay() + 1
             result.map(obj => {
-                    i++
-                    var date = (obj.diaSemana === actualDay && obj.horaExtendida === 0) ? new Date() : (obj.diaSemana === actualDay) ? 
+                i++
+                var date = (obj.diaSemana === actualDay && obj.horaExtendida === 0) ? new Date() : (obj.diaSemana === actualDay) ?
                     new Date(new Date().setDate(new Date().getDate() + 1)) : new Date(new Date().setDate(new Date().getDate() - 1))
-                    date.setHours(obj.horaCierra.substring(0, 2))
-                    date.setMinutes(obj.horaCierra.substring(3, 5))
-                    date.setSeconds('00')
-                    var diff = date - today
-                    var minutes = Math.floor((diff / 1000) / 60);
-                    if(minutes <= 10 && minutes >= 0) rta = true
-                    if(i === result.length) return res.json(rta)
+                date.setHours(obj.horaCierra.substring(0, 2))
+                date.setMinutes(obj.horaCierra.substring(3, 5))
+                date.setSeconds('00')
+                var diff = date - today
+                var minutes = Math.floor((diff / 1000) / 60);
+                if (minutes <= 10 && minutes >= 0) rta = true
+                if (i === result.length) return res.json(rta)
             })
         }
     })
@@ -437,29 +484,69 @@ exports.getTop10RequestedProductsByShop = (req, res) => {
         else if (result.length == 0) {
             return res.status(204).json('No hay pedidos realizados')
         }
-        else
-            return res.json(result)
+        else {
+            var newResult = []
+            if (result[0].length > 0 && result[1].length > 0) {
+                /*var joinArray = result[0].concat(result[1])
+                newResult = joinArray.reduce((unique, o) => {
+                    if (!unique.some(obj => obj.nombre === o.nombre)) {
+                        unique.push(o);
+                    }
+                    return unique;
+                }, []);
+                result[1].map((obj) => {
+                    var item = newResult.find(element => element.nombre === obj.nombre)
+                    if (item !== undefined) item.cantidad += obj.cantidad
+                })*/
+
+                var joinArray = result[0].concat(result[1])
+                newResult = joinArray.reduce((unique, o) => {
+                    if (!unique.some(obj => obj.nombre === o.nombre)) {
+                        unique.push(o);
+                    }
+                    return unique;
+                }, []);
+                newResult = newResult.map(obj0 => {
+                    return result[1].map((obj1) => {
+                        if (obj0.nombre === obj1.nombre && (result[0].filter(it => (it.nombre === obj1.nombre)).length > 0)) {
+                            obj0.cantidad = obj0.cantidad + obj1.cantidad
+                        }
+                        return obj0
+                    })
+                });
+            }
+            else if (result[0].length > 0) newResult = result[0]
+            else newResult = result[1]
+            return res.json(newResult)
+        }
     })
 }
 
 exports.getTopRequestedHoursByShop = (req, res) => {
-    OrderService.getOrdersTopHours(req.body, (error, result) => {
-        if (error) {
-            console.log(error)
-            return res.status(500).json('Error al buscar horarios con más pedidos del local')
-        } else {
-            var hoursResult = [{ hora: 00, cantidad: 0 }, { hora: 01, cantidad: 0 }, { hora: 02, cantidad: 0 }, { hora: 03, cantidad: 0 }, { hora: 04, cantidad: 0 },
-            { hora: 05, cantidad: 0 }, { hora: 06, cantidad: 0 }, { hora: 07, cantidad: 0 }, { hora: 08, cantidad: 0 }, { hora: 09, cantidad: 0 }, { hora: 10, cantidad: 0 },
-            { hora: 11, cantidad: 0 }, { hora: 12, cantidad: 0 }, { hora: 13, cantidad: 0 }, { hora: 14, cantidad: 0 }, { hora: 15, cantidad: 0 }, { hora: 16, cantidad: 0 },
-            { hora: 17, cantidad: 0 }, { hora: 18, cantidad: 0 }, { hora: 19, cantidad: 0 }, { hora: 20, cantidad: 0 }, { hora: 21, cantidad: 0 }, { hora: 22, cantidad: 0 },
-            { hora: 23, cantidad: 0 }]
-            result.map(obj => {
-                hoursResult[obj.hora].cantidad = obj.cantidad
-            })
-            var cant = []
-            hoursResult.map(it => cant.push(it.cantidad))
-            return res.json(cant)
-        }
+    var hoursResult = [{ hora: 00, cantidad: 0 }, { hora: 01, cantidad: 0 }, { hora: 02, cantidad: 0 }, { hora: 03, cantidad: 0 }, { hora: 04, cantidad: 0 },
+    { hora: 05, cantidad: 0 }, { hora: 06, cantidad: 0 }, { hora: 07, cantidad: 0 }, { hora: 08, cantidad: 0 }, { hora: 09, cantidad: 0 }, { hora: 10, cantidad: 0 },
+    { hora: 11, cantidad: 0 }, { hora: 12, cantidad: 0 }, { hora: 13, cantidad: 0 }, { hora: 14, cantidad: 0 }, { hora: 15, cantidad: 0 }, { hora: 16, cantidad: 0 },
+    { hora: 17, cantidad: 0 }, { hora: 18, cantidad: 0 }, { hora: 19, cantidad: 0 }, { hora: 20, cantidad: 0 }, { hora: 21, cantidad: 0 }, { hora: 22, cantidad: 0 },
+    { hora: 23, cantidad: 0 }]
+    var hoursDay = [{ id: 0, dia: 'Lunes' }, { id: 1, dia: 'Martes' }, { id: 2, dia: 'Miércoles' }, { id: 3, dia: 'Jueves' }, { id: 4, dia: 'Viernes' },
+    { id: 5, dia: 'Sábado' }, { id: 6, dia: 'Domingo' }]
+    var i = 0
+    hoursDay.map(obj => {
+        OrderService.getOrdersTopHours(req.body, obj.id, (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).json('Error al buscar horarios con más pedidos del local')
+            } else {
+                obj.horas = []
+                var aux = JSON.parse(JSON.stringify(hoursResult))
+                result.map(obj => {
+                    aux[obj.hora].cantidad = obj.cantidad
+                })
+                obj.horas.push(aux)
+                i++
+                if (i === 7) return res.json(hoursDay)
+            }
+        })
     })
 }
 

@@ -163,10 +163,9 @@ exports.updateShopFeatures = (shop, callback) => {
     });
 }
 
-exports.updateDelayShop = (shop, callback) => {
+exports.updateDelayShop = (cuit, delay, callback) => {
     const sql = 'UPDATE local SET demora = ? WHERE cuit = ?';
-    var values = [shop.demora, shop.cuit]
-    conMysql.query(sql, values, (err, result) => {
+    conMysql.query(sql, [delay, cuit], (err, result) => {
         if (err)
             callback(err);
         else
@@ -271,6 +270,17 @@ exports.updateShopPassword = (user, callback) => {
     const sql = 'UPDATE local SET contraseña= ? WHERE mail= ?';
     var values = [hashedPassword, user.mail]
     conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result);
+    });
+}
+
+exports.getDelay = (cuit, day, initialHour, endHour, callback) => {
+    const sql = 'SELECT numero, fecha, fechaListo, TIMESTAMPDIFF(MINUTE,fecha,fechaListo) AS dif FROM pedido WHERE local = ? AND weekday(fecha) = ? ' +
+    'AND pagado = 1 AND HOUR(fecha) >= ? AND HOUR(fecha) < ? AND fecha >= DATE_ADD(NOW(), INTERVAL -1 MONTH) OR fechaListo IS NULL ORDER BY fecha DESC';
+    conMysql.query(sql, [cuit, day, initialHour, endHour], (err, result) => {
         if (err)
             callback(err);
         else

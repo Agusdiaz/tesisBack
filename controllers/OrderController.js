@@ -1,5 +1,6 @@
 const OrderService = require('../service/orderService');
 const ClientService = require('../service/clientService');
+const ShopController = require('../controllers/ShopController');
 const ShopService = require('../service/shopService');
 const ProductService = require('../service/productService');
 const IngredientService = require('../service/ingredientService');
@@ -252,26 +253,23 @@ exports.getShopPendingOrdersByProducts = (req, res) => {
                     })
                 });
             }
-            else if (result[0].length > 0)
-                newResult = result[0]
-            else
-                newResult = result[1]
+            else if (result[0].length > 0) newResult = result[0]
+            else newResult = result[1]
             var finalResult = []
             var long = newResult.length
             var iProd = 0
             var iProm = 0
             newResult.map(obj => {
-                obj.promociones = []
-                obj.productos = []
-                asyncPromosOrderByShop(obj.numero, 'pendiente', res, (r) => {
-                    obj.promociones.push(r)
+                obj[0].promociones = []
+                obj[0].productos = []
+                asyncPromosOrderByShop(obj[0].numero, 'pendiente', res, (r) => {
+                    obj[0].promociones.push(r)
                     iProm++
-                    asyncProductsForShop(obj.numero, res, (r) => {
-                        obj.productos.push(r)
-                        finalResult.push(obj)
+                    asyncProductsForShop(obj[0].numero, res, (r) => {
+                        obj[0].productos.push(r)
+                        finalResult.push(obj[0])
                         iProd++
-                        if (iProd == long)
-                            return res.json(finalResult)
+                        if (iProd == long) return res.json(finalResult)
                     })
                 })
             })
@@ -356,6 +354,7 @@ exports.insertClientOrder = (req, res) => {
                                                 var idPedPromo = result.insertId
                                                 iPromo++
                                                 obj.productos.map(obj => {
+                                                    console.log(obj)
                                                     ProductService.createProductPromoForOrder(obj, idPedPromo, (error, result) => {
                                                         if (error) {
                                                             console.log(error)
@@ -405,6 +404,7 @@ exports.insertClientOrder = (req, res) => {
                                                                     return res.status(500).json('Error al crear pedido pendiente')
                                                                 }
                                                                 else {
+                                                                    ShopController.calculateDelay(req.body.cuit)
                                                                     return res.json(orderNumber)
                                                                 }
                                                             })
@@ -419,6 +419,7 @@ exports.insertClientOrder = (req, res) => {
                                                                     return res.status(500).json('Error al crear pedido pendiente')
                                                                 }
                                                                 else {
+                                                                    ShopController.calculateDelay(req.body.cuit)
                                                                     return res.json(orderNumber)
                                                                 }
                                                             })
@@ -435,6 +436,7 @@ exports.insertClientOrder = (req, res) => {
                                                 return res.status(500).json('Error al crear pedido pendiente')
                                             }
                                             else {
+                                                ShopController.calculateDelay(req.body.cuit)
                                                 return res.json(orderNumber)
                                             }
                                         })
@@ -495,6 +497,7 @@ exports.insertClientOrder = (req, res) => {
                                                             return res.status(500).json('Error al crear pedido pendiente')
                                                         }
                                                         else {
+                                                            ShopController.calculateDelay(req.body.cuit)
                                                             return res.json(orderNumber)
                                                         }
                                                     })
@@ -509,6 +512,7 @@ exports.insertClientOrder = (req, res) => {
                                                             return res.status(500).json('Error al crear pedido pendiente')
                                                         }
                                                         else {
+                                                            ShopController.calculateDelay(req.body.cuit)
                                                             return res.json(orderNumber)
                                                         }
                                                     })

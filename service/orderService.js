@@ -176,9 +176,9 @@ exports.getShopPendingOrdersByArrival = (shop, callback) => {
 exports.getShopPendingOrdersByProducts = (shop, callback) => {
     const sql = 'SELECT numero, cliente, etapa, takeAway, (total + propina) AS total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario, SUM(cantidad) AS '+ 
     'cantProductos, aceptado FROM pedido INNER JOIN pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND etapa = ? AND pagado = 1 GROUP BY numero ORDER BY cantProductos DESC; ' +
-    'SELECT numero, cliente, takeAway, total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, (SUM(promocionproducto.cantidad) * pedidopromocion.cantidad) AS cantProductos ' +
-    'FROM pedido INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN promocionproducto ON pedidopromocion.promocion ' +
-    '= promocionproducto.promocion WHERE local = ? AND etapa = ? GROUP BY numero ORDER BY cantProductos DESC;'
+    'SELECT numero, cliente, etapa, takeAway, (total + propina) AS total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario, SUM(pedidopromocionproducto.cantidad) * pedidopromocion.cantidad AS cantProductos, ' +
+    'aceptado FROM pedido INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN pedidopromocionproducto ON pedidopromocionproducto.pedidoPromocion ' +
+    '= pedidoPromocion.id WHERE local = ? AND etapa = ? AND pagado = 1 GROUP BY numero ORDER BY cantProductos DESC;'
     conMysql.query(sql, [shop.cuit, 'pendiente', shop.cuit, 'pendiente'], (err, result) => {
         if (err)
             callback(err);
@@ -188,9 +188,10 @@ exports.getShopPendingOrdersByProducts = (shop, callback) => {
 }
 
 exports.getTopRequestedProducts = (shop, callback) => {
-    const sql = 'SELECT pedidoproducto.id, pedidoproducto.nombre, SUM(cantidad) AS cantidad FROM pedidoproducto INNER JOIN pedido ON pedido = numero ' + 
-    'WHERE pedido.local = ? GROUP BY id ORDER BY cantidad DESC LIMIT 10';
-    conMysql.query(sql, shop.cuit, (err, result) => {
+    const sql = 'SELECT pedidoproducto.id, pedidoproducto.nombre, SUM(cantidad) AS cantidad FROM pedido INNER JOIN pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND pagado = 1 ' +
+    'GROUP BY id ORDER BY cantidad DESC LIMIT 10; SELECT pedidopromocionproducto.id, pedidopromocionproducto.nombre, SUM(pedidopromocionproducto.cantidad * pedidopromocion.cantidad) AS cantidad FROM pedido ' +
+    'INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN pedidopromocionproducto ON pedidopromocionproducto.pedidoPromocion = pedidoPromocion.id WHERE local = ? AND pagado = 1 GROUP BY nombre ORDER BY cantidad LIMIT 10;'
+    conMysql.query(sql, [shop.cuit, shop.cuit], (err, result) => {
         if (err)
             callback(err);
         else
@@ -198,9 +199,10 @@ exports.getTopRequestedProducts = (shop, callback) => {
     });
 }
 
-exports.getOrdersTopHours = (shop, callback) => {
-    const sql = 'SELECT HOUR(fecha) AS hora, COUNT(*) AS cantidad FROM pedido WHERE local = ? GROUP BY hora ORDER BY fecha DESC';
-    conMysql.query(sql, shop.cuit, (err, result) => {
+exports.getOrdersTopHours = (shop, day, callback) => {
+    const sql = 'SELECT HOUR(fecha) AS hora, COUNT(*) AS cantidad FROM pedido WHERE local = ? AND weekday(fecha) = ? ' + 
+    'AND pagado = 1 GROUP BY hora ORDER BY fecha DESC';
+    conMysql.query(sql, [shop.cuit, day], (err, result) => {
         if (err)
             callback(err);
         else
@@ -209,7 +211,7 @@ exports.getOrdersTopHours = (shop, callback) => {
 }
 
 exports.getLast6MonthOrdersAmount = (shop, callback) => {
-    const sql = 'SELECT MONTH(fecha) AS mes, COUNT(*) AS cantidad FROM pedido WHERE local = ? AND fecha >= DATE_SUB(CURRENT_DATE(), ' +
+    const sql = 'SELECT MONTH(fecha) AS mes, COUNT(*) AS cantidad FROM pedido WHERE local = ? AND pagado = 1 AND fecha >= DATE_SUB(CURRENT_DATE(), ' +
     'INTERVAL 6 MONTH) GROUP BY mes ORDER BY mes;';
     conMysql.query(sql, shop.cuit, (err, result) => {
         if (err)
