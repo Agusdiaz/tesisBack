@@ -69,7 +69,7 @@ exports.updateOrderDelivered = (order, callback) => {
 }
 
 exports.deleteOrderPendingByShop = (order, callback) => {
-    const sql = 'UPDATE pendiente SET local = ? WHERE pedido = ?';
+    const sql = 'UPDATE pendiente SET local = ? WHERE pedido = ?;';
     var values = [null, order.numero]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -80,9 +80,9 @@ exports.deleteOrderPendingByShop = (order, callback) => {
 }
 
 exports.updateOrderReady = (order, callback) => {
-    const sql = 'UPDATE pedido SET etapa = ?, fechaListo = ? WHERE numero = ?';
+    const sql = 'UPDATE pedido SET etapa = ?, fechaListo = ? WHERE numero = ?; SELECT cliente FROM pendiente WHERE pedido = ?';
     var fecha = new Date()
-    var values = ['listo', fecha, order.numero]
+    var values = ['listo', fecha, order.numero, order.numero]
     conMysql.query(sql, values, (err, result) => {
         if (err)
             callback(err);
@@ -189,7 +189,7 @@ exports.getShopPendingOrdersByProducts = (shop, callback) => {
 
 exports.getTopRequestedProducts = (shop, callback) => {
     const sql = 'SELECT pedidoproducto.id, pedidoproducto.nombre, SUM(cantidad) AS cantidad FROM pedido INNER JOIN pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND pagado = 1 ' +
-    'GROUP BY id ORDER BY cantidad DESC LIMIT 10; SELECT pedidopromocionproducto.id, pedidopromocionproducto.nombre, SUM(pedidopromocionproducto.cantidad * pedidopromocion.cantidad) AS cantidad FROM pedido ' +
+    'GROUP BY id ORDER BY cantidad DESC LIMIT 10; SELECT pedidopromocionproducto.id, pedidopromocionproducto.nombre, SUM(pedidopromocionproducto.cantidad * pedidopromocion.cantidad) AS cantidad, "si" AS promo FROM pedido ' +
     'INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN pedidopromocionproducto ON pedidopromocionproducto.pedidoPromocion = pedidoPromocion.id WHERE local = ? AND pagado = 1 GROUP BY nombre ORDER BY cantidad LIMIT 10;'
     conMysql.query(sql, [shop.cuit, shop.cuit], (err, result) => {
         if (err)

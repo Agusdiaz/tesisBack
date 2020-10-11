@@ -49,8 +49,8 @@ exports.checkIfShopIsFavourite = (client, shop, callback) => {
 }
 
 exports.createShopAsFavourite = (body, callback) => {
-    const sql = 'INSERT INTO favorito (cliente, local) SELECT * FROM (SELECT ?, ?) AS tmp WHERE NOT EXISTS (SELECT cliente, local ' + 
-    'FROM favorito WHERE cliente = ? AND local = ?) LIMIT 1;'
+    const sql = 'INSERT INTO favorito (cliente, local) SELECT * FROM (SELECT ?, ?) AS tmp WHERE NOT EXISTS (SELECT cliente, local ' +
+        'FROM favorito WHERE cliente = ? AND local = ?) LIMIT 1;'
     var values = [body.mail, body.cuit, body.mail, body.cuit]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -197,7 +197,7 @@ exports.updateNewShop = (cuit, callback) => {
 exports.createShopShedule = (cuit, day, hours, callback) => {
     const sql = 'INSERT INTO horariolocal (local, diaSemana, horaAbre, horaCierra, horaExtendida) VALUES ?';
     var values = [
-        [cuit, day, hours.horaAbre, hours.horaCierra, hours.horaExtendida ]
+        [cuit, day, hours.horaAbre, hours.horaCierra, hours.horaExtendida]
     ]
     conMysql.query(sql, [values], (err, result) => {
         if (err)
@@ -278,12 +278,35 @@ exports.updateShopPassword = (user, callback) => {
 }
 
 exports.getDelay = (cuit, day, initialHour, endHour, callback) => {
-    const sql = 'SELECT numero, fecha, fechaListo, TIMESTAMPDIFF(MINUTE,fecha,fechaListo) AS dif FROM pedido WHERE local = ? AND weekday(fecha) = ? ' +
-    'AND pagado = 1 AND HOUR(fecha) >= ? AND HOUR(fecha) < ? AND fecha >= DATE_ADD(NOW(), INTERVAL -1 MONTH) OR fechaListo IS NULL ORDER BY fecha DESC';
+    const sql = 'SELECT numero, fecha, fechaListo, TIMESTAMPDIFF(MINUTE,fecha,fechaListo) AS dif FROM pedido WHERE local = ? AND pagado = 1 AND( ' +
+        '(weekday(fecha) = ? AND HOUR(fecha) >= ? AND HOUR(fecha) < ? AND fecha >= DATE_ADD(NOW(), INTERVAL -1 MONTH)) OR fechaListo IS NULL) ORDER BY fecha DESC';
     conMysql.query(sql, [cuit, day, initialHour, endHour], (err, result) => {
         if (err)
             callback(err);
         else
             callback(null, result);
+    });
+}
+
+exports.createDeviceId = (shop, callback) => {
+    const sql = 'INSERT INTO dispositivolocal (cuit, deviceKey) VALUES ?'
+    var values = [
+        [shop.cuit, shop.device]
+    ]
+    conMysql.query(sql, [values], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, false);
+    });
+}
+
+exports.getDeviceId = (cuit, callback) => {
+    const sql = 'SELECT deviceKey FROM dispositivolocal WHERE cuit = ?'
+    conMysql.query(sql, [cuit], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result)
     });
 }

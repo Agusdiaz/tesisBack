@@ -1,5 +1,7 @@
 const PaymentService = require('../service/paymentService')
 const OrderService = require('../service/orderService')
+const ShopController = require('../controllers/ShopController')
+const ClientController = require('../controllers/ClientController')
 var mercadopago = require('mercadopago');
 const cons = require('consolidate');
 
@@ -16,6 +18,8 @@ exports.insertPayment = (req, res) => {
                     console.log(error)
                 }
                 else {
+                    ShopController.calculateDelay(cuit)
+                    ShopController.sendShopNotification(cuit, 'Atención','¡Ha llegado un nuevo pedido!')
                     return res.render('success_screen')
                 }
             })
@@ -67,7 +71,7 @@ exports.makePayment = async (req, res) => {
 }
 
 exports.makeRefund = async (req, res) => {
-    const { numero } = req.params;
+    const { numero, mailCliente } = req.params;
     PaymentService.getPaymentId(numero, async (error, result) => {
         if (error) {
             console.log(error)
@@ -86,7 +90,10 @@ exports.makeRefund = async (req, res) => {
                         console.log(error)
                         return res.status(500).json('Error al cancelar pedido. Inténtalo nuevamente')
                     }
-                    else return res.json('Pedido cancelado exitosamente')
+                    else{
+                        ClientController.sendClientNotification(mailCliente, 'Malas noticias', 'El local ha rechazado tu pedido')
+                        return res.json('Pedido cancelado exitosamente')
+                    } 
                 })
             } catch (err) {
                 console.log(err)

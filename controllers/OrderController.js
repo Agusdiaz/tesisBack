@@ -1,10 +1,11 @@
 const OrderService = require('../service/orderService');
 const ClientService = require('../service/clientService');
-const ShopController = require('../controllers/ShopController');
+const ClientController = require('../controllers/ClientController');
 const ShopService = require('../service/shopService');
 const ProductService = require('../service/productService');
 const IngredientService = require('../service/ingredientService');
 const PromoService = require('../service/promoService');
+const cons = require('consolidate');
 
 exports.setOrderDeliveredByClient = (req, res) => {
     OrderService.deleteOrderPendingByClient(req.body, (error, result) => {
@@ -38,22 +39,22 @@ exports.setOrderReadyByShop = (req, res) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al eliminar local de pedido pendiente')
-        }
-        /*  else if (result.affectedRows == 0) {
-             return res.status(404).json('Pedido no encontrado')
-         } */
-        else {
+        } else {
             if (result.affectedRows !== 0) {
                 OrderService.updateOrderReady(req.body, (error, result) => {
                     if (error) {
                         console.log(error)
                         return res.status(500).json('Error al actualizar etapa y fecha del pedido')
                     }
-                    else if (result.affectedRows == 0) {
+                    else if (result[0].affectedRows == 0) {
                         return res.status(404).json('Pedido no encontrado')
                     }
-                    else
+                    else{
+                        result[1].map(obj => {
+                            ClientController.sendClientNotification(obj.cliente, '¡Atención!', 'El pedido ya esta listo para ser retirado')
+                        })
                         return res.json('Etapa y fecha del pedido actualizada')
+                    }
                 })
             }
         }
@@ -404,7 +405,6 @@ exports.insertClientOrder = (req, res) => {
                                                                     return res.status(500).json('Error al crear pedido pendiente')
                                                                 }
                                                                 else {
-                                                                    ShopController.calculateDelay(req.body.cuit)
                                                                     return res.json(orderNumber)
                                                                 }
                                                             })
@@ -419,7 +419,6 @@ exports.insertClientOrder = (req, res) => {
                                                                     return res.status(500).json('Error al crear pedido pendiente')
                                                                 }
                                                                 else {
-                                                                    ShopController.calculateDelay(req.body.cuit)
                                                                     return res.json(orderNumber)
                                                                 }
                                                             })
@@ -436,7 +435,6 @@ exports.insertClientOrder = (req, res) => {
                                                 return res.status(500).json('Error al crear pedido pendiente')
                                             }
                                             else {
-                                                ShopController.calculateDelay(req.body.cuit)
                                                 return res.json(orderNumber)
                                             }
                                         })
@@ -497,7 +495,6 @@ exports.insertClientOrder = (req, res) => {
                                                             return res.status(500).json('Error al crear pedido pendiente')
                                                         }
                                                         else {
-                                                            ShopController.calculateDelay(req.body.cuit)
                                                             return res.json(orderNumber)
                                                         }
                                                     })
@@ -512,7 +509,6 @@ exports.insertClientOrder = (req, res) => {
                                                             return res.status(500).json('Error al crear pedido pendiente')
                                                         }
                                                         else {
-                                                            ShopController.calculateDelay(req.body.cuit)
                                                             return res.json(orderNumber)
                                                         }
                                                     })
@@ -548,7 +544,10 @@ exports.aceptClientOrder = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al aceptar pedido. Inténtalo nuevamente')
         }
-        else return res.json('El pedido fue aceptado')
+        else{
+            ClientController.sendClientNotification(req.body.mailCliente, 'Buenas noticias', 'El local ha aceptado tu pedido')
+            return res.json('El pedido fue aceptado')
+        } 
     })
 }
 

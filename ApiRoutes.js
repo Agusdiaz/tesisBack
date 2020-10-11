@@ -85,7 +85,7 @@ router.post('/insertPayment', auth.middleware, function(req, res){
   PaymentController.insertPayment(req, res);
 })
 
-router.post('/getPendingOrdersByClient', auth.middleware, function(req, res){
+router.post('/getPendingOrdersByClient', auth.middleware, function(req, res){ 
   OrderController.getClientPendingOrders(req, res);
 })
 
@@ -103,6 +103,10 @@ router.post('/deleteClientOrder', auth.middleware, function(req, res){
 
 router.post('/validateClosingShop', auth.middleware, function(req, res){
   ShopController.validateSoonClosingShop(req, res);
+})
+
+router.post('/insertClientDeviceId', function(req, res){
+  ClientController.insertDeviceId(req, res);
 })
 
 
@@ -159,7 +163,7 @@ router.post('/aceptClientOrder', auth.middleware, function(req, res){
   OrderController.aceptClientOrder(req, res);
 })
 
-router.post('/getTop10RequestedProductsByShop', function(req, res){ //auth.middleware
+router.post('/getTop10RequestedProductsByShop', auth.middleware, function(req, res){ 
   ShopController.getTop10RequestedProductsByShop(req, res);
 })
 
@@ -231,6 +235,10 @@ router.post('/modifyPromo', auth.middleware, function(req, res){
   PromoController.modifyPromo(req, res);
 })
 
+router.post('/insertShopDeviceId', function(req, res){
+  ShopController.insertDeviceId(req, res);
+})
+
 //MERCADO PAGO
 router.get('/payments/checkout/:number/:mail/:total/:cuit', auth.middleware, async (req, res) => {
   PaymentController.makePayment(req, res);
@@ -248,7 +256,7 @@ router.get('/payments/failure', (req, res) => {
   return res.render('failure_screen')
 })
 
-router.get('/payments/refund/:numero', auth.middleware, async (req, res) => {
+router.get('/payments/refund/:numero/:mailCliente', auth.middleware, async (req, res) => {
   PaymentController.makeRefund(req, res);
 })
 

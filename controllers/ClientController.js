@@ -3,10 +3,10 @@ const ShopController = require('./ShopController')
 const ShopService = require('../service/shopService')
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
+const fetch = require('node-fetch');
 
 exports.insertClient = (req, res) => {
     ClientService.createClient(req.body, (error, result) => {
-        //console.log(result.length)
         if (error) {
             console.log(error)
             return res.status(500).json('Error al registrar usuario')
@@ -42,23 +42,23 @@ exports.changePassword = (req, res) => {
         else {
             let password = bcrypt.compareSync(req.body.contraseña.toString(), result[0].contraseña)
             if (!password) {
-                if(result[0].apellido){
-                ClientService.updateClientPassword(req.body, (error, result) => {
-                    if (error) {
-                        console.log(error)
-                        return res.status(500).json('Error al cambiar contraseña. Inténtelo nuevamente')
-                    } else
-                        return res.status(200).json('La contraseña se cambió exitosamente')
-                })
-            } else {
-                ShopService.updateShopPassword(req.body, (error, result) => {
-                    if (error) {
-                        console.log(error)
-                        return res.status(500).json('Error al cambiar contraseña. Inténtelo nuevamente')
-                    } else
-                        return res.status(200).json('La contraseña se cambió exitosamente')
-                })
-            }
+                if (result[0].apellido) {
+                    ClientService.updateClientPassword(req.body, (error, result) => {
+                        if (error) {
+                            console.log(error)
+                            return res.status(500).json('Error al cambiar contraseña. Inténtelo nuevamente')
+                        } else
+                            return res.status(200).json('La contraseña se cambió exitosamente')
+                    })
+                } else {
+                    ShopService.updateShopPassword(req.body, (error, result) => {
+                        if (error) {
+                            console.log(error)
+                            return res.status(500).json('Error al cambiar contraseña. Inténtelo nuevamente')
+                        } else
+                            return res.status(200).json('La contraseña se cambió exitosamente')
+                    })
+                }
             } else return res.status(401).json('Error: La contraseña no puede ser igual a la anterior')
         }
     })
@@ -117,7 +117,7 @@ exports.loginUser = (req, res) => {
                 }
             }
             else
-                return res.status(401).json('Contraseña inválida')
+                return res.status(401).json('Contraseña incorrecta')
         }
     })
 }
@@ -133,5 +133,41 @@ exports.setClient = (req, res) => {
         }
         else
             return res.json('Cliente actualizado')
+    })
+}
+
+exports.insertDeviceId = (req, res) => {
+    ClientService.createDeviceId(req.body, (error, result) => {
+        if (error.code == 'ER_DUP_ENTRY') return res.status(401).json('ID dispositivo ya existe')
+        else if (error) {
+            console.log(error)
+            return res.status(500).json('Error al registrar ID dispositivo')
+        } else return res.status(200).json('ID dispositivo guardado')
+    })
+}
+
+exports.sendClientNotification = async (mail, title, body) => {
+    ClientService.getDeviceId(mail, async (error, result) => {
+        if (error) console.log(error)
+        else {
+            result.map(async (obj) => {
+                const message = {
+                    to: obj.deviceKey,
+                    sound: 'default',
+                    title: title,
+                    body: body,
+                };
+
+                await fetch('https://exp.host/--/api/v2/push/send', {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Accept-encoding': 'gzip, deflate',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(message),
+                });
+            })
+        }
     })
 }

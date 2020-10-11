@@ -50,7 +50,7 @@ exports.deleteIngredient = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al validar cierre del local')
         } else {
-            if(result[0].abierto === 1 || req.body.inicial){
+            if(result[0].abierto === 0 || req.body.inicial){
                 IngredientService.deleteIngredient(req.body, (error, result) => {
                     if (error) {
                         console.log(error)

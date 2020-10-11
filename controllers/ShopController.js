@@ -2,9 +2,7 @@ const ShopService = require('../service/shopService');
 const PromoService = require('../service/promoService');
 const OrderService = require('../service/orderService');
 const EventController = require('./EventController');
-var bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
-const cons = require('consolidate');
+const fetch = require('node-fetch');
 
 exports.insertShop = (req, res) => {
     ShopService.createShop(req.body, (error, result) => {
@@ -328,21 +326,21 @@ exports.setShopFeatures = (req, res) => {
     })
 }
 
-exports.calculateDelay = (cuit) => {
+exports.calculateDelay = (cuit, delay) => {
     var date = new Date()
     var today = date.getDay();
     var initialHour = date.getHours()
     var endHour = initialHour + 1
+    var totalDelay = 0
     if (today === 0) today = 6
     else today--
     ShopService.getDelay(cuit, today, initialHour, endHour, (error, result) => { //2, 00, 23
         if (error) {
             console.log(error)
             return res.status(500).json('Error al calcular demora del local')
-        } if (result.length === 0)
-            setShopDelay(req.body.cuit, 0, res)
-        else {
-            var totalDelay = 0
+        } if (result.length === 0) {
+            if (delay !== totalDelay) setShopDelay(cuit, 0)
+        } else {
             var cant = 0
             var cantNull = 0
             var areOrders = false
@@ -362,7 +360,12 @@ exports.calculateDelay = (cuit) => {
                 }
             }
             if (!areOrders && cantNull === 0) totalDelay = 0
-            setShopDelay(cuit, totalDelay)
+            else if (areOrders && cantNull > 0 && totalDelay === 0) {
+                if (cantNull > 7) totalDelay = 41
+                else if (cantNull < 4) totalDelay = 19
+                else totalDelay = 30
+            }
+            if (delay !== totalDelay) setShopDelay(cuit, totalDelay)
         }
     })
 }
@@ -487,18 +490,6 @@ exports.getTop10RequestedProductsByShop = (req, res) => {
         else {
             var newResult = []
             if (result[0].length > 0 && result[1].length > 0) {
-                /*var joinArray = result[0].concat(result[1])
-                newResult = joinArray.reduce((unique, o) => {
-                    if (!unique.some(obj => obj.nombre === o.nombre)) {
-                        unique.push(o);
-                    }
-                    return unique;
-                }, []);
-                result[1].map((obj) => {
-                    var item = newResult.find(element => element.nombre === obj.nombre)
-                    if (item !== undefined) item.cantidad += obj.cantidad
-                })*/
-
                 var joinArray = result[0].concat(result[1])
                 newResult = joinArray.reduce((unique, o) => {
                     if (!unique.some(obj => obj.nombre === o.nombre)) {
@@ -506,14 +497,13 @@ exports.getTop10RequestedProductsByShop = (req, res) => {
                     }
                     return unique;
                 }, []);
-                newResult = newResult.map(obj0 => {
-                    return result[1].map((obj1) => {
-                        if (obj0.nombre === obj1.nombre && (result[0].filter(it => (it.nombre === obj1.nombre)).length > 0)) {
-                            obj0.cantidad = obj0.cantidad + obj1.cantidad
-                        }
-                        return obj0
-                    })
-                });
+                newResult.map(obj => {
+                    const found = result[1].find(element => element.nombre === obj.nombre)
+                    if (found !== undefined && !obj.promo)
+                        obj.cantidad += found.cantidad
+                })
+                newResult.sort((a, b) => { return b.cantidad - a.cantidad })
+                newResult = newResult.slice(0, 10)
             }
             else if (result[0].length > 0) newResult = result[0]
             else newResult = result[1]
@@ -662,6 +652,43 @@ exports.updateNewField = (req, res) => {
             return res.status(500).json('Error al actualizar campo nuevo')
         } else {
             return res.status(200).json(result[1][0].abierto)
+        }
+    })
+}
+
+exports.insertDeviceId = (req, res) => {
+    ShopService.createDeviceId(req.body, (error, result) => {
+        if (error.code == 'ER_DUP_ENTRY') return res.status(401).json('ID dispositivo ya existe')
+        else if (error) {
+            console.log(error)
+            return res.status(500).json('Error al registrar ID dispositivo')
+        }
+        else return res.status(200).json('ID dispositivo guardado')
+    })
+}
+
+exports.sendShopNotification = async (cuit, title, body) => {
+    ShopService.getDeviceId(cuit, async (error, result) => {
+        if (error) console.log(error)
+        else {
+            result.map(async (obj) => {
+                const message = {
+                    to: obj.deviceKey,
+                    sound: 'default',
+                    title: title,
+                    body: body,
+                };
+
+                await fetch('https://exp.host/--/api/v2/push/send', {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Accept-encoding': 'gzip, deflate',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(message),
+                });
+            })
         }
     })
 }

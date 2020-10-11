@@ -90,3 +90,26 @@ exports.updateClientPassword = (user, callback) => {
             callback(null, result);
     });
 }
+
+exports.createDeviceId = (client, callback) => {
+            const sql = 'INSERT INTO dispositivocliente (mail, deviceKey) VALUES ?'
+            var values = [
+                [client.mail, client.device]
+            ]
+            conMysql.query(sql, [values], (err, result) => {
+                if (err)
+                    callback(err);
+                else
+                    callback(null, false);
+            });
+}
+
+exports.getDeviceId = (mail, callback) => {
+    const sql = 'SELECT deviceKey FROM dispositivocliente WHERE mail = ?'
+    conMysql.query(sql, [mail], (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, result)
+    });
+}

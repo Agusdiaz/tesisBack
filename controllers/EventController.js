@@ -16,7 +16,7 @@ function checkAllShopsSchedules() {
         else if (result.length > 0) {
             result.map(obj => {
                 asyncSchedules(obj.cuit, obj.abierto)
-                if(obj.abierto === 1) ShopController.calculateDelay(obj.cuit)
+                if(obj.abierto === 1) ShopController.calculateDelay(obj.cuit, obj.demora)
             })
         }
     })
