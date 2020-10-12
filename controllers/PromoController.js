@@ -198,6 +198,7 @@ function asyncIngredientsPromo(num, res, callback) {
             var ingr = JSON.parse(JSON.stringify(result))
             var resIngr = []
             resIngr = ingr.map(it => {
+                it.check = (it.opcion === 1) ? false : true 
                 return it
             })
             callback(resIngr)

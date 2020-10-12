@@ -19,7 +19,7 @@ exports.insertPayment = (req, res) => {
                 }
                 else {
                     ShopController.calculateDelay(cuit)
-                    ShopController.sendShopNotification(cuit, 'Atención','¡Ha llegado un nuevo pedido!')
+                    ShopController.sendShopNotification(cuit, '¡Atención!','Ha llegado un nuevo pedido')
                     return res.render('success_screen')
                 }
             })

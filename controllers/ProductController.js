@@ -155,9 +155,11 @@ function asyncIngredientsMenu(id, res, callback) {
             return res.status(500).json('Error al buscar ingredientes del menú')
         }
         else if (result.length > 0) {
+            
             var ingr = JSON.parse(JSON.stringify(result))
             var resIngr = []
             resIngr = ingr.map(it => {
+                it.check = (it.opcion === 1) ? false : true 
                 return it
             })
             callback(resIngr)
