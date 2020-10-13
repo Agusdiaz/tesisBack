@@ -5,6 +5,7 @@ var conMysql = mysql.createConnection({
   user: process.env.USER || "root",
   password: process.env.PASS || "tesis2020",
   database: process.env.DB || "flamma",
+  port: process.env.PORT || null,
   multipleStatements: true,
   //insecureAuth : true,
 });
