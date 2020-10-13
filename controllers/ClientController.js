@@ -17,7 +17,7 @@ exports.insertClient = (req, res) => {
         else {
             let token = jwt.sign({
                 id: result.insertId
-            }, process.env.SECRET || 'token-secret', {
+            }, process.env.REACT_APP_SECRET || 'token-secret', {
                 expiresIn: 86400 // expires in 24 hours
             });
             let sendJson = {
@@ -79,7 +79,7 @@ exports.loginUser = (req, res) => {
             if (passwordIsValid) {
                 let token = jwt.sign({
                     id: result[0].id
-                }, process.env.SECRET || 'token-secret', {
+                }, process.env.REACT_APP_SECRET || 'token-secret', {
                     expiresIn: 86400 // expires in 24 hours
                 });
                 if (result[0].cuit !== undefined) {

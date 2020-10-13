@@ -36,7 +36,7 @@ const getFullUrl = (req) => {
 exports.makePayment = async (req, res) => {
     mercadopago.configure({
         sandbox: true,
-        access_token: process.env.MP_ACCESS_TOKEN || "TEST-2746523765714151-090119-0f853f59b4dfeccdbffa8ef9e5eb26d6-637291628"
+        access_token: process.env.REACT_APP_MP_ACCESS_TOKEN || "TEST-2746523765714151-090119-0f853f59b4dfeccdbffa8ef9e5eb26d6-637291628"
     });
     const { number, mail, total, cuit } = req.params;
     const purchaseOrder = {
@@ -81,7 +81,7 @@ exports.makeRefund = async (req, res) => {
             var idPago = result[0].idPago
             mercadopago.configure({
                 sandbox: true,
-                access_token: process.env.MP_ACCESS_TOKEN || "TEST-2746523765714151-090119-0f853f59b4dfeccdbffa8ef9e5eb26d6-637291628"
+                access_token: process.env.REACT_APP_MP_ACCESS_TOKEN || "TEST-2746523765714151-090119-0f853f59b4dfeccdbffa8ef9e5eb26d6-637291628"
             });
             try {
                 const refund = await mercadopago.payment.refund(idPago)

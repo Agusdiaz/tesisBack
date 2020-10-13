@@ -15,7 +15,7 @@ exports.insertShop = (req, res) => {
         else {
             /*let token = jwt.sign({
                 id: result.insertId
-            }, process.env.SECRET || 'token-secret', {
+            }, process.env.REACT_APP_SECRET || 'token-secret', {
                 expiresIn: 86400 // expires in 24 hours
             });
             let sendJson = {

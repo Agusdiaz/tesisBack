@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const SECRET = process.env.SECRET || 'token-secret'
+const SECRET = process.env.REACT_APP_SECRET || 'token-secret'
 
 exports.middleware = (req, res, next) => {
    jwt.verify(req.headers.authorization, SECRET, (err) => {

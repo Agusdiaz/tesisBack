@@ -1,11 +1,11 @@
 var mysql = require('mysql');
 
 var conMysql = mysql.createConnection({
-  host: process.env.HOST || "localhost",
-  user: process.env.USER || "root",
-  password: process.env.PASS || "tesis2020",
-  database: process.env.DB || "flamma",
-  port: process.env.PORT || null,
+  host: process.env.REACT_APP_HOST || "localhost",
+  user: process.env.REACT_APP_USER || "root",
+  password: process.env.REACT_APP_PASS || "tesis2020",
+  database: process.env.REACT_APP_DB || "flamma",
+  port: process.env.REACT_APP_PORT || null,
   multipleStatements: true,
   //insecureAuth : true,
 });
