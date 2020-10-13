@@ -133,12 +133,9 @@ exports.getShopMenu = (req, res) => {
             result.map(obj => {
                 obj.ingredientes = []
                 asyncIngredientsMenu(obj.id, res, (r) => {
-                    if (obj.selectivo === 1 && r.length === 0) {
-
-                    } else {
-                        obj.ingredientes.push(r)
-                        finalResult.push(obj)
-                    }
+                    obj.valido = (obj.selectivo === 1 && r.find(el => el.opcion === 1) === undefined) ? false : true
+                    obj.ingredientes.push(r)
+                    finalResult.push(obj)
                     i++
                     if (i == long)
                         return res.json(finalResult)
@@ -155,11 +152,11 @@ function asyncIngredientsMenu(id, res, callback) {
             return res.status(500).json('Error al buscar ingredientes del menú')
         }
         else if (result.length > 0) {
-            
+
             var ingr = JSON.parse(JSON.stringify(result))
             var resIngr = []
             resIngr = ingr.map(it => {
-                it.check = (it.opcion === 1) ? false : true 
+                it.check = (it.opcion === 1) ? false : true
                 return it
             })
             callback(resIngr)
@@ -175,8 +172,8 @@ exports.deleteProduct = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al validar cierre del local')
         } else {
-            if (result[0].abierto === 0 || req.body.inicial) {
-                ProductService.deleteProduct(req.body, (error, result) => {
+            if (result[0].abierto === 1 || req.body.inicial) {
+                ProductService.deleteProduct(req.body.id, (error, result) => {
                     if (error) {
                         console.log(error)
                         return res.status(500).json('Error al eliminar producto. Inténtelo nuevamente')
@@ -256,7 +253,7 @@ exports.modifyProduct = (req, res) => {
                         })
                     }
                 })
-            } else return res.status(401).json({close: 'Para realizar esta acción el local debe estar cerrado'})
+            } else return res.status(401).json({ close: 'Para realizar esta acción el local debe estar cerrado' })
         }
     })
 }

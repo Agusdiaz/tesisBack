@@ -50,28 +50,47 @@ exports.deleteIngredient = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al validar cierre del local')
         } else {
-            if(result[0].abierto === 0 || req.body.inicial){
+            if (result[0].abierto === 1 || req.body.inicial) {
                 IngredientService.deleteIngredient(req.body, (error, result) => {
                     if (error) {
                         console.log(error)
                         return res.status(500).json('Error al eliminar ingrediente. Inténtelo nuevamente')
                     }
-                    else if(result[0].length > 0){
-                        var prod = JSON.parse(JSON.stringify(result[0]))
+                    else if (result[1].length > 0) {
+                        var prodIds = JSON.parse(JSON.stringify(result[1]))
+                        var prodIngr = JSON.parse(JSON.stringify(result[0]))
+                        prodIds.map(obj => {
+                            obj.ingredientes = prodIngr.filter(el => (el.producto === obj.id && el.ingrediente !== req.body.id))
+                        })
                         var iProd = 0
-                        prod.map(obj => {
+                        prodIds.map(obj => {
                             iProd++
-                            if(obj.cantIngr === 1 && obj.selectivo === 1){
-                                ProductService.deleteProduct(req.body, (error, result) => {
+                            if (obj.ingredientes.length === 0 || obj.ingredientes.find(el => el.opcion === 1) === undefined) {
+                                ProductService.deleteProduct(obj.id, (error, result) => {
                                     if (error) {
                                         console.log(error)
                                         return res.status(500).json('Error al eliminar ingrediente. Inténtelo nuevamente')
                                     }
                                 })
                             }
-                            if(iProd === prod.length) return res.json('Ingrediente eliminado')
+                            if (iProd === prodIds.length) return res.json('Ingrediente eliminado')
                         })
-                    }else return res.json('Ingrediente eliminado')
+
+                        /*
+                                                if (prod.length > 0) {
+                                                    prod.map(obj => {
+                                                        console.log(obj)
+                                                        iProd++
+                                                        ProductService.deleteProduct(obj.producto, (error, result) => {
+                                                            if (error) {
+                                                                console.log(error)
+                                                                return res.status(500).json('Error al eliminar ingrediente. Inténtelo nuevamente')
+                                                            }
+                                                        })
+                                                        if (iProd === prod.length) return res.json('Ingrediente eliminado')
+                                                    })
+                                                } else return res.json('Ingrediente eliminado')*/
+                    } else return res.json('Ingrediente eliminado')
                 })
             } else return res.status(401).json('Para realizar esta acción el local debe estar cerrado')
         }
@@ -84,7 +103,7 @@ exports.modifyIngredient = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al validar cierre del local')
         } else {
-            if (result[0].abierto === 0 || req.body.inicial) {
+            if (result[0].abierto === 1 || req.body.inicial) {
                 IngredientService.validateNameOfExistentIngredient(req.body.ingrediente, req.body.cuit, (error, result) => {
                     if (error) {
                         console.log(error)
@@ -93,7 +112,7 @@ exports.modifyIngredient = (req, res) => {
                     else if (result.length > 0) {
                         return res.status(401).json('Ya existe un ingrediente con ese nombre')
                     }
-                    else{
+                    else {
                         IngredientService.updateIngredient(req.body.ingrediente, (error, result) => {
                             if (error) {
                                 console.log(error)
@@ -104,9 +123,9 @@ exports.modifyIngredient = (req, res) => {
                             }
                         })
                     }
-                        
+
                 })
-            } else return res.status(401).json({close: 'Para realizar esta acción el local debe estar cerrado'})
+            } else return res.status(401).json({ close: 'Para realizar esta acción el local debe estar cerrado' })
         }
     })
 }

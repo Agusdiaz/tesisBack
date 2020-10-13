@@ -126,10 +126,10 @@ exports.createProductPromoForOrder = (product, idPedidoPromocion, callback) => {
     });
 }
 
-exports.deleteProduct = (product, callback) => {
-    const sql = 'DELETE promocionproducto, promocion FROM promocionproducto INNER JOIN promocion ON promocionproducto.promocion = ' + 
-    'promocion.id WHERE promocionproducto.producto = ?; DELETE FROM producto WHERE id = ?;'
-    conMysql.query(sql, [product.id, product.id], (err, result) => {
+exports.deleteProduct = (id, callback) => {
+    const sql = 'DELETE promocion, promocionproducto FROM promocion INNER JOIN promocionproducto ON promocion.id = promocionproducto.promocion ' + 
+    'WHERE promocionproducto.producto = ?; DELETE FROM producto WHERE id = ?;'
+    conMysql.query(sql, [id, id], (err, result) => {
         if (err)
             callback(err);
         else

@@ -175,8 +175,8 @@ function asyncValidateProductsPromo(id, res, callback) {
                 if (it.disponible == 0) dispo = false
                 it.ingredientes = []
                 asyncIngredientsPromo(it.id, res, (r) => {
-                    if (it.selectivo === 1 && r.length === 0) dispo = false
-                    else it.ingredientes.push(r)
+                    if (it.selectivo === 1 && r.find(el => el.opcion === 1) === undefined) dispo = false
+                    it.ingredientes.push(r)
                     i++
                     if (i == prod.length) callback(resProd, dispo)
                     //else if (i == prod.length && !dispo) callback(null)

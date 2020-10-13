@@ -176,9 +176,10 @@ exports.validateNameOfIngredient = (body, callback) => {
 }
 
 exports.deleteIngredient = (ingredient, callback) => {
-    const sql = 'SELECT producto, COUNT(producto) AS cantIngr, selectivo FROM productoingrediente INNER JOIN producto ON productoingrediente.producto ' +
-    '= producto.id WHERE producto IN (SELECT producto FROM productoingrediente WHERE ingrediente = ?) GROUP BY producto; DELETE FROM ingrediente WHERE id = ?';
-    conMysql.query(sql, [ingredient.id, ingredient.id], (err, result) => {
+    const sql = 'SELECT producto, ingrediente, opcion FROM productoingrediente INNER JOIN producto ON productoingrediente.producto = producto.id WHERE ' +
+    'producto IN (SELECT producto FROM productoingrediente WHERE ingrediente = ?) AND selectivo = 1; SELECT distinct producto AS id FROM productoingrediente ' +
+    'INNER JOIN producto ON productoingrediente.producto = producto.id WHERE producto IN (SELECT producto FROM productoingrediente WHERE ingrediente = ?) AND selectivo = 1; DELETE FROM ingrediente WHERE id = ?'
+    conMysql.query(sql, [ingredient.id, ingredient.id, ingredient.id], (err, result) => {
         if (err)
             callback(err);
         else
