@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded(
 app.use(bodyParser.json());
 app.use(cors());
 
-const port = process.env.REACT_APP_PORT || 8080;
+const port = process.env.PORT || 8080;
 
 app.get('/', (req, res) => res.send('Hello World with Express'));
 

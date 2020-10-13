@@ -5,7 +5,7 @@ var conMysql = mysql.createConnection({
   user: process.env.REACT_APP_USER || "root",
   password: process.env.REACT_APP_PASS || "tesis2020",
   database: process.env.REACT_APP_DB || "flamma",
-  port: process.env.REACT_APP_PORT || null,
+  port: process.env.REACT_APP_DB_PORT || null,
   multipleStatements: true,
   //insecureAuth : true,
 });
