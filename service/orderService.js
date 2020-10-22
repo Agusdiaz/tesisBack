@@ -189,7 +189,7 @@ exports.getShopPendingOrdersByProducts = (shop, callback) => {
 
 exports.getTopRequestedProducts = (shop, callback) => {
     const sql = 'SELECT pedidoproducto.id, pedidoproducto.nombre, SUM(cantidad) AS cantidad FROM pedido INNER JOIN pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND pagado = 1 ' +
-    'GROUP BY id ORDER BY cantidad DESC LIMIT 10; SELECT pedidopromocionproducto.id, pedidopromocionproducto.nombre, SUM(pedidopromocionproducto.cantidad * pedidopromocion.cantidad) AS cantidad, "si" AS promo FROM pedido ' +
+    'GROUP BY id ORDER BY cantidad DESC LIMIT 10; SELECT MIN(pedidopromocionproducto.id) as id, pedidopromocionproducto.nombre, SUM(pedidopromocionproducto.cantidad * pedidopromocion.cantidad) AS cantidad, "si" AS promo FROM pedido ' +
     'INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN pedidopromocionproducto ON pedidopromocionproducto.pedidoPromocion = pedidopromocion.id WHERE local = ? AND pagado = 1 GROUP BY nombre ORDER BY cantidad LIMIT 10;'
     conMysql.query(sql, [shop.cuit, shop.cuit], (err, result) => {
         if (err)
@@ -201,7 +201,7 @@ exports.getTopRequestedProducts = (shop, callback) => {
 
 exports.getOrdersTopHours = (shop, day, callback) => {
     const sql = 'SELECT HOUR(fecha) AS hora, COUNT(*) AS cantidad FROM pedido WHERE local = ? AND weekday(fecha) = ? ' + 
-    'AND pagado = 1 GROUP BY hora ORDER BY fecha DESC';
+    'AND pagado = 1 GROUP BY HOUR(fecha)';
     conMysql.query(sql, [shop.cuit, day], (err, result) => {
         if (err)
             callback(err);
