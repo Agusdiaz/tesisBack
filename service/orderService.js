@@ -190,7 +190,7 @@ exports.getShopPendingOrdersByProducts = (shop, callback) => {
 exports.getTopRequestedProducts = (shop, callback) => {
     const sql = 'SELECT pedidoproducto.id, pedidoproducto.nombre, SUM(cantidad) AS cantidad FROM pedido INNER JOIN pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND pagado = 1 ' +
     'GROUP BY id ORDER BY cantidad DESC LIMIT 10; SELECT pedidopromocionproducto.id, pedidopromocionproducto.nombre, SUM(pedidopromocionproducto.cantidad * pedidopromocion.cantidad) AS cantidad, "si" AS promo FROM pedido ' +
-    'INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN pedidopromocionproducto ON pedidopromocionproducto.pedidoPromocion = pedidoPromocion.id WHERE local = ? AND pagado = 1 GROUP BY nombre ORDER BY cantidad LIMIT 10;'
+    'INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN pedidopromocionproducto ON pedidopromocionproducto.pedidoPromocion = pedidopromocion.id WHERE local = ? AND pagado = 1 GROUP BY nombre ORDER BY cantidad LIMIT 10;'
     conMysql.query(sql, [shop.cuit, shop.cuit], (err, result) => {
         if (err)
             callback(err);
