@@ -658,8 +658,8 @@ exports.updateNewField = (req, res) => {
 
 exports.insertDeviceId = (req, res) => {
     ShopService.createDeviceId(req.body, (error, result) => {
-        if (error.code == 'ER_DUP_ENTRY') return res.status(401).json('ID dispositivo ya existe')
-        else if (error) {
+        /*if (error.code == 'ER_DUP_ENTRY') return res.status(401).json('ID dispositivo ya existe')
+        else */if (error) {
             console.log(error)
             return res.status(500).json('Error al registrar ID dispositivo')
         }
@@ -670,7 +670,7 @@ exports.insertDeviceId = (req, res) => {
 exports.sendShopNotification = async (cuit, title, body) => {
     ShopService.getDeviceId(cuit, async (error, result) => {
         if (error) console.log(error)
-        else {
+        else if(result.length > 0){
             result.map(async (obj) => {
                 const message = {
                     to: obj.deviceKey,

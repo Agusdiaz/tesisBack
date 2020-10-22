@@ -138,8 +138,8 @@ exports.setClient = (req, res) => {
 
 exports.insertDeviceId = (req, res) => {
     ClientService.createDeviceId(req.body, (error, result) => {
-        if (error.code == 'ER_DUP_ENTRY') return res.status(401).json('ID dispositivo ya existe')
-        else if (error) {
+        /*if (error.code == 'ER_DUP_ENTRY') return res.status(401).json('ID dispositivo ya existe')
+        else*/ if (error) {
             console.log(error)
             return res.status(500).json('Error al registrar ID dispositivo')
         } else return res.status(200).json('ID dispositivo guardado')
@@ -149,7 +149,7 @@ exports.insertDeviceId = (req, res) => {
 exports.sendClientNotification = async (mail, title, body) => {
     ClientService.getDeviceId(mail, async (error, result) => {
         if (error) console.log(error)
-        else {
+        else if(result.length > 0){
             result.map(async (obj) => {
                 const message = {
                     to: obj.deviceKey,

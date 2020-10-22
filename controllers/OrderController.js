@@ -85,8 +85,10 @@ exports.shareOrder = (req, res) => {
                             console.log(error)
                             return res.status(500).json('Error al compartir pedido')
                         }
-                        else
+                        else{
+                            ClientController.sendClientNotification(req.body.mail, '¡Atención!', 'Te compartieron un pedido')
                             return res.json('Pedido compartido')
+                        }   
                     })
                 }
             })
