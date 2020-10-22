@@ -51,7 +51,7 @@ exports.makePayment = async (req, res) => {
             }
         ],
         payer: {
-            email: 'a@mail.com' //mail
+            email: (mail.includes('@')) ? mail : (mail + '@mail.com')
         },
         auto_return: "all",
         external_reference: number,

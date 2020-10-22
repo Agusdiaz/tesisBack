@@ -6,7 +6,6 @@ var jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 
 exports.insertClient = (req, res) => {
-    console.log('aca')
     ClientService.createClient(req.body, (error, result) => {
         if (error) {
             console.log(error)
