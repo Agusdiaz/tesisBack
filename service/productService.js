@@ -81,7 +81,7 @@ exports.validateProduct = (product, callback) => {
 exports.validateProductsAndIngredients = (products, ingredients, callback) => {
     const sql1 = 'SELECT id FROM producto WHERE id IN ? AND disponible = 0; SELECT id FROM ingrediente WHERE id IN ? AND disponible = 0;'
     const sql2 = 'SELECT id FROM producto WHERE id IN ? AND disponible = 0;'
-    if(ingredients.length > 0){
+    if (ingredients.length > 0) {
         conMysql.query(sql1, [[products], [ingredients]], (err, result) => {
             if (err)
                 callback(err)
@@ -89,7 +89,7 @@ exports.validateProductsAndIngredients = (products, ingredients, callback) => {
                 callback(null, result)
         })
     }
-    else{
+    else {
         conMysql.query(sql2, [[products]], (err, result) => {
             if (err)
                 callback(err)
@@ -127,8 +127,8 @@ exports.createProductPromoForOrder = (product, idPedidoPromocion, callback) => {
 }
 
 exports.deleteProduct = (id, callback) => {
-    const sql = 'DELETE promocion, promocionproducto FROM promocion INNER JOIN promocionproducto ON promocion.id = promocionproducto.promocion ' + 
-    'WHERE promocionproducto.producto = ?; DELETE FROM producto WHERE id = ?;'
+    const sql = 'DELETE promocion, promocionproducto FROM promocion INNER JOIN promocionproducto ON promocion.id = promocionproducto.promocion ' +
+        'WHERE promocionproducto.producto = ?; DELETE FROM producto WHERE id = ?;'
     conMysql.query(sql, [id, id], (err, result) => {
         if (err)
             callback(err);

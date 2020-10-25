@@ -75,21 +75,6 @@ exports.deleteIngredient = (req, res) => {
                             }
                             if (iProd === prodIds.length) return res.json('Ingrediente eliminado')
                         })
-
-                        /*
-                                                if (prod.length > 0) {
-                                                    prod.map(obj => {
-                                                        console.log(obj)
-                                                        iProd++
-                                                        ProductService.deleteProduct(obj.producto, (error, result) => {
-                                                            if (error) {
-                                                                console.log(error)
-                                                                return res.status(500).json('Error al eliminar ingrediente. Inténtelo nuevamente')
-                                                            }
-                                                        })
-                                                        if (iProd === prod.length) return res.json('Ingrediente eliminado')
-                                                    })
-                                                } else return res.json('Ingrediente eliminado')*/
                     } else return res.json('Ingrediente eliminado')
                 })
             } else return res.status(401).json('Para realizar esta acción el local debe estar cerrado')

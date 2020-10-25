@@ -59,8 +59,8 @@ exports.updateIngredientStatus = (ingredient, callback) => {
 }
 
 exports.getIngredientsOrder = (orderNum, callback) => {
-    const sql = 'SELECT pedidoingrediente.id, pedidoingrediente.nombre, pedidoingrediente.detalle, pedidoingrediente.precio, ' + 
-    'pedidoingrediente.cantidad FROM pedidoproducto INNER JOIN pedidoingrediente ON pedidoproducto.id = pedidoingrediente.pedidoProducto WHERE pedidoingrediente.pedidoProducto = ?';
+    const sql = 'SELECT pedidoingrediente.id, pedidoingrediente.nombre, pedidoingrediente.detalle, pedidoingrediente.precio, ' +
+        'pedidoingrediente.cantidad FROM pedidoproducto INNER JOIN pedidoingrediente ON pedidoproducto.id = pedidoingrediente.pedidoProducto WHERE pedidoingrediente.pedidoProducto = ?';
     var values = [orderNum]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -84,7 +84,7 @@ exports.getIngredientsByProduct = (prodId, callback) => {
 
 exports.getIngredientsByProductPromoInMakeOrder = (prodId, callback) => {
     const sql = 'SELECT ingrediente.id, nombre, codigo, precio, detalle, disponible, cantidad, opcion FROM ingrediente INNER JOIN ' +
-    'productoingrediente ON ingrediente.id = productoingrediente.ingrediente WHERE productoingrediente.producto = ?';
+        'productoingrediente ON ingrediente.id = productoingrediente.ingrediente WHERE productoingrediente.producto = ?';
     var values = [prodId]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -96,8 +96,8 @@ exports.getIngredientsByProductPromoInMakeOrder = (prodId, callback) => {
 
 exports.getIngredientsByProductPromoInGetOrder = (prodId, callback) => {
     const sql = 'SELECT pedidopromocioningrediente.id, pedidopromocioningrediente.nombre, pedidopromocioningrediente.detalle, pedidopromocioningrediente.precio, ' +
-    'pedidopromocioningrediente.cantidad FROM pedidopromocioningrediente INNER JOIN pedidopromocionproducto ON ' + 
-    'pedidopromocioningrediente.pedidoPromocionProducto = pedidopromocionproducto.id WHERE pedidopromocioningrediente.pedidoPromocionProducto = ?';
+        'pedidopromocioningrediente.cantidad FROM pedidopromocioningrediente INNER JOIN pedidopromocionproducto ON ' +
+        'pedidopromocioningrediente.pedidoPromocionProducto = pedidopromocionproducto.id WHERE pedidopromocioningrediente.pedidoPromocionProducto = ?';
     var values = [prodId]
     conMysql.query(sql, values, (err, result) => {
         if (err)
@@ -109,7 +109,7 @@ exports.getIngredientsByProductPromoInGetOrder = (prodId, callback) => {
 
 exports.getUnavailableIngredientsByProductsPromo = (promos, callback) => {
     const sql = 'SELECT * FROM ingrediente INNER JOIN productoingrediente ON ingrediente.id = productoingrediente.ingrediente INNER JOIN ' +
-    'promocionproducto ON promocionproducto.producto = productoingrediente.producto WHERE promocionproducto.promocion IN ? AND ingrediente.disponible = 0';
+        'promocionproducto ON promocionproducto.producto = productoingrediente.producto WHERE promocionproducto.promocion IN ? AND ingrediente.disponible = 0';
     conMysql.query(sql, [[promos]], (err, result) => {
         if (err)
             callback(err);
@@ -177,8 +177,8 @@ exports.validateNameOfIngredient = (body, callback) => {
 
 exports.deleteIngredient = (ingredient, callback) => {
     const sql = 'SELECT producto, ingrediente, opcion FROM productoingrediente INNER JOIN producto ON productoingrediente.producto = producto.id WHERE ' +
-    'producto IN (SELECT producto FROM productoingrediente WHERE ingrediente = ?) AND selectivo = 1; SELECT distinct producto AS id FROM productoingrediente ' +
-    'INNER JOIN producto ON productoingrediente.producto = producto.id WHERE producto IN (SELECT producto FROM productoingrediente WHERE ingrediente = ?) AND selectivo = 1; DELETE FROM ingrediente WHERE id = ?'
+        'producto IN (SELECT producto FROM productoingrediente WHERE ingrediente = ?) AND selectivo = 1; SELECT distinct producto AS id FROM productoingrediente ' +
+        'INNER JOIN producto ON productoingrediente.producto = producto.id WHERE producto IN (SELECT producto FROM productoingrediente WHERE ingrediente = ?) AND selectivo = 1; DELETE FROM ingrediente WHERE id = ?'
     conMysql.query(sql, [ingredient.id, ingredient.id, ingredient.id], (err, result) => {
         if (err)
             callback(err);

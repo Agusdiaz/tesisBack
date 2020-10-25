@@ -11,26 +11,21 @@ exports.setOrderDeliveredByClient = (req, res) => {
     OrderService.deleteOrderPendingByClient(req.body, (error, result) => {
         if (error) {
             console.log(error)
-            return res.status(500).json('Error al actualizar pedido') //Error al eliminar pedido pendiente
+            return res.status(500).json('Error al actualizar pedido')
         }
-        /*   /* else if (result.affectedRows == 0) {
-              return res.status(404).json('Pedido no encontrado')
-          } */
-        else {
-            if (result.affectedRows !== 0) {
-                OrderService.updateOrderDelivered(req.body, (error, result) => {
-                    if (error) {
-                        console.log(error)
-                        return res.status(500).json('Error al actualizar pedido')
-                    }
-                    else if (result.affectedRows == 0) {
-                        return res.status(404).json('Pedido no encontrado')
-                    }
-                    else
-                        return res.json('Pedido actualizado')
-                })
-            }
-        }
+        else if (result.affectedRows !== 0) {
+            OrderService.updateOrderDelivered(req.body, (error, result) => {
+                if (error) {
+                    console.log(error)
+                    return res.status(500).json('Error al actualizar pedido')
+                }
+                else if (result.affectedRows == 0) {
+                    return res.status(404).json('Pedido no encontrado')
+                }
+                else
+                    return res.json('Pedido actualizado')
+            })
+        } else return res.json('El pedido ya fue actualizado')
     })
 }
 
@@ -39,25 +34,19 @@ exports.setOrderReadyByShop = (req, res) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al eliminar local de pedido pendiente')
-        } else {
-            if (result.affectedRows !== 0) {
-                OrderService.updateOrderReady(req.body, (error, result) => {
-                    if (error) {
-                        console.log(error)
-                        return res.status(500).json('Error al actualizar etapa y fecha del pedido')
-                    }
-                    else if (result[0].affectedRows == 0) {
-                        return res.status(404).json('Pedido no encontrado')
-                    }
-                    else{
-                        result[1].map(obj => {
-                            ClientController.sendClientNotification(obj.cliente, '¡Atención!', 'El pedido ya esta listo para ser retirado')
-                        })
-                        return res.json('Etapa y fecha del pedido actualizada')
-                    }
-                })
-            }
-        }
+        } else if (result.changedRows !== 0) {
+            OrderService.updateOrderReady(req.body, (error, result) => {
+                if (error) {
+                    console.log(error)
+                    return res.status(500).json('Error al actualizar etapa y fecha del pedido')
+                } else {
+                    result[1].map(obj => {
+                        ClientController.sendClientNotification(obj.cliente, '¡Atención!', 'El pedido ya esta listo para ser retirado')
+                    })
+                    return res.json('Etapa y fecha del pedido actualizada')
+                }
+            })
+        } else return res.json('El pedido ya fue actualizado')
     })
 }
 
@@ -85,10 +74,10 @@ exports.shareOrder = (req, res) => {
                             console.log(error)
                             return res.status(500).json('Error al compartir pedido')
                         }
-                        else{
+                        else {
                             ClientController.sendClientNotification(req.body.mail, '¡Atención!', 'Te compartieron un pedido')
                             return res.json('Pedido compartido')
-                        }   
+                        }
                     })
                 }
             })
@@ -363,7 +352,7 @@ exports.insertClientOrder = (req, res) => {
                                                             console.log(error)
                                                             return res.status(500).json('Error al guardar productos en pedido promoción productos')
                                                         }
-                                                        else{
+                                                        else {
                                                             obj.ingredientes.map(obj => {
                                                                 var idPedPromoProd = result.insertId
                                                                 IngredientService.createIngredientPromoForOrder(obj, idPedPromoProd, (error, result) => {
@@ -546,10 +535,10 @@ exports.aceptClientOrder = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al aceptar pedido. Inténtalo nuevamente')
         }
-        else{
+        else {
             ClientController.sendClientNotification(req.body.mailCliente, 'Buenas noticias', 'El local ha aceptado tu pedido')
             return res.json('El pedido fue aceptado')
-        } 
+        }
     })
 }
 

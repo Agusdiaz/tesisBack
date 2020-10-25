@@ -131,13 +131,8 @@ exports.getShopPromos = (req, res) => {
                         var finalRta = []
                         finalResult.map(obj => {
                             i++
-                            //if (obj.productos[0] != null)
                             finalRta.push(obj)
                             if (i == long) {
-                                /* if (finalRta.length == 0) {
-                                    return res.status(204).json('Local sin promociones')
-                                } */
-                                //else {
                                 finalResult = []
                                 long = finalRta.length;
                                 i = 0;
@@ -179,7 +174,6 @@ function asyncValidateProductsPromo(id, res, callback) {
                     it.ingredientes.push(r)
                     i++
                     if (i == prod.length) callback(resProd, dispo)
-                    //else if (i == prod.length && !dispo) callback(null)
                 })
                 return it
             })
@@ -198,7 +192,7 @@ function asyncIngredientsPromo(num, res, callback) {
             var ingr = JSON.parse(JSON.stringify(result))
             var resIngr = []
             resIngr = ingr.map(it => {
-                it.check = (it.opcion === 1) ? false : true 
+                it.check = (it.opcion === 1) ? false : true
                 return it
             })
             callback(resIngr)

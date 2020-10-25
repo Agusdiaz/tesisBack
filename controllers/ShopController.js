@@ -13,15 +13,6 @@ exports.insertShop = (req, res) => {
         else if (result.length > 1)
             return res.status(401).json('Mail existente')
         else {
-            /*let token = jwt.sign({
-                id: result.insertId
-            }, process.env.REACT_APP_SECRET || 'token-secret', {
-                expiresIn: 86400 // expires in 24 hours
-            });
-            let sendJson = {
-                token: token,
-                mail: req.body.mail,
-            }*/
             return res.json('Local guardado')
         }
     })
@@ -334,7 +325,7 @@ exports.calculateDelay = (cuit, delay) => {
     var totalDelay = 0
     if (today === 0) today = 6
     else today--
-    ShopService.getDelay(cuit, today, initialHour, endHour, (error, result) => { //2, 00, 23
+    ShopService.getDelay(cuit, today, initialHour, endHour, (error, result) => {
         if (error) {
             console.log(error)
             return res.status(500).json('Error al calcular demora del local')
@@ -381,7 +372,6 @@ function setShopDelay(cuit, delay) {
         }
         else {
             console.log('Se actualizó el local cuit=' + cuit + ' a demora=' + delay)
-            //return res.json('Demora del local actualizada')
         }
     })
 }
@@ -658,8 +648,7 @@ exports.updateNewField = (req, res) => {
 
 exports.insertDeviceId = (req, res) => {
     ShopService.createDeviceId(req.body, (error, result) => {
-        /*if (error.code == 'ER_DUP_ENTRY') return res.status(401).json('ID dispositivo ya existe')
-        else */if (error) {
+        if (error) {
             console.log(error)
             return res.status(500).json('Error al registrar ID dispositivo')
         }
@@ -670,7 +659,7 @@ exports.insertDeviceId = (req, res) => {
 exports.sendShopNotification = async (cuit, title, body) => {
     ShopService.getDeviceId(cuit, async (error, result) => {
         if (error) console.log(error)
-        else if(result.length > 0){
+        else if (result.length > 0) {
             result.map(async (obj) => {
                 const message = {
                     to: obj.deviceKey,

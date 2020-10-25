@@ -290,7 +290,7 @@ exports.getDelay = (cuit, day, initialHour, endHour, callback) => {
 
 exports.createDeviceId = (shop, callback) => {
     const sql = 'INSERT INTO dispositivolocal (cuit, deviceKey) SELECT * FROM (SELECT ?, ?) AS tmp WHERE NOT EXISTS ' +
-            '(SELECT cuit, deviceKey FROM dispositivolocal WHERE cuit = ? AND deviceKey = ?) LIMIT 1;'
+        '(SELECT cuit, deviceKey FROM dispositivolocal WHERE cuit = ? AND deviceKey = ?) LIMIT 1;'
     var values = [shop.cuit, shop.device, shop.cuit, shop.device]
     conMysql.query(sql, values, (err, result) => {
         if (err)

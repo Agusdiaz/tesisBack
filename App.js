@@ -12,14 +12,14 @@ const app = express();
 
 // Todo lo que recibe la app se tratara como json
 app.use(bodyParser.urlencoded(
-    {
-      extended: true,
-    }));
+  {
+    extended: true,
+  }));
 app.use(bodyParser.json());
 app.use(cors());
 
 const port = process.env.PORT || 8080;
-const host =  process.env.HOST || '172.20.0.20';
+const host = process.env.HOST || '172.20.0.20';
 app.get('/', (req, res) => res.send('Hello World with Express'));
 
 // Uso Api routes en App
@@ -30,8 +30,8 @@ app.engine("ejs", engines.ejs);
 app.set('views', path.join(__dirname, './views'));
 app.set("view engine", "ejs");
 
-app.listen(port, host, function() {
-  console.log('Running RestHub on port '+ host + ':' + port);
+app.listen(port, host, function () {
+  console.log('Running RestHub on port ' + host + ':' + port);
 });
 
 EventController.checkAllShopsSchedules()

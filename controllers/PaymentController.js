@@ -19,7 +19,7 @@ exports.insertPayment = (req, res) => {
                 }
                 else {
                     ShopController.calculateDelay(cuit)
-                    ShopController.sendShopNotification(cuit, '¡Atención!','Ha llegado un nuevo pedido')
+                    ShopController.sendShopNotification(cuit, '¡Atención!', 'Ha llegado un nuevo pedido')
                     return res.render('success_screen')
                 }
             })
@@ -29,7 +29,6 @@ exports.insertPayment = (req, res) => {
 
 const getFullUrl = (req) => {
     const url = req.protocol + '://' + req.get('host');
-    //console.log(url)
     return url;
 }
 
@@ -90,10 +89,10 @@ exports.makeRefund = async (req, res) => {
                         console.log(error)
                         return res.status(500).json('Error al cancelar pedido. Inténtalo nuevamente')
                     }
-                    else{
+                    else {
                         ClientController.sendClientNotification(mailCliente, 'Malas noticias', 'El local ha rechazado tu pedido')
                         return res.json('Pedido cancelado exitosamente')
-                    } 
+                    }
                 })
             } catch (err) {
                 console.log(err)

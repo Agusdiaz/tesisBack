@@ -92,15 +92,15 @@ exports.updateClientPassword = (user, callback) => {
 }
 
 exports.createDeviceId = (client, callback) => {
-            const sql = 'INSERT INTO dispositivocliente (mail, deviceKey) SELECT * FROM (SELECT ?, ?) AS tmp WHERE NOT EXISTS ' +
-            '(SELECT mail, deviceKey FROM dispositivocliente WHERE mail = ? AND deviceKey = ?) LIMIT 1;'
-            var values = [client.mail, client.device, client.mail, client.device]
-            conMysql.query(sql, values, (err, result) => {
-                if (err)
-                    callback(err);
-                else
-                    callback(null, false);
-            });
+    const sql = 'INSERT INTO dispositivocliente (mail, deviceKey) SELECT * FROM (SELECT ?, ?) AS tmp WHERE NOT EXISTS ' +
+        '(SELECT mail, deviceKey FROM dispositivocliente WHERE mail = ? AND deviceKey = ?) LIMIT 1;'
+    var values = [client.mail, client.device, client.mail, client.device]
+    conMysql.query(sql, values, (err, result) => {
+        if (err)
+            callback(err);
+        else
+            callback(null, false);
+    });
 }
 
 exports.getDeviceId = (mail, callback) => {
