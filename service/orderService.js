@@ -176,9 +176,9 @@ exports.getShopPendingOrdersByArrival = (shop, callback) => {
 exports.getShopPendingOrdersByProducts = (shop, callback) => {
     const sql = 'SELECT numero, cliente, etapa, takeAway, (total + propina) AS total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario, SUM(cantidad) AS '+ 
     'cantProductos, aceptado FROM pedido INNER JOIN pedidoproducto ON pedido.numero = pedidoproducto.pedido WHERE local = ? AND etapa = ? AND pagado = 1 GROUP BY numero ORDER BY cantProductos DESC; ' +
-    'SELECT numero, cliente, etapa, takeAway, (total + propina) AS total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario, SUM(pedidopromocionproducto.cantidad) * pedidopromocion.cantidad AS cantProductos, ' +
-    'aceptado FROM pedido INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN pedidopromocionproducto ON pedidopromocionproducto.pedidoPromocion ' +
-    '= pedidoPromocion.id WHERE local = ? AND etapa = ? AND pagado = 1 GROUP BY numero ORDER BY cantProductos DESC;'
+    'SELECT numero, cliente, etapa, takeAway, (total + propina) AS total, TIMESTAMPDIFF(MINUTE,fecha,NOW()) AS tiempo, fecha, comentario, SUM(pedidopromocionproducto.cantidad) * MAX(pedidopromocion.cantidad) ' + 
+    'AS cantProductos, aceptado FROM pedido INNER JOIN pedidopromocion ON pedido.numero = pedidopromocion.pedido INNER JOIN pedidopromocionproducto ON pedidopromocionproducto.pedidoPromocion ' +
+    '= pedidopromocion.id WHERE local = ? AND etapa = ? AND pagado = 1 GROUP BY numero ORDER BY cantProductos DESC;'
     conMysql.query(sql, [shop.cuit, 'pendiente', shop.cuit, 'pendiente'], (err, result) => {
         if (err)
             callback(err);
