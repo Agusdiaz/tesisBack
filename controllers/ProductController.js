@@ -172,7 +172,7 @@ exports.deleteProduct = (req, res) => {
             console.log(error)
             return res.status(500).json('Error al validar cierre del local')
         } else {
-            if (result[0].abierto === 1 || req.body.inicial) {
+            //if (result[0].abierto === 0 || req.body.inicial) {
                 ProductService.deleteProduct(req.body.id, (error, result) => {
                     if (error) {
                         console.log(error)
@@ -183,7 +183,7 @@ exports.deleteProduct = (req, res) => {
                     else
                         return res.json('Producto eliminado')
                 })
-            } else return res.status(401).json('Para realizar esta acción el local debe estar cerrado')
+            //} else return res.status(401).json('Para realizar esta acción el local debe estar cerrado')
         }
     })
 }
